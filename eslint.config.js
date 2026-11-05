@@ -25,7 +25,15 @@ const noFloatMoney = {
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/.next/**', 'docs/planning/**', 'coverage/**'],
+    // apps/web is not linted here yet; its owner can opt it in.
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      'docs/planning/**',
+      'coverage/**',
+      'apps/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
