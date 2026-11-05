@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { WalletButton } from "./wallet-button";
 
 const LINKS = [
   { href: "/vault", label: "Vault" },
@@ -35,8 +36,9 @@ export function Nav() {
             );
           })}
         </ul>
-        {/* P-0.3: the NEAR Connect sign-in button goes here. */}
-        <div className="ml-auto text-xs text-white/60">Not signed in</div>
+        <div className="ml-auto">
+          <WalletButton />
+        </div>
       </nav>
     </header>
   );
