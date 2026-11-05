@@ -31,10 +31,10 @@ export default function WalletCheckPage() {
 
   return (
     <>
-      <PageHeader title="Wallet check" intro="Day-1 check (P-0.3): sign in with a testnet wallet, then sign one FunctionCall that attaches a deposit." />
-      <ol className="space-y-4">
-        <li className="rounded-lg border border-line bg-white p-5">
-          <h2 className="font-semibold text-navy">1. Sign in on testnet</h2>
+      <PageHeader eyebrow="Day-1 check · P-0.3" title="Wallet check" intro="Day-1 check (P-0.3): sign in with a testnet wallet, then sign one FunctionCall that attaches a deposit." />
+      <ol className="max-w-3xl space-y-4">
+        <li className="panel rounded-[var(--radius-card)] p-6">
+          <h2 className="font-semibold text-fg">1. Sign in on testnet</h2>
           <p className="mt-1 text-sm text-muted">Use Meteor, Intear or Nightly. They are the testnet-capable wallets in the NEAR Connect manifest.</p>
           <div className="mt-3">
             {!ready ? (
@@ -42,20 +42,20 @@ export default function WalletCheckPage() {
             ) : accountId ? (
               <p className="text-sm">
                 Signed in as{" "}
-                <a className="font-mono text-blue underline" href={accountUrl(accountId)} target="_blank" rel="noreferrer">
+                <a className="font-mono text-accent underline underline-offset-4" href={accountUrl(accountId)} target="_blank" rel="noreferrer">
                   {accountId}
                 </a>
                 {walletName && <span className="text-muted"> via {walletName}</span>}
               </p>
             ) : (
-              <button onClick={() => signIn()} className="rounded-md bg-blue px-3 py-2 text-sm font-medium text-white">
+              <button onClick={() => signIn()} className="key key-primary h-10 px-5 text-sm">
                 Sign in
               </button>
             )}
           </div>
         </li>
-        <li className="rounded-lg border border-line bg-white p-5">
-          <h2 className="font-semibold text-navy">2. Sign a FunctionCall with a deposit</h2>
+        <li className="panel rounded-[var(--radius-card)] p-6">
+          <h2 className="font-semibold text-fg">2. Sign a FunctionCall with a deposit</h2>
           <p className="mt-1 text-sm text-muted">
             Registers your account on a NEP-141 token with <code>storage_deposit</code>, attaching the token&apos;s minimum storage deposit. Use{" "}
             <code>{config.tokenId}</code> once Isaac has deployed cpUSD, or <code>wrap.testnet</code> before that.
@@ -63,9 +63,9 @@ export default function WalletCheckPage() {
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <label className="text-sm">
               <span className="block text-xs text-muted">Token contract</span>
-              <input value={token} onChange={(e) => setToken(e.target.value.trim())} className="mt-1 w-72 rounded border border-line px-2 py-1.5 font-mono text-sm" />
+              <input value={token} onChange={(e) => setToken(e.target.value.trim())} className="mt-1.5 h-10 w-72 rounded-full border border-line bg-[color-mix(in_srgb,var(--color-bg)_55%,transparent)] px-4 font-mono text-sm text-fg" />
             </label>
-            <button onClick={() => setToken("wrap.testnet")} className="rounded border border-line px-3 py-1.5 text-sm">
+            <button onClick={() => setToken("wrap.testnet")} className="key key-secondary h-10 px-4 text-sm">
               Use wrap.testnet
             </button>
             <button
@@ -77,7 +77,7 @@ export default function WalletCheckPage() {
                   return storageDeposit(accountId!, min, token);
                 })
               }
-              className="rounded-md bg-navy px-3 py-2 text-sm font-medium text-white disabled:opacity-40"
+              className="key key-primary h-10 px-5 text-sm"
             >
               Send storage_deposit
             </button>
