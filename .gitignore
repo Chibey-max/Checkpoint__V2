@@ -5,6 +5,7 @@ out/
 .next/
 coverage/
 *.tsbuildinfo
+next-env.d.ts
 target/
 
 # secrets: never commit (PRD NFR-03)

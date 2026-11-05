@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "item_key": "vps-2c4g-month",
+      "title": "VPS, 2 vCPU / 4 GB RAM, 1 month",
+      "unit": "vps-month",
+      "min_spec": {
+        "vcpu": 2,
+        "ram_gb": 4
+      },
+      "aliases": [
+        "vps",
+        "server",
+        "droplet",
+        "instance",
+        "2 vcpu",
+        "4 gb"
+      ]
+    },
+    {
+      "item_key": "domain-com-year",
+      "title": ".com domain registration, 1 year",
+      "unit": "domain-year",
+      "min_spec": {
+        "tld": "com"
+      },
+      "aliases": [
+        "domain",
+        ".com",
+        "dot com"
+      ]
+    },
+    {
+      "item_key": "storage-1tb-month",
+      "title": "Object storage, 1 TB stored, 1 month",
+      "unit": "storage-tb-month",
+      "min_spec": {
+        "storage_gb": 1000
+      },
+      "aliases": [
+        "object storage",
+        "storage",
+        "s3",
+        "bucket",
+        "1 tb"
+      ]
+    },
+    {
+      "item_key": "email-10k-month",
+      "title": "Transactional email, 10,000 emails, 1 month",
+      "unit": "email-10k-month",
+      "min_spec": {
+        "emails_per_month": 10000
+      },
+      "aliases": [
+        "email",
+        "transactional email",
+        "smtp",
+        "10k emails"
+      ]
+    }
+  ]
+}
