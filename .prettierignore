@@ -1,0 +1,6 @@
+docs/planning/
+pnpm-lock.yaml
+node_modules/
+coverage/
+packages/shared/vectors/
+*.md

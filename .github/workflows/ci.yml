@@ -1,0 +1,69 @@
+# CI (task D-7.2, FR-DX06): types, lint, tests and a secret scan on every PR and push to main.
+# Rust contract tests and `pnpm demo:sandbox` join once contracts/ and the sandbox script land (H13).
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    runs-on: ubuntu-24.04
+    env:
+      LLM_PROVIDER: none # CI never calls the LLM (PRD FR-AG11)
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - name: Vector file is up to date
+        run: pnpm vector:gen && git diff --exit-code packages/shared/vectors/
+      - name: Dev fixture snapshot validates
+        run: pnpm snapshot:check data/fixtures/dev-snapshot
+      - name: Captured snapshot validates
+        if: hashFiles('data/snapshot/offers.json') != ''
+        # Non-blocking until decisions-pending #5 (fixture rows say capture_method "fixture") is agreed.
+        continue-on-error: true
+        run: pnpm snapshot:check data/snapshot
+
+  contracts:
+    if: hashFiles('contracts/**/Cargo.toml') != ''
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Rust toolchain (pinned by rust-toolchain.toml)
+        run: rustup show && rustup target add wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace
+
+  secrets:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # scan the full history, not just HEAD
+      - name: Install gitleaks 8.30.1 (checksum verified)
+        run: |
+          set -euo pipefail
+          V=8.30.1
+          cd "$RUNNER_TEMP"
+          curl -sSfLO "https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_linux_x64.tar.gz"
+          curl -sSfLO "https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_checksums.txt"
+          grep " gitleaks_${V}_linux_x64.tar.gz$" "gitleaks_${V}_checksums.txt" | sha256sum -c -
+          tar -xzf "gitleaks_${V}_linux_x64.tar.gz" gitleaks
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - run: gitleaks detect --source . --redact --no-banner --log-opts="--all"

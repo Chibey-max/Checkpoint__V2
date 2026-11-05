@@ -1,17 +1,23 @@
+# dependencies and build output
 node_modules/
-.next/
-out/
 dist/
+out/
+.next/
 coverage/
 *.tsbuildinfo
 next-env.d.ts
+target/
 
-# secrets: never commit
+# secrets: never commit (PRD NFR-03)
 .env
 .env.*
 !.env.example
 *.key
+*.pem
 data/private/
 
-# rust
-target/
+# local state
+*.sqlite
+*.sqlite-journal
+*.db
+.DS_Store
