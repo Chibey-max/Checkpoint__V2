@@ -11,7 +11,7 @@ A team of AI agents can research, compare and buy things for you, and pay for th
 </div>
 
 > [!IMPORTANT]
-> **Status: in active development (5 → 14 November 2026).** This README describes the target design for the hackathon MVP, as specified in our PRD v2. Sections marked **🚧 planned** describe things that are not built yet. The [Roadmap](#16-roadmap) shows what is done. We update this file as each part lands, so the README always matches what actually runs.
+> **Status: in active development (5 → 14 November 2026).** This README describes the target design for the hackathon MVP, as specified in our [PRD v2](docs/planning/Checkpoint-PRD-v2.pdf). Sections marked **🚧 planned** describe things that are not built yet. The [Roadmap](#16-roadmap) shows what is done. We update this file as each part lands, so the README always matches what actually runs.
 
 ---
 
@@ -35,6 +35,7 @@ A team of AI agents can research, compare and buy things for you, and pay for th
 16. [Roadmap](#16-roadmap)
 17. [Limitations and honest claims](#17-limitations-and-honest-claims)
 18. [Team](#18-team)
+19. [Project documents](#19-project-documents)
 
 ---
 
@@ -845,3 +846,15 @@ Stretch (only after the gate): vendor agents bidding for baskets, a NEAR Intents
 | **Patrick** ([@Phantomcall](https://github.com/Phantomcall)) | Offer snapshot, web app, README and docs, demo video, submission |
 
 Built for the **NEAR Hackathon 2026** (1–14 November).
+
+---
+
+## 19. Project documents
+
+| Document | Contents |
+|---|---|
+| [Project decision](docs/planning/NEAR-Project-Decision.pdf) | Why Checkpoint and Agent Procurement Desk were merged into one submission, checked against the live hackathon rules |
+| [PRD v2.0](docs/planning/Checkpoint-PRD-v2.pdf) | Full product spec: requirements, Guard rules, data model, **frozen interfaces**, invariants, threat model, test plan, demo script |
+| [Task list](docs/planning/Checkpoint-Task-List.pdf) | 74 day-by-day tasks for the team, with tools, recommended approach, alternatives, "done when" tests and handoffs |
+
+Index and editable sources: [`docs/`](docs/README.md).
