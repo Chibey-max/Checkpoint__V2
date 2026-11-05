@@ -1,0 +1,101 @@
+{
+  "format": "checkpoint-basket-vector-v1",
+  "note": "TEST-ONLY key material. Never use this key on testnet. Regenerate with: pnpm vector:gen",
+  "domain_hex": "434845434b504f494e545f4241534b45545f563100",
+  "domain_utf8": "CHECKPOINT_BASKET_V1\\0",
+  "test_key": {
+    "seed_hex": "e4215e6724823db1705eb987a28d4d89c678e48499ff17796b3ab92514ca7af9",
+    "pubkey_hex": "6a96eb5e0b1d18c37f75d31769ed33beb3b3877e5d22c291537c763111e40e6c",
+    "pubkey_b58": "8B5h1ehxe2SBQuukrS3EgbP6piSySZsYvpD7YmN4y3Go"
+  },
+  "cases": [
+    {
+      "name": "demo-two-vendors",
+      "description": "Typical testnet basket: two vendors, cpUSD base units (6 decimals).",
+      "payload": {
+        "schema_version": 1,
+        "network_id": "testnet",
+        "vault_id": "vault.cpdemo.testnet",
+        "policy_version": 3,
+        "rules_hash": "b8f95fec6d5f90c2af386204795134cd3b3364543cca98bc60a46e93f56f3ba4",
+        "guard_key_version": 1,
+        "basket_id": "3f2c1d4e-8a7b-4c6d-9e0f-1a2b3c4d5e6f",
+        "owner_id": "owner-demo.cpdemo.testnet",
+        "agent_id": "agent.cpdemo.testnet",
+        "token_id": "cpusd.cpdemo.testnet",
+        "payouts": [
+          {
+            "vendor_id": "vendor-02.cpdemo.testnet",
+            "amount": "23000000",
+            "line_count": 1
+          },
+          {
+            "vendor_id": "vendor-06.cpdemo.testnet",
+            "amount": "9990000",
+            "line_count": 1
+          }
+        ],
+        "total": "32990000",
+        "evidence_hash": "9b467225f13b8e2b2a4a06e2a2a9080ef01be38d74d0776e41389afef51f9eb8",
+        "nonce": "10320662794978892550",
+        "created_at_ms": "1793966400000",
+        "expires_at_ms": "1793967300000"
+      },
+      "payload_len": 361,
+      "payload_hex": "0107000000746573746e6574140000007661756c742e637064656d6f2e746573746e657403000000b8f95fec6d5f90c2af386204795134cd3b3364543cca98bc60a46e93f56f3ba4010000002400000033663263316434652d386137622d346336642d396530662d316132623363346435653666190000006f776e65722d64656d6f2e637064656d6f2e746573746e6574140000006167656e742e637064656d6f2e746573746e65741400000063707573642e637064656d6f2e746573746e6574020000001800000076656e646f722d30322e637064656d6f2e746573746e6574c0f35e0100000000000000000000000001001800000076656e646f722d30362e637064656d6f2e746573746e6574706f980000000000000000000000000001003063f7010000000000000000000000009b467225f13b8e2b2a4a06e2a2a9080ef01be38d74d0776e41389afef51f9eb8069b4e7d215c3a8f00e2bab0a1010000a09dc8b0a1010000",
+      "payload_b64": "AQcAAAB0ZXN0bmV0FAAAAHZhdWx0LmNwZGVtby50ZXN0bmV0AwAAALj5X+xtX5DCrzhiBHlRNM07M2RUPMqYvGCkbpP1bzukAQAAACQAAAAzZjJjMWQ0ZS04YTdiLTRjNmQtOWUwZi0xYTJiM2M0ZDVlNmYZAAAAb3duZXItZGVtby5jcGRlbW8udGVzdG5ldBQAAABhZ2VudC5jcGRlbW8udGVzdG5ldBQAAABjcHVzZC5jcGRlbW8udGVzdG5ldAIAAAAYAAAAdmVuZG9yLTAyLmNwZGVtby50ZXN0bmV0wPNeAQAAAAAAAAAAAAAAAAEAGAAAAHZlbmRvci0wNi5jcGRlbW8udGVzdG5ldHBvmAAAAAAAAAAAAAAAAAABADBj9wEAAAAAAAAAAAAAAACbRnIl8TuOKypKBuKiqQgO8BvjjXTQd25BOJr+9R+euAabTn0hXDqPAOK6sKEBAACgnciwoQEAAA==",
+      "hash_hex": "be5ca6580a8bea8a2c8b95b1dec0856967b4177683baf9cb7fc290c062ad176b",
+      "signature_hex": "479f681b842d3050d2f2e8f8cabd6fed33afbb7e0f589386ab55bad0b07999b023015dc6095194547dd9e24bc8d1976a11c5faecab9520970bdcd81de5834702",
+      "signature_b64": "R59oG4QtMFDS8uj4yr1v7TOvu34PWJOGq1W60LB5mbAjAV3GCVGUVH3Z4kvI0ZdqEcX67KuVIJcL3Ngd5YNHAg=="
+    },
+    {
+      "name": "edge-large-values",
+      "description": "Width checks: u128 above 2^64, u64 at max, u32 above 2^16, four payouts.",
+      "payload": {
+        "schema_version": 1,
+        "network_id": "sandbox",
+        "vault_id": "vault.test.near",
+        "policy_version": 70000,
+        "rules_hash": "11303ccae638fac67964e2a9a7dda79bcaf25607b3d351485bf6b1bc264a0335",
+        "guard_key_version": 4000000000,
+        "basket_id": "00000000-0000-4000-8000-000000000000",
+        "owner_id": "owner.test.near",
+        "agent_id": "agent.test.near",
+        "token_id": "cpusd.test.near",
+        "payouts": [
+          {
+            "vendor_id": "vendor-01.test.near",
+            "amount": "18446744073709551621",
+            "line_count": 65535
+          },
+          {
+            "vendor_id": "vendor-02.test.near",
+            "amount": "1",
+            "line_count": 1
+          },
+          {
+            "vendor_id": "vendor-03.test.near",
+            "amount": "0",
+            "line_count": 2
+          },
+          {
+            "vendor_id": "vendor-04.test.near",
+            "amount": "170141183460469231731687303715884105727",
+            "line_count": 3
+          }
+        ],
+        "total": "170141183460469231750134047789593657349",
+        "evidence_hash": "24886f4240c97d56ac8334984cc76a06426117e5927177a251e397a606bd48cd",
+        "nonce": "18446744073709551615",
+        "created_at_ms": "0",
+        "expires_at_ms": "18446744073709551615"
+      },
+      "payload_len": 408,
+      "payload_hex": "010700000073616e64626f780f0000007661756c742e746573742e6e6561727011010011303ccae638fac67964e2a9a7dda79bcaf25607b3d351485bf6b1bc264a033500286bee2400000030303030303030302d303030302d343030302d383030302d3030303030303030303030300f0000006f776e65722e746573742e6e6561720f0000006167656e742e746573742e6e6561720f00000063707573642e746573742e6e656172040000001300000076656e646f722d30312e746573742e6e65617205000000000000000100000000000000ffff1300000076656e646f722d30322e746573742e6e6561720100000000000000000000000000000001001300000076656e646f722d30332e746573742e6e6561720000000000000000000000000000000002001300000076656e646f722d30342e746573742e6e656172ffffffffffffffffffffffffffffff7f03000500000000000000010000000000008024886f4240c97d56ac8334984cc76a06426117e5927177a251e397a606bd48cdffffffffffffffff0000000000000000ffffffffffffffff",
+      "payload_b64": "AQcAAABzYW5kYm94DwAAAHZhdWx0LnRlc3QubmVhcnARAQARMDzK5jj6xnlk4qmn3aebyvJWB7PTUUhb9rG8JkoDNQAoa+4kAAAAMDAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAwDwAAAG93bmVyLnRlc3QubmVhcg8AAABhZ2VudC50ZXN0Lm5lYXIPAAAAY3B1c2QudGVzdC5uZWFyBAAAABMAAAB2ZW5kb3ItMDEudGVzdC5uZWFyBQAAAAAAAAABAAAAAAAAAP//EwAAAHZlbmRvci0wMi50ZXN0Lm5lYXIBAAAAAAAAAAAAAAAAAAAAAQATAAAAdmVuZG9yLTAzLnRlc3QubmVhcgAAAAAAAAAAAAAAAAAAAAACABMAAAB2ZW5kb3ItMDQudGVzdC5uZWFy////////////////////fwMABQAAAAAAAAABAAAAAAAAgCSIb0JAyX1WrIM0mEzHagZCYRflknF3olHjl6YGvUjN//////////8AAAAAAAAAAP//////////",
+      "hash_hex": "19a5b6dfba72c1023fd82164a0b22f51c1634cf6da7d5b30d0b0d71ee9e86f1a",
+      "signature_hex": "ef9684ac58203205a48680ae0e559be46d01b758ed69b4bcc7b74e60c6546f5c5b97abbd0245fafba080143cb09dab81874c324c03a6695a26de00a8babf6108",
+      "signature_b64": "75aErFggMgWkhoCuDlWb5G0Bt1jtabS8x7dOYMZUb1xbl6u9AkX6+6CAFDywnauBh0wyTAOmaVom3gCour9hCA=="
+    }
+  ]
+}
