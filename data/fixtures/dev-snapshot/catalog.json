@@ -1,0 +1,33 @@
+{
+  "note": "SYNTHETIC DEV FIXTURE for tests and the mock server. Item keys are a proposal; Patrick's real catalogue in data/snapshot/ is the source of truth.",
+  "items": [
+    {
+      "item_key": "vps-2c4g-month",
+      "title": "VPS 2 vCPU / 4 GB, 1 month",
+      "unit": "vps-month",
+      "min_spec": { "vcpu": 2, "ram_gb": 4 },
+      "aliases": ["vps", "virtual server", "cloud server", "server", "droplet", "instance"]
+    },
+    {
+      "item_key": "domain-com-year",
+      "title": ".com domain, 1 year",
+      "unit": "domain-year",
+      "min_spec": { "tld": "com" },
+      "aliases": ["domain name", ".com domain", ".com", "domain"]
+    },
+    {
+      "item_key": "storage-1tb-month",
+      "title": "Object storage 1 TB, 1 month",
+      "unit": "storage-tb-month",
+      "min_spec": { "storage_gb": 1000 },
+      "aliases": ["object storage", "s3 storage", "storage", "bucket"]
+    },
+    {
+      "item_key": "email-10k-month",
+      "title": "Transactional email, 10k per month",
+      "unit": "email-10k-month",
+      "min_spec": { "emails_per_month": 10000 },
+      "aliases": ["transactional email", "email sending", "email", "smtp"]
+    }
+  ]
+}
