@@ -116,6 +116,7 @@
   }
   body {
     @apply bg-bg font-sans text-fg antialiased;
+    overflow-x: clip;
     font-feature-settings: "ss01", "cv11";
   }
   h1, h2, h3 { letter-spacing: -0.035em; }
@@ -266,3 +267,25 @@
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(6px); }
 }
+
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* ---------- Pointer spotlight: a soft light that follows the cursor (::after only, so it never fights .edge-light's ::before) ---------- */
+[data-spotlight] { position: relative; isolation: isolate; transition: border-color 300ms ease; }
+[data-spotlight]::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 55%);
+  opacity: 0; transition: opacity 300ms ease;
+}
+[data-spotlight]:hover::after { opacity: 1; }
+[data-spotlight]:hover { border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-line)); }
+
+/* ---------- Hero entrance ---------- */
+.hero-word { animation: word-in 900ms var(--ease-out-soft) both; display: inline-block; }
+.hero-rise { animation: rise-in 900ms var(--ease-out-soft) both; }
+@keyframes word-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(8px); } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }

@@ -100,7 +100,7 @@ function LockCard({ n, Icon, name, kind, body, delay, children }: {
   n: string; Icon: typeof ShieldCheck; name: string; kind: "onchain" | "advisory"; body: string; delay: number; children: React.ReactNode;
 }) {
   return (
-    <Reveal as="li" delay={delay} className="panel edge-light flex flex-col rounded-[var(--radius-card)] p-6">
+    <Reveal as="li" delay={delay} className="panel edge-light flex flex-col rounded-[var(--radius-card)] p-6" spotlight>
       <div className="flex items-start justify-between">
         <span className="grid size-11 place-items-center rounded-2xl bg-accent-soft text-accent ring-1 ring-inset ring-accent/25">
           <Icon aria-hidden className="size-5" />

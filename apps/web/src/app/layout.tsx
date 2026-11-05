@@ -6,6 +6,7 @@ import { Atmosphere } from "@/components/site/atmosphere";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
 import { TestnetStrip } from "@/components/site/testnet-strip";
+import { Spotlight } from "@/components/ui/spotlight";
 import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <WalletProvider>
           <Atmosphere />
+          <Spotlight />
           <TestnetStrip />
           <Header />
           <main className="mx-auto w-full max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">{children}</main>
