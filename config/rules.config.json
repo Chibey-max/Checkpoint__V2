@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "min_offers": 3,
+  "max_age_hours": 720,
+  "bps": { "good_max": 10500, "fair_max": 12000, "low_min": 5000 },
+  "currency": "USD",
+  "usd_to_token": { "decimals": 6, "rate_micro": 1000000 }
+}
