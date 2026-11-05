@@ -70,7 +70,7 @@ export const OfferSchema = z.object({
   capture_method: CaptureMethodSchema.optional(),
   raw_text: z.string().max(500).optional(), // untrusted listing text; never parsed for decisions
   notes: z.string().optional(),
-  screenshot: z.string().optional(),
+  screenshot: z.string().nullable().optional(), // null = no screenshot captured
 });
 export type Offer = z.infer<typeof OfferSchema>;
 
