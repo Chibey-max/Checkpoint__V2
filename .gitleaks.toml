@@ -1,0 +1,28 @@
+# gitleaks config: default rules plus Checkpoint-specific secrets.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "checkpoint-guard-secret"
+description = "Guard ed25519 seed in an env assignment"
+regex = '''GUARD_SECRET_KEY\s*=\s*['"]?([1-9A-HJ-NP-Za-km-z]{32,90})'''
+secretGroup = 1
+
+[[rules]]
+id = "near-private-key"
+description = "NEAR private key (ed25519:...)"
+regex = '''ed25519:[1-9A-HJ-NP-Za-km-z]{64,90}'''
+
+[[allowlists]]
+description = "Published test-only key material in the shared vector"
+paths = ['''packages/shared/vectors/basket-v1\.json''']
+
+[[allowlists]]
+description = "Catalogue item keys (e.g. item_key: \"vps-2c4g-month\") are slugs, not secrets"
+regexTarget = "match"
+regexes = ['''item_key['"]?\s*[:=]\s*['"][a-z0-9][a-z0-9-]*['"]''']
+
+[[rules]]
+id = "groq-api-key"
+description = "Groq API key"
+regex = '''\bgsk_[A-Za-z0-9]{40,64}\b'''
