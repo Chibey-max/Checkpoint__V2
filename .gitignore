@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# secrets: never commit
+.env
+.env.*
+!.env.example
+*.key
+data/private/
+
+# rust
+target/
