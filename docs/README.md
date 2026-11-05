@@ -15,8 +15,18 @@ The PDFs are the readable versions. The editable sources are in [`planning/sourc
 - `build_tasks.py` generates `Checkpoint-Task-List.html` from structured task data:
   `python3 build_tasks.py Checkpoint-Task-List.html`
 
+## Engineering docs
+
+| Document | What it is |
+|---|---|
+| [**Decisions pending**](decisions-pending.md) | Where the Day 0 code departs from or adds to PRD v2, each with who needs to agree. **Read this first.** |
+| [**API**](api.md) | Guard and agents HTTP contracts, SSE events with real examples, the evidence bundle, the mock server, and the Vault view shapes Guard expects |
+| [**Architecture**](architecture.md) | How the off-chain code maps to PRD §6, and where each guarantee is enforced and tested |
+| [README section draft](readme-section-guard-agents.md) | Guard and agents text for the master README (D-7.1) |
+| [Payload vector](../packages/shared/vectors/README.md) | The shared Borsh test vector (H1) and the Rust struct that matches it |
+
 ## Change rules
 
 - The PRD's §11 interfaces are **frozen**. Change them only when all three of us agree, and update the PRD, the shared test vectors and the code in the same PR.
 - When a task's "done when" passes, tick it on the board. If the plan changes, update the task data in `build_tasks.py` and re-render.
-- The other docs planned under `docs/` (`architecture.md`, `api.md`, `permissions.md`, `evidence.md`, `limitations.md`, `demo-script.md`) arrive with the milestones in the task list.
+- The other docs planned under `docs/` (`permissions.md`, `evidence.md`, `limitations.md`, `demo-script.md`) arrive with the milestones in the task list.
