@@ -1,0 +1,350 @@
+{
+  "note": "SYNTHETIC DEV FIXTURE: not real listings. Every row is capture_method fixture.",
+  "offers": [
+    {
+      "offer_id": "vps-a",
+      "item_key": "vps-2c4g-month",
+      "vendor_id": "vendor-01.cpdemo.testnet",
+      "seller_name": "Seller A",
+      "product_title": "Basic 2 vCPU 4 GB",
+      "product_fingerprint": "seller-a/basic-2-4",
+      "spec": {
+        "vcpu": 2,
+        "ram_gb": 4
+      },
+      "quantity": 1,
+      "unit": "vps-month",
+      "price_total_micro_usd": 12000000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/vps-a",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "vps-b",
+      "item_key": "vps-2c4g-month",
+      "vendor_id": "vendor-02.cpdemo.testnet",
+      "seller_name": "Seller B",
+      "product_title": "Cloud S2",
+      "product_fingerprint": "seller-b/cloud-s2",
+      "spec": {
+        "vcpu": 2,
+        "ram_gb": 4
+      },
+      "quantity": 1,
+      "unit": "vps-month",
+      "price_total_micro_usd": 11500000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/vps-b",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "vps-c",
+      "item_key": "vps-2c4g-month",
+      "vendor_id": "vendor-03.cpdemo.testnet",
+      "seller_name": "Seller C",
+      "product_title": "VM Standard 2",
+      "product_fingerprint": "seller-c/vm-std-2",
+      "spec": {
+        "vcpu": 2,
+        "ram_gb": 4
+      },
+      "quantity": 1,
+      "unit": "vps-month",
+      "price_total_micro_usd": 12500000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/vps-c",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "vps-d",
+      "item_key": "vps-2c4g-month",
+      "vendor_id": "vendor-04.cpdemo.testnet",
+      "seller_name": "Seller D",
+      "product_title": "Premium 2 vCPU",
+      "product_fingerprint": "seller-d/premium-2",
+      "spec": {
+        "vcpu": 2,
+        "ram_gb": 4
+      },
+      "quantity": 1,
+      "unit": "vps-month",
+      "price_total_micro_usd": 16000000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/vps-d",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "vps-e",
+      "item_key": "vps-2c4g-month",
+      "vendor_id": "vendor-05.cpdemo.testnet",
+      "seller_name": "Seller E",
+      "product_title": "Starter 2/4",
+      "product_fingerprint": "seller-e/starter-2-4",
+      "spec": {
+        "vcpu": 2,
+        "ram_gb": 4
+      },
+      "quantity": 1,
+      "unit": "vps-month",
+      "price_total_micro_usd": 10800000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/vps-e",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "dom-a",
+      "item_key": "domain-com-year",
+      "vendor_id": "vendor-01.cpdemo.testnet",
+      "seller_name": "Seller A",
+      "product_title": ".com registration",
+      "product_fingerprint": "seller-a/com",
+      "spec": {
+        "tld": "com"
+      },
+      "quantity": 1,
+      "unit": "domain-year",
+      "price_total_micro_usd": 10440000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/dom-a",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "dom-b",
+      "item_key": "domain-com-year",
+      "vendor_id": "vendor-02.cpdemo.testnet",
+      "seller_name": "Seller B",
+      "product_title": ".com 1 year",
+      "product_fingerprint": "seller-b/com",
+      "spec": {
+        "tld": "com"
+      },
+      "quantity": 1,
+      "unit": "domain-year",
+      "price_total_micro_usd": 11000000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/dom-b",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "dom-c",
+      "item_key": "domain-com-year",
+      "vendor_id": "vendor-03.cpdemo.testnet",
+      "seller_name": "Seller C",
+      "product_title": ".com domain",
+      "product_fingerprint": "seller-c/com",
+      "spec": {
+        "tld": "com"
+      },
+      "quantity": 1,
+      "unit": "domain-year",
+      "price_total_micro_usd": 12980000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/dom-c",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "dom-d",
+      "item_key": "domain-com-year",
+      "vendor_id": "vendor-04.cpdemo.testnet",
+      "seller_name": "Seller D",
+      "product_title": "com registration",
+      "product_fingerprint": "seller-d/com",
+      "spec": {
+        "tld": "com"
+      },
+      "quantity": 1,
+      "unit": "domain-year",
+      "price_total_micro_usd": 11500000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/dom-d",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "dom-f",
+      "item_key": "domain-com-year",
+      "vendor_id": "vendor-06.cpdemo.testnet",
+      "seller_name": "Seller F",
+      "product_title": ".com yearly",
+      "product_fingerprint": "seller-f/com",
+      "spec": {
+        "tld": "com"
+      },
+      "quantity": 1,
+      "unit": "domain-year",
+      "price_total_micro_usd": 9990000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/dom-f",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "sto-a",
+      "item_key": "storage-1tb-month",
+      "vendor_id": "vendor-01.cpdemo.testnet",
+      "seller_name": "Seller A",
+      "product_title": "Object storage 1 TB",
+      "product_fingerprint": "seller-a/obj-1tb",
+      "spec": {
+        "storage_gb": 1000
+      },
+      "quantity": 1,
+      "unit": "storage-tb-month",
+      "price_total_micro_usd": 6990000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/sto-a",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "sto-b",
+      "item_key": "storage-1tb-month",
+      "vendor_id": "vendor-02.cpdemo.testnet",
+      "seller_name": "Seller B",
+      "product_title": "Archive bucket 1 TB",
+      "product_fingerprint": "seller-b/archive-1tb",
+      "spec": {
+        "storage_gb": 1000
+      },
+      "quantity": 1,
+      "unit": "storage-tb-month",
+      "price_total_micro_usd": 2500000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/sto-b",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "sto-c",
+      "item_key": "storage-1tb-month",
+      "vendor_id": "vendor-03.cpdemo.testnet",
+      "seller_name": "Seller C",
+      "product_title": "S3-compatible 1 TB",
+      "product_fingerprint": "seller-c/s3-1tb",
+      "spec": {
+        "storage_gb": 1000
+      },
+      "quantity": 1,
+      "unit": "storage-tb-month",
+      "price_total_micro_usd": 6000000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/sto-c",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "sto-d",
+      "item_key": "storage-1tb-month",
+      "vendor_id": "vendor-04.cpdemo.testnet",
+      "seller_name": "Seller D",
+      "product_title": "Storage 1 TB",
+      "product_fingerprint": "seller-d/storage-1tb",
+      "spec": {
+        "storage_gb": 1000
+      },
+      "quantity": 1,
+      "unit": "storage-tb-month",
+      "price_total_micro_usd": 5990000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/sto-d",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "eml-a",
+      "item_key": "email-10k-month",
+      "vendor_id": "vendor-01.cpdemo.testnet",
+      "seller_name": "Seller A",
+      "product_title": "Email 10k",
+      "product_fingerprint": "seller-a/email-10k",
+      "spec": {
+        "emails_per_month": 10000
+      },
+      "quantity": 1,
+      "unit": "email-10k-month",
+      "price_total_micro_usd": 15000000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/eml-a",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "eml-b",
+      "item_key": "email-10k-month",
+      "vendor_id": "vendor-02.cpdemo.testnet",
+      "seller_name": "Seller B",
+      "product_title": "Mail API 10k",
+      "product_fingerprint": "seller-b/mail-10k",
+      "spec": {
+        "emails_per_month": 10000
+      },
+      "quantity": 1,
+      "unit": "email-10k-month",
+      "price_total_micro_usd": 20000000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/eml-b",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    },
+    {
+      "offer_id": "eml-c",
+      "item_key": "email-10k-month",
+      "vendor_id": "vendor-03.cpdemo.testnet",
+      "seller_name": "Seller C",
+      "product_title": "Transactional 10k",
+      "product_fingerprint": "seller-c/tx-10k",
+      "spec": {
+        "emails_per_month": 10000
+      },
+      "quantity": 1,
+      "unit": "email-10k-month",
+      "price_total_micro_usd": 14500000,
+      "fees_micro_usd": 0,
+      "currency": "USD",
+      "source_url": "https://example.com/fixture/eml-c",
+      "captured_at": "2026-11-05T10:00:00Z",
+      "capture_method": "fixture",
+      "notes": "Synthetic dev fixture, not a real listing."
+    }
+  ]
+}
