@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* Design tokens: same palette as the PRD (navy, blue, ok, warn, bad). */
+@theme {
+  --color-navy: #0f1a2e;
+  --color-ink: #1c2433;
+  --color-muted: #5b6474;
+  --color-line: #dfe3ea;
+  --color-soft: #f4f6fa;
+  --color-blue: #2456d6;
+  --color-ok: #1f7a4d;
+  --color-ok-soft: #e6f3ec;
+  --color-warn: #b4531a;
+  --color-warn-soft: #fbefe6;
+  --color-bad: #a32626;
+  --color-bad-soft: #f8e7e7;
+  --color-testnet: #f6c445;
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html {
+  color: var(--color-ink);
+  background: var(--color-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
