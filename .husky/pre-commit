@@ -1,0 +1,7 @@
+# Secret scan on every commit (PRD NFR-03, FR-DX03). The repo is public, so this fails closed.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed, so this commit is blocked." >&2
+  echo "Install it: https://github.com/gitleaks/gitleaks#installing (or 'brew install gitleaks')." >&2
+  exit 1
+fi
+gitleaks protect --staged --redact --no-banner
