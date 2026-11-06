@@ -38,7 +38,7 @@ Every offer is paid to a neutral stand-in testnet account (D-09). The UI shows t
 
 ## Offers
 
-Expected verdicts come from applying PRD §9 by hand to this file alone, with the allowlist set to vendor-01–04 and 06. David's Guard tests should reproduce them.
+Verdicts below are what Guard returns (`assessOffers` from `@checkpoint/guard`, rules hash `89e1b151…`), with the allowlist set to vendor-01–04 and 06. The loader merges `fixtures/*.json` into the evidence store (decisions-pending #5), so medians and ratios include the fixture rows. That is what the demo shows. Checked on 2026-11-05; `pnpm snapshot:check` is clean.
 
 ### VPS, 2 vCPU / 4 GB RAM, 1 month (median $24.00)
 
@@ -50,24 +50,24 @@ Expected verdicts come from applying PRD §9 by hand to this file alone, with th
 | `vps-akamai` | Akamai (Linode) | vendor-04 | $24.00 | 100.00% | ALLOW (R-08) | [page](https://www.akamai.com/cloud/pricing/cpu) | [jpg](screens/vps-akamai.jpg) | linode.com/pricing redirects here. |
 | `vps-aws-lightsail` | Amazon Web Services | vendor-02 | $24.00 | 100.00% | ALLOW (R-08) | [page](https://aws.amazon.com/lightsail/pricing/) | **to capture** | IPv6-only bundle is $20; we use the IPv4 bundle as the like-for-like plan. |
 
-### .com domain registration, 1 year (median $11.76)
+### .com domain registration, 1 year (median $11.71)
 
 | offer_id | Seller | Stand-in | Price | Ratio | Expected | Source | Screenshot | Note |
 |---|---|---|---|---|---|---|---|---|
-| `domain-ionos` | IONOS | vendor-04 | $1.00 | 8.50% | REVIEW (R-07) | [page](https://www.ionos.com/domains/com-domain) | **to capture** | Intro price; renewal not shown on the page. A real-world 'unusually low' case. |
-| `domain-gandi` | Gandi | vendor-02 | $11.71 | 99.57% | ALLOW (R-08) | [page](https://www.gandi.net/en-US/domain/tld/com) | [jpg](screens/domain-gandi.jpg) | Excl. VAT. Renewal is much higher ($38.38); we price the 1-year registration only. |
-| `domain-porkbun` | Porkbun | vendor-01 | $11.81 | 100.42% | ALLOW (R-08) | [page](https://porkbun.com/products/domains) | **to capture** | No promo; first year = renewal. |
-| `domain-namecom` | Name.com | vendor-03 | $13.99 | 118.96% | REVIEW (R-06) | [page](https://www.name.com/pricing) | [jpg](screens/domain-namecom.jpg) | First-year price; struck-through $21.99 is probably the regular rate. |
+| `domain-ionos` | IONOS | vendor-04 | $1.00 | 8.53% | REVIEW (R-07) | [page](https://www.ionos.com/domains/com-domain) | **to capture** | Intro price; renewal not shown on the page. A real-world 'unusually low' case. |
+| `domain-gandi` | Gandi | vendor-02 | $11.71 | 100.00% | ALLOW (R-08) | [page](https://www.gandi.net/en-US/domain/tld/com) | [jpg](screens/domain-gandi.jpg) | Excl. VAT. Renewal is much higher ($38.38); we price the 1-year registration only. |
+| `domain-porkbun` | Porkbun | vendor-01 | $11.81 | 100.85% | ALLOW (R-08) | [page](https://porkbun.com/products/domains) | **to capture** | No promo; first year = renewal. |
+| `domain-namecom` | Name.com | vendor-03 | $13.99 | 119.47% | REVIEW (R-06) | [page](https://www.name.com/pricing) | [jpg](screens/domain-namecom.jpg) | First-year price; struck-through $21.99 is probably the regular rate. |
 
-### Object storage, 1 TB stored, 1 month (median $7.99)
+### Object storage, 1 TB stored, 1 month (median $7.40)
 
 | offer_id | Seller | Stand-in | Price | Ratio | Expected | Source | Screenshot | Note |
 |---|---|---|---|---|---|---|---|---|
-| `storage-backblaze` | Backblaze | vendor-06 | $6.95 | 86.98% | ALLOW (R-08) | [page](https://www.backblaze.com/cloud-storage/pricing) | **to capture** | 1 TB billed as listed per-TB rate. |
-| `storage-hetzner` | Hetzner | vendor-04 | $7.28 | 91.16% | ALLOW (R-08) | [page](https://www.hetzner.com/storage/object-storage/) | [jpg](screens/storage-hetzner.jpg) | €6.49 converted at the ECB reference rate of 2026-11-05 (1.1224), floored to micro-USD. |
-| `storage-wasabi` | Wasabi | vendor-02 | $7.99 | 100.00% | ALLOW (R-08) | [page](https://wasabi.com/pricing) | [jpg](screens/storage-wasabi.jpg) | – |
-| `storage-cloudflare-r2` | Cloudflare | vendor-03 | $15.00 | 187.73% | BLOCK (R-05) | [page](https://developers.cloudflare.com/r2/pricing/) | [jpg](screens/storage-cloudflare-r2.jpg) | 1,000 GB x $0.015 = $15.00; the 10 GB free tier and request charges are ignored. |
-| `storage-digitalocean` | DigitalOcean | vendor-01 | $20.00 | 250.31% | BLOCK (R-05) | [page](https://www.digitalocean.com/pricing/spaces-object-storage) | [jpg](screens/storage-digitalocean.jpg) | $5 base + 750 GiB x $0.02 = $20.00. |
+| `storage-backblaze` | Backblaze | vendor-06 | $6.95 | 93.91% | ALLOW (R-08) | [page](https://www.backblaze.com/cloud-storage/pricing) | **to capture** | 1 TB billed as listed per-TB rate. |
+| `storage-hetzner` | Hetzner | vendor-04 | $7.28 | 98.43% | ALLOW (R-08) | [page](https://www.hetzner.com/storage/object-storage/) | [jpg](screens/storage-hetzner.jpg) | €6.49 converted at the ECB reference rate of 2026-11-05 (1.1224), floored to micro-USD. |
+| `storage-wasabi` | Wasabi | vendor-02 | $7.99 | 107.97% | REVIEW (R-06) | [page](https://wasabi.com/pricing) | [jpg](screens/storage-wasabi.jpg) | – |
+| `storage-cloudflare-r2` | Cloudflare | vendor-03 | $15.00 | 202.70% | BLOCK (R-05) | [page](https://developers.cloudflare.com/r2/pricing/) | [jpg](screens/storage-cloudflare-r2.jpg) | 1,000 GB x $0.015 = $15.00; the 10 GB free tier and request charges are ignored. |
+| `storage-digitalocean` | DigitalOcean | vendor-01 | $20.00 | 270.27% | BLOCK (R-05) | [page](https://www.digitalocean.com/pricing/spaces-object-storage) | [jpg](screens/storage-digitalocean.jpg) | $5 base + 750 GiB x $0.02 = $20.00. |
 
 ### Transactional email, 10,000 emails, 1 month (median $15.00)
 
@@ -109,7 +109,7 @@ No real offer is above 120% of the VPS median, so `fx-vps-overpriced` supplies t
 
 ## Known issues and to-dos
 
-1. **The snapshot goes stale before the video and the submission.** R-02 flags offers older than `max_age_hours` (168 h). These were captured on 5 Nov at 17:30 UTC, so every offer turns REVIEW at **12 Nov 17:30 UTC**, before recording (Day 8, 13 Nov) and submission (14 Nov). Agree on one of these by Day 1: (a) set `max_age_hours` to 336 in `rules.config.json` before the rules hash goes on-chain (recommended, a one-line change before H3), (b) re-capture on Day 7, or (c) have Guard use the snapshot time as "now" in demo mode.
+1. **Staleness (resolved in config, pending team OK).** `config/rules.config.json` now sets `max_age_hours` to 720 (decisions-pending #1), so these 5 Nov captures stay fresh until 5 Dec, past submission and judging. The snapshot is frozen as of 5 Nov: new rows go only into `fixtures/`.
 2. **Five screenshots still need capturing by hand.** Lightsail, Hetzner Cloud, Porkbun, IONOS and Backblaze blocked headless Chrome. Open each source URL in a normal browser, take the screenshot with Flameshot, save it as `screens/<offer_id>.jpg` and set the offer's `screenshot` field.
 3. **"Starting at" and intro prices** (OVHcloud $4.54 and IONOS $1) are kept as displayed. They are real examples of prices the rules should send to REVIEW rather than auto-buy.
 4. **Excluded:** Vultr, Namecheap, Spaceship, GoDaddy and Hover blocked automated fetches. Cloudflare Registrar publishes no .com price on its product page, so it was skipped rather than taken from a third-party tracker. Dynadot's price needed a coupon.
