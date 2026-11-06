@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/page-header";
-import { agents, history, remember, type HistoryEntry } from "@/lib/agents/client";
-import type { CatalogItem } from "@/lib/agents/types";
+import { agents } from "@/lib/agents/client";
+import type { CatalogItem, RequestSummary } from "@/lib/agents/types";
+import { formatAmount } from "@/lib/format";
 import { humanError } from "@/lib/errors";
 import { parseAmount } from "@/lib/format";
 import { useWallet } from "@/lib/wallet";
@@ -22,14 +23,25 @@ export default function DeskPage() {
   const [max, setMax] = useState("");
   const [prefer, setPrefer] = useState<string[]>([]);
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
-  const [past, setPast] = useState<HistoryEntry[]>([]);
+  const [past, setPast] = useState<RequestSummary[] | null>(null);
+  const [catalogErr, setCatalogErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const owner = accountId ?? DEMO_OWNER;
   useEffect(() => {
-    agents.catalog().then(setCatalog).catch(() => setCatalog([]));
-    setPast(history());
+    agents
+      .catalog()
+      .then(setCatalog)
+      .catch((e: Error) => setCatalogErr(e.message));
   }, []);
+  useEffect(() => {
+    // Desk history comes from the service (GET /v1/requests?owner_id=), so it follows the owner across browsers.
+    agents
+      .listRequests(owner)
+      .then(setPast)
+      .catch(() => setPast([]));
+  }, [owner]);
 
   const maxErr = useMemo(() => {
     if (!max.trim()) return null;
@@ -51,16 +63,14 @@ export default function DeskPage() {
     setBusy(true);
     setErr(null);
     try {
-      const owner = accountId ?? DEMO_OWNER;
       const constraints = {
         ...(max.trim() ? { max_total: parseAmount(max).toString() } : {}),
         ...(prefer.length ? { preferred_vendors: prefer.map((v) => `${v}.cpdemo.testnet`) } : {}),
       };
       const { request_id } = await agents.createRequest({ owner_id: owner, text: text.trim(), constraints });
-      remember({ id: request_id, text: text.trim(), created: Date.now(), owner });
       router.push(`/desk/${request_id}`);
     } catch (e) {
-      setErr(e instanceof Error && e.message.startsWith("Couldn't") ? e.message : humanError(e));
+      setErr(e instanceof Error ? e.message : humanError(e));
       setBusy(false);
     }
   }
@@ -102,16 +112,24 @@ export default function DeskPage() {
 
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="mr-1 font-mono text-[10.5px] text-faint">Catalogue</span>
-            {catalog.map((c) => (
-              <button
-                type="button"
-                key={c.item_key}
-                onClick={() => addLine(`1× ${c.title.replace(/,/g, " ·")}`)}
-                className="rounded-full border border-line px-2.5 py-1 text-xs text-muted transition-colors hover:border-accent/40 hover:text-fg"
-              >
-                + {c.title.split(",")[0]}
-              </button>
-            ))}
+            {catalogErr ? (
+              <span role="alert" className="text-xs text-bad">
+                {catalogErr}
+              </span>
+            ) : catalog.length === 0 ? (
+              [72, 96, 84, 110].map((w) => <span key={w} aria-hidden className="h-[26px] animate-pulse rounded-full bg-line" style={{ width: w }} />)
+            ) : (
+              catalog.map((c) => (
+                <button
+                  type="button"
+                  key={c.item_key}
+                  onClick={() => addLine(`1× ${c.title.replace(/,/g, " ·")}`)}
+                  className="rounded-full border border-line px-2.5 py-1 text-xs text-muted transition-colors hover:border-accent/40 hover:text-fg"
+                >
+                  + {c.title.split(",")[0]}
+                </button>
+              ))
+            )}
           </div>
 
           <div className="mt-6 grid gap-4 border-t border-line pt-5 sm:grid-cols-2">
@@ -170,23 +188,35 @@ export default function DeskPage() {
 
         <aside className="panel rounded-[var(--radius-card)] p-5">
           <p className="eyebrow">Your requests</p>
-          {past.length === 0 ? (
+          {past === null ? (
+            <ul aria-busy className="mt-3 space-y-1.5">
+              {[0, 1, 2].map((i) => (
+                <li key={i} className="space-y-1.5 px-3 py-2.5">
+                  <span className="block h-3.5 w-3/4 animate-pulse rounded bg-line" />
+                  <span className="block h-2.5 w-1/2 animate-pulse rounded bg-line" />
+                </li>
+              ))}
+            </ul>
+          ) : past.length === 0 ? (
             <div className="flex flex-col items-center py-14 text-center">
               <span className="grid size-12 place-items-center rounded-2xl bg-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] text-muted">
                 <Inbox aria-hidden className="size-5" />
               </span>
               <p className="mt-3 text-sm text-fg">No requests yet</p>
-              <p className="mt-1 max-w-56 text-xs text-muted">Your requests from this browser will show up here.</p>
+              <p className="mt-1 max-w-56 text-xs text-muted">
+                Requests for <span className="font-mono">{owner}</span> show up here.
+              </p>
             </div>
           ) : (
             <ul className="mt-3 space-y-1.5">
               {past.map((h) => (
-                <li key={h.id}>
-                  <Link href={`/desk/${h.id}`} data-spotlight className="group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 hover:border-line">
+                <li key={h.request_id}>
+                  <Link href={`/desk/${h.request_id}`} data-spotlight className="group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 hover:border-line">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[13px] text-fg">{h.text.split("\n")[0]}</span>
                       <span className="block font-mono text-[10.5px] text-faint">
-                        {h.text.split("\n").length} lines · {ago(h.created)} · {h.id.slice(0, 8)}
+                        {STATE[h.state] ?? h.state} · {h.total ? `${formatAmount(h.total)} · ` : ""}
+                        {ago(Date.parse(h.created_at))}
                       </span>
                     </span>
                     <ArrowRight aria-hidden className="size-4 text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-fg" />
@@ -200,6 +230,21 @@ export default function DeskPage() {
     </>
   );
 }
+
+const STATE: Record<string, string> = {
+  created: "starting",
+  parsed: "researching",
+  researched: "researching",
+  assessed: "checking",
+  needs_ack: "needs review",
+  signed: "signed",
+  awaiting_approval: "awaiting approval",
+  executing: "paying",
+  final: "settled",
+  refused: "refused",
+  expired: "expired",
+  cancelled: "cancelled",
+};
 
 function ago(t: number) {
   const s = Math.round((Date.now() - t) / 1000);

@@ -7,7 +7,8 @@ import { TrustLabel } from "@/components/trust-label";
 import { accountUrl, config, txUrl } from "@/lib/config";
 import { humanError } from "@/lib/errors";
 import { formatAmount, parseAmount } from "@/lib/format";
-import { ft, pollView, rpc, vault, type OwnerState, type VaultStatus } from "@/lib/near";
+import { ft, pollView, rpc, vault, type VaultBalanceView, type VaultOwnerStateView, type VaultPolicyView } from "@/lib/near";
+import { utcDayIndex } from "@checkpoint/shared";
 import { deposit, isRegistered, setAgent, storageDeposit, storageMin, txHash, withdraw, type Tx } from "@/lib/tx";
 import { useWallet } from "@/lib/wallet";
 
@@ -18,8 +19,9 @@ interface Data {
   tokenLive: boolean;
   registered: boolean;
   wallet: bigint;
-  status: VaultStatus | null;
-  owner: OwnerState | null;
+  policy: VaultPolicyView | null;
+  owner: VaultOwnerStateView | null;
+  balance: VaultBalanceView | null;
 }
 
 async function exists(accountId: string) {
@@ -44,8 +46,10 @@ function useVault(accountId: string | null) {
       const [vaultLive, tokenLive] = await Promise.all([exists(config.vaultId), exists(config.tokenId)]);
       const registered = tokenLive ? await isRegistered(accountId) : false;
       const wallet = tokenLive && registered ? BigInt(await ft.balanceOf(config.tokenId, accountId)) : 0n;
-      const [status, owner] = vaultLive ? await Promise.all([vault.status().catch(() => null), vault.ownerState(accountId).catch(() => null)]) : [null, null];
-      const d = { vaultLive, tokenLive, registered, wallet, status, owner };
+      const [policy, owner, balance] = vaultLive
+        ? await Promise.all([vault.policy().catch(() => null), vault.ownerState(accountId).catch(() => null), vault.balance(accountId).catch(() => null)])
+        : [null, null, null];
+      const d = { vaultLive, tokenLive, registered, wallet, policy, owner, balance };
       setData(d);
       return d;
     } catch (e) {
@@ -69,7 +73,7 @@ export default function VaultPage() {
   const [tab, setTab] = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState("");
 
-  const bal = data?.owner?.balances?.[config.tokenId];
+  const bal = data?.balance;
   const available = BigInt(bal?.available ?? "0");
   const agentOn = !!data?.owner?.agents?.includes(AGENT);
 
@@ -133,14 +137,14 @@ export default function VaultPage() {
       {header}
       {error && <Banner tone="bad" Icon={AlertTriangle} text={error} />}
       {data && !data.vaultLive && (
-        <StateCard Icon={Hammer} title="The Vault isn't on testnet yet" body={`Isaac deploys ${config.vaultId} in I-3.x (handoff H5). Until then this page can only read the token side.`}>
+        <StateCard Icon={Hammer} title="The Vault isn't on testnet yet" body={`${config.vaultId} hasn't been deployed yet. Until it is, this page can only read the token side.`}>
           <a href={accountUrl(config.vaultId)} target="_blank" rel="noreferrer" className="font-mono text-xs text-accent underline-offset-4 hover:underline">
             {config.vaultId}
           </a>
         </StateCard>
       )}
-      {data?.status?.paused && <Banner tone="bad" Icon={PauseCircle} text="The guardian has paused the Vault. Approvals and payments are stopped; withdrawals continue unless a deficit is flagged." />}
-      {data?.status?.deficit && <Banner tone="bad" Icon={AlertTriangle} text="The Vault found less cpUSD than it owes. Deposits and withdrawals are stopped until the DAO resolves it." />}
+      {data?.policy?.paused && <Banner tone="bad" Icon={PauseCircle} text="The guardian has paused the Vault. Approvals and payments are stopped; withdrawals continue unless a deficit is flagged." />}
+      {data?.policy?.deficit && <Banner tone="bad" Icon={AlertTriangle} text="The Vault found less cpUSD than it owes. Deposits and withdrawals are stopped until the DAO resolves it." />}
 
       {!data ? (
         <Skeleton />
@@ -207,8 +211,8 @@ export default function VaultPage() {
                     disabled={!parsed || !!amountErr || !!busy || !data.vaultLive}
                     onClick={() =>
                       tab === "deposit"
-                        ? run("Deposit", () => deposit(parsed!), (d) => BigInt(d?.owner?.balances?.[config.tokenId]?.available ?? "0") > available)
-                        : run("Withdraw", () => withdraw(parsed!), (d) => BigInt(d?.owner?.balances?.[config.tokenId]?.available ?? "0") < available)
+                        ? run("Deposit", () => deposit(parsed!), (d) => BigInt(d?.balance?.available ?? "0") > available)
+                        : run("Withdraw", () => withdraw(parsed!), (d) => BigInt(d?.balance?.available ?? "0") < available)
                     }
                     className="key key-primary mt-5 h-11 px-6 text-sm"
                   >
@@ -273,9 +277,10 @@ export default function VaultPage() {
   );
 }
 
-function Limits({ owner }: { owner: OwnerState }) {
-  const cap = BigInt(owner.effective_limits?.daily_cap ?? "0");
-  const spent = BigInt(owner.spent_today ?? "0");
+function Limits({ owner }: { owner: VaultOwnerStateView }) {
+  const cap = BigInt(owner.daily_cap);
+  // The Vault resets the day lazily: a stale day index means nothing is spent yet today.
+  const spent = Number(owner.day) === utcDayIndex(Date.now()) ? BigInt(owner.spent_today) : 0n;
   const pct = cap > 0n ? Number((spent * 1000n) / cap) / 10 : 0;
   return (
     <div className="mt-3">
@@ -288,7 +293,7 @@ function Limits({ owner }: { owner: OwnerState }) {
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-fg)_7%,transparent)]">
         <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-accent-strong),var(--color-accent))]" style={{ width: `${Math.min(100, pct)}%` }} />
       </div>
-      <p className="mt-2 font-mono text-[11px] text-muted">max per basket {formatAmount(owner.effective_limits?.max_basket_total ?? "0")}</p>
+      <p className="mt-2 font-mono text-[11px] text-muted">max per basket {formatAmount(owner.max_basket)}</p>
     </div>
   );
 }

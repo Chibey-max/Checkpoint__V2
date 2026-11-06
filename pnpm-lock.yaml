@@ -41,15 +41,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@checkpoint/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hot-labs/near-connect':
         specifier: 0.12.0
         version: 0.12.0
-      '@noble/hashes':
-        specifier: 2.4.0
-        version: 2.4.0
-      borsh:
-        specifier: 2.0.0
-        version: 2.0.0
       geist:
         specifier: ^1.9.1
         version: 1.9.1(next@16.4.5(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))

@@ -1,4 +1,5 @@
 import { JsonRpcProvider } from "near-api-js";
+import { VaultApprovalViewSchema, VaultBalanceViewSchema, VaultBasketViewSchema, VaultOwnerStateViewSchema, VaultPolicyViewSchema } from "@checkpoint/shared";
 import { config } from "./config";
 
 /**
@@ -46,32 +47,20 @@ export const ft = {
   metadata: (token: string) => view<{ symbol: string; decimals: number; name: string }>(token, "ft_metadata"),
 };
 
-export interface OwnerTokenState {
-  available: U128;
-  reserved: U128;
-  withdrawing: U128;
-}
-
-export interface OwnerState {
-  balances: Record<string, OwnerTokenState>;
-  agents: string[];
-  effective_limits: { max_basket_total: U128; daily_cap: U128 };
-  spent_today: U128;
-  remaining_today: U128;
-}
-
-export interface VaultStatus {
-  paused: boolean;
-  deficit: boolean;
-  policy_version: number;
-}
-
+/**
+ * Vault views, parsed with the same schemas Guard and the agents use (@checkpoint/shared vault-views,
+ * docs/api.md "Vault views"). If the contract returns another shape, the parse fails loudly here instead
+ * of a page rendering wrong numbers; the fix goes in packages/shared, once, for every reader.
+ */
 export const vault = {
-  ownerState: (ownerId: string) => view<OwnerState>(config.vaultId, "get_owner_state", { owner_id: ownerId }),
-  status: () => view<VaultStatus>(config.vaultId, "get_status"),
-  policy: () => view<Record<string, unknown>>(config.vaultId, "get_policy"),
-  approval: (hashHex: string) => view<{ owner: string; expires_at_ms: string } | null>(config.vaultId, "get_approval", { hash_hex: hashHex }),
-  basket: (hashHex: string) => view<Record<string, unknown> | null>(config.vaultId, "get_basket", { hash_hex: hashHex }),
-  baskets: (ownerId: string, fromIndex = 0, limit = 20) =>
-    view<Record<string, unknown>[]>(config.vaultId, "get_baskets", { owner_id: ownerId, from_index: fromIndex, limit }),
+  policy: async () => VaultPolicyViewSchema.parse(await view(config.vaultId, "get_policy")),
+  ownerState: async (ownerId: string) => VaultOwnerStateViewSchema.parse(await view(config.vaultId, "get_owner_state", { owner_id: ownerId })),
+  balance: async (ownerId: string, tokenId = config.tokenId) => VaultBalanceViewSchema.parse(await view(config.vaultId, "get_balance", { owner_id: ownerId, token_id: tokenId })),
+  approval: async (hashHex: string) => VaultApprovalViewSchema.nullable().parse(await view(config.vaultId, "get_approval", { hash_hex: hashHex })),
+  basket: async (hashHex: string) => VaultBasketViewSchema.nullable().parse(await view(config.vaultId, "get_basket", { hash_hex: hashHex })),
+  /** Newest first (PRD FR-UI05). */
+  baskets: async (ownerId: string, fromIndex = 0, limit = 20) =>
+    VaultBasketViewSchema.array().parse(await view(config.vaultId, "get_baskets", { owner_id: ownerId, from_index: fromIndex, limit })),
 };
+
+export type { VaultBalanceView, VaultBasketView, VaultOwnerStateView, VaultPolicyView } from "@checkpoint/shared";
