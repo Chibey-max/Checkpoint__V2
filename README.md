@@ -13,7 +13,16 @@ A team of AI agents can research, compare and buy things for you, and pay for th
 > [!IMPORTANT]
 > **Status: in active development (5 → 14 November 2026).** This README describes the target design for the hackathon MVP, as specified in our [PRD v2](docs/planning/Checkpoint-PRD-v2.pdf). Sections marked **🚧 planned** describe things that are not built yet. The [Roadmap](#16-roadmap) shows what is done. We update this file as each part lands, so the README always matches what actually runs.
 >
-> **Runs today (6 Nov):** Guard's rules engine and signer, the agents service, the shared payload and evidence code with 149 tests, and the web app (Desk, Audit, Governance, Vault). With no keys and no chain: `pnpm mock` plus the web app run the whole loop against a stand-in Vault ([Getting started](#15-getting-started)). **Not built yet:** the Vault and cpUSD contracts, the council DAO on testnet, the attack scripts and `pnpm demo:sandbox`.
+> **Runs today (6 Nov):** Guard's rules engine and signer, the agents service, the shared payload and evidence code with 149 tests, and the web app (Desk, Audit, Governance, Vault). With no keys and no chain: `pnpm mock` plus the web app run the whole loop against a stand-in Vault ([Getting started](#15-getting-started)). **On testnet since 6 Nov:** the Vault (`vault.cpdemo.testnet`) and cpUSD (`cpusd.cpdemo.testnet`), with the rules hash pinned and 200 cpUSD deposited for the demo owner; their source isn't in this repo yet. **Not built yet:** the council DAO on testnet (until then the Vault's DAO account is a stand-in), the attack scripts and `pnpm demo:sandbox`.
+
+| | |
+|---|---|
+| [![The Desk: offers with Guard verdicts and the rule behind each](docs/img/desk-verdicts.png)](docs/img/desk-verdicts.png) | [![The basket card: five checks recomputed in the browser](docs/img/basket-verified.png)](docs/img/basket-verified.png) |
+| **Desk.** Offers for each item, priced against the median, with Guard's verdict and the rule behind it. Listing text is shown as data, never read as instructions. | **Basket card.** The exact basket Guard signed, decoded and re-hashed in your browser before you approve it. |
+| [![The Audit page: a settled basket verified in the browser](docs/img/audit-verified.png)](docs/img/audit-verified.png) | [![The Vault page reading the deployed testnet contract](docs/img/vault-testnet.png)](docs/img/vault-testnet.png) |
+| **Audit.** Every approved basket with its payouts, and the evidence and signature checks rerun in your browser. | **Vault on testnet.** The demo owner's balance, caps and allowlist, read from `vault.cpdemo.testnet`. |
+
+<sub>Desk, basket and Audit: the in-browser agents over the real captured offers, with the stand-in wallet (6 Nov). Vault: live testnet.</sub>
 
 ---
 
@@ -36,8 +45,10 @@ A team of AI agents can research, compare and buy things for you, and pay for th
 15. [Getting started](#15-getting-started)
 16. [Roadmap](#16-roadmap)
 17. [Limitations and honest claims](#17-limitations-and-honest-claims)
-18. [Team](#18-team)
-19. [Project documents](#19-project-documents)
+18. [AI tools disclosure](#18-ai-tools-disclosure)
+19. [Team](#19-team)
+20. [Project documents](#20-project-documents)
+21. [Licence](#21-licence)
 
 ---
 
@@ -780,11 +791,12 @@ Checkpoint__V2/
 ├─ config/                 rules.config.json (hashed into rules_hash)
 ├─ data/snapshot/          real offers: catalog.json, offers.json, sources.md, screens/, fixtures/
 ├─ data/fixtures/          synthetic dev snapshot used by `pnpm mock` and the tests
-├─ docs/                   api, architecture, decisions, demo script, evidence, wallet, planning PDFs
-├─ contracts/vault/        🚧 planned: Rust Vault contract + near-workspaces tests
-├─ contracts/cpusd/        🚧 planned: NEP-141 test token
+├─ docs/                   api, architecture, decisions, demo script, evidence, wallet, img/, planning PDFs
+├─ contracts/vault/        🚧 source to come: Rust Vault contract + near-workspaces tests (deployed on testnet)
+├─ contracts/cpusd/        🚧 source to come: NEP-141 test token (deployed on testnet)
 ├─ scripts/attacks/        🚧 planned: stolen-key, over-cap and edited-basket attacks
-└─ deployments/            🚧 planned: testnet.json (account IDs, code hashes, deploy tx hashes)
+├─ deployments/            🚧 planned: testnet.json (until then: docs/evidence.md#deployed-on-testnet)
+└─ LICENSE                 MIT
 ```
 
 ---
@@ -852,9 +864,21 @@ pnpm verify:audit <basket_id> --pubkey Hmw3vdWrTE3s52kui8XC4eLgucRtAH6ECHz6NKVYw
 
 `verify:audit` fetches the evidence bundle from the agents service and recomputes the evidence hash and the basket hash, then checks Guard's signature (the key above is the published dev key `pnpm mock` signs with). It prints PASS or FAIL per check. On testnet, `--rpc <url> --vault vault.cpdemo.testnet` reads the key from the Vault and also compares the result with `get_basket`.
 
-### D. Sandbox and testnet (🚧 planned)
+### D. Read the deployed contracts (works today)
 
-These need the Vault and cpUSD contracts, which are not built yet:
+The Vault and cpUSD are on testnet. Anyone can read them, with no wallet:
+
+```bash
+pnpm rules:hash      # prints rules_hash 89e1b151…c23d
+curl -s https://rpc.testnet.fastnear.com -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"query","params":{"request_type":"call_function","finality":"final","account_id":"vault.cpdemo.testnet","method_name":"get_policy","args_base64":"e30="}}' \
+  | node -e 'process.stdin.on("data",d=>console.log(Buffer.from(JSON.parse(d).result.result).toString()))'
+```
+
+The policy lists the allowlisted vendors (vendor-05 is not one), the caps, the Guard key and a `rules_hash` equal to the one `pnpm rules:hash` prints. In the web app, <http://localhost:3000/vault?view=owner-demo.cpdemo.testnet> shows the demo owner's balances, limits and agent, read-only.
+
+### E. Sandbox and full testnet run (🚧 planned)
+
+These need the contract source and the setup scripts, which are not in the repo yet:
 
 ```bash
 pnpm demo:sandbox          # local NEAR sandbox: deploy → request → approve → pay → 3 attacks → PASS table
@@ -884,7 +908,8 @@ Hackathon window: **1–14 Nov 2026** · our submission target: **14 Nov, 12:00 
 
 **To do**
 
-- [ ] Vault and cpUSD contracts with near-workspaces tests; testnet accounts and deployment
+- [x] Vault and cpUSD deployed on testnet, demo owner funded and its settlement agent set (6 Nov; [deploy transactions](docs/evidence.md#deployed-on-testnet))
+- [ ] Vault and cpUSD source in this repo, with near-workspaces tests
 - [ ] Sputnik council DAO on testnet and a real vote on a limit
 - [ ] **Gate · Mon 9 Nov:** on testnet, list → verdicts → basket → wallet approval → vendors paid, plus edited-basket rejection and failed-vendor restore
 - [ ] Attack scripts (stolen key, edited basket, replay, over-cap) with transaction hashes in [`docs/evidence.md`](docs/evidence.md)
@@ -908,7 +933,23 @@ Stretch (only after the gate): vendor agents bidding for baskets, a NEAR Intents
 
 ---
 
-## 18. Team
+## 18. AI tools disclosure
+
+**In the product.** The agents service can call an LLM (Groq, `openai/gpt-oss-120b`) for two jobs only: turning a shopping list into catalogue items, and writing plain-English explanations of verdicts. Its output is checked against a strict schema, it never sees a key, and it doesn't pick offers, vendors, amounts or verdicts: the Guard rules and the Vault do. Without a key, or with `LLM_PROVIDER=none` (as in `pnpm mock`, the in-browser agents and CI), a deterministic parser and template text do both jobs. The timeline shows which parser read the list, and an LLM explanation is shown only with an "advisory" label.
+
+**In building it.** 🚧 To be completed by each team member before the freeze (12 Nov): which AI assistants were used, and for what.
+
+| Member | Tools | Used for |
+|---|---|---|
+| Isaac | _to fill_ | _to fill_ |
+| David | _to fill_ | _to fill_ |
+| Patrick | _to fill_ | _to fill_ |
+
+Every change was reviewed and merged by a team member, and the tests and on-chain evidence are what the claims rest on, not the tools that helped write the code.
+
+---
+
+## 19. Team
 
 | | Focus |
 |---|---|
@@ -920,14 +961,13 @@ Built for the **NEAR Hackathon 2026** (1–14 November).
 
 ---
 
-## 19. Project documents
+## 20. Project documents
 
 | Document | Contents |
 |---|---|
 | [Project decision](docs/planning/NEAR-Project-Decision.pdf) | Why Checkpoint and Agent Procurement Desk were merged into one submission, checked against the live hackathon rules |
 | [PRD v2.0](docs/planning/Checkpoint-PRD-v2.pdf) | Full product spec: requirements, Guard rules, data model, **frozen interfaces**, invariants, threat model, test plan, demo script |
 | [Task list](docs/planning/Checkpoint-Task-List.pdf) | 74 day-by-day tasks for the team, with tools, recommended approach, alternatives, "done when" tests and handoffs |
-
 | [API](docs/api.md) | Guard and agents HTTP contracts, SSE events with examples, the evidence bundle, the mock server |
 | [Architecture](docs/architecture.md) | How the off-chain code maps to the PRD, and where each guarantee is enforced and tested |
 | [Decisions pending](docs/decisions-pending.md) | Where the code departs from or adds to PRD v2, awaiting team agreement |
@@ -936,3 +976,9 @@ Built for the **NEAR Hackathon 2026** (1–14 November).
 | [Offer snapshot sources](data/snapshot/sources.md) | Where each price came from, the verdicts Guard gives it, and the expected demo basket |
 
 Index and editable sources: [`docs/`](docs/README.md).
+
+---
+
+## 21. Licence
+
+[MIT](LICENSE). The offer snapshot quotes public list prices with their sources; the vendor accounts are stand-ins and nothing is bought from the sellers named.
