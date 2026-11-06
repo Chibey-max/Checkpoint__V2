@@ -74,11 +74,11 @@ export const revokeApproval = (hashHex: string) =>
 export type VoteAction = "VoteApprove" | "VoteReject" | "VoteRemove";
 
 /**
- * Sputnik v2 act_proposal. Some Sputnik versions also require the proposal `kind` to guard against
- * a proposal being swapped under the voter; pass it when Isaac's docs/dao.md says so (D-05).
+ * Sputnik v2 act_proposal. Current Sputnik requires the proposal's `kind` as well, so a proposal can't be
+ * swapped under the voter: the vote fails unless the kind matches what the voter saw.
  */
-export const actProposal = (id: number, action: VoteAction, proposalKind?: unknown) =>
-  call(config.daoId, "act_proposal", { id, action, ...(proposalKind ? { proposal: proposalKind } : {}) }, 0n, 150n, `${action} on proposal #${id}`);
+export const actProposal = (id: number, action: VoteAction, proposalKind: unknown) =>
+  call(config.daoId, "act_proposal", { id, action, proposal: proposalKind }, 0n, 150n, `${action} on proposal #${id}`);
 
 /** Transaction hash from whatever the wallet returns (FinalExecutionOutcome). */
 export function txHash(outcome: unknown): string | null {

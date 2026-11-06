@@ -9,9 +9,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@checkpoint/shared": "workspace:*",
     "@hot-labs/near-connect": "0.12.0",
-    "@noble/hashes": "2.4.0",
-    "borsh": "2.0.0",
     "geist": "^1.9.1",
     "lucide-react": "^1.69.0",
     "near-api-js": "7.4.0",

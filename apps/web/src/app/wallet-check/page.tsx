@@ -58,7 +58,7 @@ export default function WalletCheckPage() {
           <h2 className="font-semibold text-fg">2. Sign a FunctionCall with a deposit</h2>
           <p className="mt-1 text-sm text-muted">
             Registers your account on a NEP-141 token with <code>storage_deposit</code>, attaching the token&apos;s minimum storage deposit. Use{" "}
-            <code>{config.tokenId}</code> once Isaac has deployed cpUSD, or <code>wrap.testnet</code> before that.
+            <code>{config.tokenId}</code> once cpUSD is deployed, or <code>wrap.testnet</code> before that.
           </p>
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <label className="text-sm">

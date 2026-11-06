@@ -1,5 +1,5 @@
 import { Check, CircleDashed, Loader2, X } from "lucide-react";
-import type { LaneKey, RequestView } from "@/lib/agents/reducer";
+import type { DeskView, LaneKey } from "@/lib/agents/reducer";
 
 const LANES: { key: LaneKey; name: string; who: string }[] = [
   { key: "research", name: "Research", who: "Research agent" },
@@ -10,7 +10,7 @@ const LANES: { key: LaneKey; name: string; who: string }[] = [
 ];
 
 /** FR-UI03: the agent timeline, one lane per actor, driven entirely by the event log. */
-export function Timeline({ view }: { view: RequestView }) {
+export function Timeline({ view }: { view: DeskView }) {
   return (
     <ol className="relative space-y-1">
       <span aria-hidden className="absolute top-5 bottom-5 left-[21px] w-px bg-line" />

@@ -1,11 +1,10 @@
-import type { AgentEvent, BasketDraft, Constraints, EventData, Offer, ParsedItem, SignedBasket, Verdict } from "./types";
+import { initialRequestView, reduceRequest, type AgentEvent, type RequestView } from "@checkpoint/shared";
 
 /**
- * Everything on the request page derives from the event list, so a refresh (full replay) renders the
- * same page, and "what happened when" is never stored twice.
+ * The request page runs the shared reducer (the one the agents service uses for GET /v1/requests/:id), so
+ * a refresh replays to the same view. On top of it the web keeps the event log and one lane per actor for
+ * the timeline, with the time each lane last moved.
  */
-export type Stage = "parsing" | "researching" | "assessing" | "needs_ack" | "signing" | "awaiting_approval" | "executing" | "final" | "refused" | "expired" | "error";
-
 export type LaneKey = "research" | "guard" | "coordinator" | "approval" | "settlement";
 export interface Lane {
   status: "idle" | "active" | "done" | "failed";
@@ -13,158 +12,125 @@ export interface Lane {
   detail?: string;
 }
 
-export interface RequestView {
-  id: string;
-  text: string;
-  owner: string;
-  constraints: Constraints;
-  stage: Stage;
-  items: ParsedItem[];
-  unmatched: string[];
-  offers: Record<string, Offer>;
-  order: string[];
-  verdicts: Record<string, Verdict>;
-  medians: Record<string, number>;
-  ratios: Record<string, number>;
-  explanations: Record<string, string>;
-  basket?: BasketDraft;
-  basketNote?: string;
-  needsAck: { offer_ids: string[]; reasons: Record<string, string> } | null;
-  signed?: SignedBasket;
-  signedMock: boolean;
-  refused?: EventData["guard.refused"];
-  approval: { status: "none" | "waiting" | "seen" | "expired"; tx?: string };
-  submittedTx?: string;
-  payouts: EventData["settlement.payout"][];
-  final?: EventData["settlement.final"]["status"];
-  errors: EventData["error"][];
+export interface DeskView extends RequestView {
   lanes: Record<LaneKey, Lane>;
-  lastSeq: number;
   log: AgentEvent[];
 }
 
-export const initialView = (id: string): RequestView => ({
-  id,
-  text: "",
-  owner: "",
-  constraints: {},
-  stage: "parsing",
-  items: [],
-  unmatched: [],
-  offers: {},
-  order: [],
-  verdicts: {},
-  medians: {},
-  ratios: {},
-  explanations: {},
-  needsAck: null,
-  signedMock: false,
-  approval: { status: "none" },
-  payouts: [],
-  errors: [],
-  lanes: { research: { status: "active" }, guard: { status: "idle" }, coordinator: { status: "idle" }, approval: { status: "idle" }, settlement: { status: "idle" } },
-  lastSeq: 0,
-  log: [],
-});
+const LANES: Record<LaneKey, Lane> = {
+  research: { status: "active" },
+  guard: { status: "idle" },
+  coordinator: { status: "idle" },
+  approval: { status: "idle" },
+  settlement: { status: "idle" },
+};
 
-export function reduce(s: RequestView, e: AgentEvent): RequestView {
-  if (e.seq <= s.lastSeq) return s;
-  const v: RequestView = { ...s, lastSeq: e.seq, log: [...s.log, e], lanes: { ...s.lanes } };
-  const lane = (k: LaneKey, l: Lane) => (v.lanes[k] = { ...v.lanes[k], ...l });
+export const initialDesk = (): DeskView => ({ ...initialRequestView(), lanes: LANES, log: [] });
+
+export function reduceDesk(s: DeskView, e: AgentEvent): DeskView {
+  if (e.seq <= s.last_seq) return s;
+  const v = reduceRequest(s, e);
+  return { ...v, log: [...s.log, e], lanes: lanes(s.lanes, v, e) };
+}
+
+function lanes(prev: Record<LaneKey, Lane>, v: RequestView, e: AgentEvent): Record<LaneKey, Lane> {
+  const l = { ...prev };
+  const set = (k: LaneKey, x: Lane) => (l[k] = { ...l[k], ...x, at: x.at ?? e.ts });
+  const verdicts = Object.values(v.verdicts);
   switch (e.type) {
     case "request.created":
-      v.text = e.data.text;
-      v.owner = e.data.owner_id;
-      v.constraints = e.data.constraints;
-      lane("research", { status: "active", at: e.ts, detail: "parsing your list" });
+      set("research", { status: "active", detail: "reading your list" });
       break;
     case "research.parsed":
-      v.items = e.data.items;
-      v.stage = "researching";
-      lane("research", { status: "active", at: e.ts, detail: `${e.data.items.length} items matched` });
-      break;
-    case "research.unmatched":
-      v.unmatched = e.data.text;
+      set("research", { status: "active", detail: `${e.data.items.length} items · ${e.data.parser} parser` });
       break;
     case "research.offer":
-      if (!v.offers[e.data.offer.offer_id]) v.order = [...v.order, e.data.offer.offer_id];
-      v.offers = { ...v.offers, [e.data.offer.offer_id]: e.data.offer };
-      lane("research", { status: "active", at: e.ts, detail: `${v.order.length} offers found` });
+      set("research", { status: "active", detail: `${v.offers.length} offers found` });
       break;
-    case "policy.verdict": {
-      const ik = v.offers[e.data.verdict.offer_id]?.item_key;
-      v.verdicts = { ...v.verdicts, [e.data.verdict.offer_id]: e.data.verdict };
-      if (ik) v.medians = { ...v.medians, [ik]: e.data.median_micro };
-      v.ratios = { ...v.ratios, [e.data.verdict.offer_id]: e.data.ratio_bps };
-      v.stage = "assessing";
-      lane("research", { status: "done", detail: `${v.order.length} offers` });
-      const vs = Object.values(v.verdicts);
-      lane("guard", { status: "active", at: e.ts, detail: `${vs.filter((x) => x.level === "BLOCK").length} blocked · ${vs.filter((x) => x.level === "REVIEW").length} flagged` });
-      break;
-    }
-    case "explain.verdict":
-      v.explanations = { ...v.explanations, [e.data.offer_id]: e.data.text };
-      break;
-    case "explain.basket":
-      v.basketNote = e.data.text;
+    case "policy.verdict":
+      if (l.research.status !== "done") set("research", { status: "done", detail: `${v.offers.length} offers` });
+      set("guard", { status: "active", detail: `${verdicts.filter((x) => x.level === "BLOCK").length} blocked · ${verdicts.filter((x) => x.level === "REVIEW").length} flagged` });
       break;
     case "coordinator.basket":
-      v.basket = e.data.basket;
-      v.signed = undefined;
-      v.needsAck = null;
-      v.stage = "signing";
-      lane("guard", { status: "done" });
-      lane("coordinator", { status: "done", at: e.ts, detail: `${e.data.basket.payouts.length} vendors · ${e.data.basket.lines.length} lines` });
+      // A re-plan supersedes the old signature, so approval and settlement start again.
+      set("guard", { status: "active", detail: "signing the basket" });
+      set("coordinator", { status: "done", detail: `${e.data.basket.payouts.length} vendors · ${e.data.basket.lines.length} lines` });
+      l.approval = { status: "idle" };
+      l.settlement = { status: "idle" };
       break;
     case "coordinator.needs_ack":
-      v.needsAck = e.data;
-      v.stage = "needs_ack";
-      lane("approval", { status: "active", at: e.ts, detail: "needs your review" });
+      set("guard", { status: "done", detail: `${e.data.offer_ids.length} line(s) need you` });
+      set("approval", { status: "active", detail: "needs your review" });
       break;
     case "guard.signed":
-      v.signed = e.data.signed;
-      v.signedMock = !!e.data.mock;
-      v.needsAck = null;
-      lane("guard", { status: "done", at: e.ts, detail: `signed · key v${e.data.signed.guard_key_version}` });
+      set("guard", { status: "done", detail: `signed · key v${e.data.signed.guard_key_version}` });
       break;
     case "guard.refused":
-      v.refused = e.data;
-      v.stage = "refused";
-      lane("guard", { status: "failed", at: e.ts, detail: e.data.code });
+      set("guard", { status: "failed", detail: e.data.code });
       break;
     case "approval.waiting":
-      v.approval = { status: "waiting" };
-      v.stage = "awaiting_approval";
-      lane("approval", { status: "active", at: e.ts, detail: "waiting for your wallet" });
+      set("approval", { status: "active", detail: "waiting for your wallet" });
       break;
     case "approval.seen":
-      v.approval = { status: "seen", tx: e.data.tx_hash };
-      v.stage = "executing";
-      lane("approval", { status: "done", at: e.ts, detail: "approved on-chain" });
-      lane("settlement", { status: "active", at: e.ts, detail: "submitting" });
+      set("approval", { status: "done", detail: "approved on-chain" });
+      set("settlement", { status: "active", detail: "submitting" });
       break;
     case "approval.expired":
-      v.approval = { status: "expired" };
-      v.stage = "expired";
-      lane("approval", { status: "failed", at: e.ts, detail: "expired" });
+      set("approval", { status: "failed", detail: "approval window closed" });
       break;
     case "settlement.submitted":
-      v.submittedTx = e.data.tx_hash;
-      lane("settlement", { status: "active", at: e.ts, detail: "execute_basket sent" });
+      set("settlement", { status: "active", detail: "execute_basket sent" });
       break;
     case "settlement.payout":
-      v.payouts = [...v.payouts.filter((p) => p.vendor_id !== e.data.vendor_id), e.data];
-      lane("settlement", { status: "active", at: e.ts, detail: `${v.payouts.length} of ${v.basket?.payouts.length ?? "?"} payouts` });
+      set("settlement", { status: "active", detail: `${v.settlement.payouts.length} of ${v.signed?.payouts.length ?? "?"} payouts` });
       break;
     case "settlement.final":
-      v.final = e.data.status;
-      v.stage = "final";
-      lane("settlement", { status: e.data.status === "Failed" ? "failed" : "done", at: e.ts, detail: e.data.status });
+      set("settlement", { status: e.data.status === "Failed" ? "failed" : "done", detail: e.data.status === "PartiallyPaid" ? "partially paid" : e.data.status.toLowerCase() });
       break;
-    case "error":
-      v.errors = [...v.errors, e.data];
-      if (!e.data.recoverable) v.stage = "error";
+    case "error": {
+      if (e.data.recoverable) break;
+      const active = (Object.keys(l) as LaneKey[]).find((k) => l[k].status === "active") ?? "research";
+      set(active, { status: "failed", detail: e.data.code === "CANCELLED" ? "cancelled" : e.data.code });
       break;
+    }
   }
-  return v;
+  return l;
 }
+
+export type Tone = "info" | "warn" | "ok" | "bad";
+
+/** One status pill for the whole request, from the shared state plus what it is waiting on. */
+export function stageOf(v: RequestView): { label: string; tone: Tone } {
+  switch (v.state) {
+    case "created":
+      return { label: "Reading your list", tone: "info" };
+    case "parsed":
+    case "researched":
+      return { label: "Researching offers", tone: "info" };
+    case "assessed":
+      return v.basket ? { label: "Guard is signing", tone: "info" } : { label: "Guard is checking prices", tone: "info" };
+    case "needs_ack":
+      return { label: "Needs your review", tone: "warn" };
+    case "signed":
+    case "awaiting_approval":
+      return { label: "Waiting for your approval", tone: "warn" };
+    case "executing":
+      return { label: "Vault is paying", tone: "info" };
+    case "final":
+      return v.settlement.final_status === "Completed"
+        ? { label: "Settled", tone: "ok" }
+        : v.settlement.final_status === "PartiallyPaid"
+          ? { label: "Partially paid", tone: "warn" }
+          : { label: "Payouts failed", tone: "bad" };
+    case "refused":
+      return v.refusal ? { label: "Refused by Guard", tone: "bad" } : { label: "Stopped", tone: "bad" };
+    case "expired":
+      return { label: "Approval window closed", tone: "bad" };
+    case "cancelled":
+      return { label: "Cancelled", tone: "bad" };
+  }
+}
+
+/** Acknowledging re-plans and re-signs; the service accepts it only in these states. */
+export const canAcknowledge = (v: RequestView) => ["assessed", "needs_ack", "signed", "awaiting_approval"].includes(v.state);
+export const canCancel = (v: RequestView) => !["executing", "final", "refused", "expired", "cancelled"].includes(v.state);
