@@ -20,7 +20,7 @@
   --color-line-strong: rgb(255 255 255 / 0.16);
   --color-fg: #eef2f7;
   --color-muted: #8d97a8;
-  --color-faint: #5a6476;
+  --color-faint: #768094; /* 5.0:1 on bg, 4.7:1 on surface (NFR-09) */
   --color-steel: #c9d2df;
 
   --color-accent: #3de3a4;
@@ -88,10 +88,11 @@
   --color-line-strong: rgb(13 18 25 / 0.18);
   --color-fg: #0c1118;
   --color-muted: #566072;
-  --color-faint: #8a93a3;
+  --color-faint: #606979; /* 4.9:1 on bg, 5.6:1 on white panels (NFR-09) */
   --color-steel: #3b4656;
   --color-accent: #0b9a68;
   --color-accent-strong: #08875a;
+  --color-accent-ink: #06704a; /* mint as small text: 4.8:1 on its own tint */
   --color-accent-fg: #ffffff;
   --color-accent-soft: rgb(11 154 104 / 0.1);
   --color-ok: #0b8a5d;
@@ -212,6 +213,9 @@
 }
 [data-theme="light"] .key-secondary { box-shadow: inset 0 1px 0 #fff, 0 0 0 1px var(--color-line-strong), 0 8px 18px -12px rgb(16 24 40 / 0.3); }
 .key-secondary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 0 0 1px color-mix(in srgb, var(--color-fg) 30%, transparent), 0 12px 26px -12px rgb(0 0 0 / 0.6); }
+/* Light mint is bright enough for fills but not for small text; text uses a deeper ink of the same hue. */
+[data-theme="light"] .text-accent { color: var(--color-accent-ink); }
+
 .key-ghost { color: var(--color-muted); }
 .key-ghost:hover:not(:disabled) { color: var(--color-fg); background: color-mix(in srgb, var(--color-fg) 6%, transparent); }
 
