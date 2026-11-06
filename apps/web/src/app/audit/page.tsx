@@ -326,6 +326,7 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
             {r.bundle && (
               <dl className="mt-4 space-y-2 font-mono text-[11px]">
                 {[
+                  ["basket id", r.basket_id],
                   ["basket hash", r.hash],
                   ["evidence hash", r.bundle.evidence_hash],
                   ["rules hash", r.bundle.core.rules.rules_hash],
