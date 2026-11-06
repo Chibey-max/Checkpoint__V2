@@ -24,9 +24,12 @@ The PDFs are the readable versions. The editable sources are in [`planning/sourc
 | [**Architecture**](architecture.md) | How the off-chain code maps to PRD §6, and where each guarantee is enforced and tested |
 | [README section draft](readme-section-guard-agents.md) | Guard and agents text for the master README (D-7.1) |
 | [Payload vector](../packages/shared/vectors/README.md) | The shared Borsh test vector (H1) and the Rust struct that matches it |
+| [Wallet check](wallet.md) | The wallet decision for the web app (P-0.3) and the manual testnet check |
+| [**Demo script**](demo-script.md) | The 4:00 video as a shot list: screens, accounts, what to say, timings, fallbacks, and how to reset state for a clean take |
+| [**Evidence**](evidence.md) | One row per acceptance test with the command, result and nearblocks link. Template until the gate; frozen on 12 Nov |
 
 ## Change rules
 
 - The PRD's §11 interfaces are **frozen**. Change them only when all three of us agree, and update the PRD, the shared test vectors and the code in the same PR.
 - When a task's "done when" passes, tick it on the board. If the plan changes, update the task data in `build_tasks.py` and re-render.
-- The other docs planned under `docs/` (`permissions.md`, `evidence.md`, `limitations.md`, `demo-script.md`) arrive with the milestones in the task list.
+- The other docs planned under `docs/` (`permissions.md`, `limitations.md`) arrive with the milestones in the task list.
