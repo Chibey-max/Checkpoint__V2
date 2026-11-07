@@ -1,7 +1,7 @@
 "use client";
 
 import { decodePayload, fromBase64, verifyEvidenceBundle, type Check as VerifyCheck, type VaultBasketView } from "@checkpoint/shared";
-import { ArrowDownLeft, Check, ChevronDown, CircleDashed, Copy, Download, ExternalLink, FileSearch, Inbox, Loader2, RefreshCw, Search, ShieldAlert, ShieldCheck, Terminal } from "lucide-react";
+import { ArrowDownLeft, Check, ChevronDown, CircleDashed, Copy, Download, ExternalLink, FileSearch, Inbox, Loader2, RefreshCw, Search, ShieldAlert, ShieldCheck, ShieldQuestion, Terminal } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { PageHeader } from "@/components/page-header";
@@ -25,6 +25,8 @@ interface Row {
   payouts: { vendor: string; amount: string; status: string | null }[];
   bundle: EvidenceBundle | null;
   bundleError: string | null;
+  /** The evidence hash the Vault stored, when the row came from chain. All zeros means none was bound (a smoke test). */
+  chainEvidence: string | null;
   checks: VerifyCheck[];
   ok: boolean;
 }
@@ -74,6 +76,7 @@ function toRow(basket_id: string, bundle: EvidenceBundle | null, bundleError: st
       : (bundle?.core.basket.payouts ?? []).map((p, i) => ({ vendor: p.vendor_id, amount: p.amount, status: bundle?.chain.payouts.find((x) => x.index === i)?.status ?? null })),
     bundle,
     bundleError,
+    chainEvidence: fromChain?.evidence_hash ?? null,
     checks: v.checks,
     ok: !!bundle && v.ok,
   };
@@ -150,8 +153,13 @@ export default function AuditPage() {
 
   const hint: Hint = source === "chain" ? "chain" : agents.mode === "mock" ? "browser" : dev ? "dev" : "chain";
 
+  // ?basket=<id> (the request page links here once a basket settles) opens that row; otherwise the newest.
   useEffect(() => {
-    if (rows?.length && open === null) setOpen(rows[0]!.basket_id);
+    if (!rows?.length || open !== null) return;
+    const want = new URLSearchParams(location.search).get("basket");
+    const row = rows.find((r) => r.basket_id === want) ?? rows[0]!;
+    setOpen(row.basket_id);
+    if (row.basket_id === want) requestAnimationFrame(() => document.getElementById(`basket-${want}`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
   }, [rows, open]);
 
   return (
@@ -215,7 +223,7 @@ export default function AuditPage() {
         )}
       </div>
 
-      <section className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <form onSubmit={check} className="panel rounded-[var(--radius-card)] p-5">
           <p className="eyebrow">Check any basket</p>
           <p className="mt-2 text-[13px] text-muted">Paste a basket ID. Its evidence bundle is fetched and verified here, the same way as above.</p>
@@ -250,6 +258,12 @@ export default function AuditPage() {
   );
 }
 
+const ICON = {
+  verified: "bg-accent-soft text-accent ring-accent/25",
+  failed: "bg-bad-soft text-bad ring-bad/25",
+  unchecked: "bg-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] text-muted ring-line",
+} as const;
+
 const STATUS: Record<Status, { cls: string; label: string }> = {
   Completed: { cls: "bg-ok-soft text-ok ring-ok/25", label: "Completed" },
   PartiallyPaid: { cls: "bg-warn-soft text-warn ring-warn/25", label: "Partially paid" },
@@ -266,6 +280,9 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
     setTimeout(() => setCopied(null), 1400);
   };
   const st = r.status ? STATUS[r.status] : null;
+  // verified: the bundle passed every check. failed: a check failed. unchecked: no bundle here, so only the chain record is shown.
+  const state = r.ok ? "verified" : r.bundle ? "failed" : "unchecked";
+  const noEvidence = !!r.chainEvidence && /^0+$/.test(r.chainEvidence);
   const exec = r.bundle?.chain.execute_tx;
   const download = () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(r.bundle, null, 2)], { type: "application/json" }));
@@ -275,15 +292,17 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
   };
 
   return (
-    <li>
+    <li id={`basket-${r.basket_id}`} className="scroll-mt-28">
       <button onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] sm:p-5">
-        <span className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset ${r.ok ? "bg-accent-soft text-accent ring-accent/25" : "bg-bad-soft text-bad ring-bad/25"}`}>
-          {r.ok ? <ShieldCheck aria-hidden className="size-5" /> : <ShieldAlert aria-hidden className="size-5" />}
+        <span className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset ${ICON[state]}`}>
+          {state === "verified" ? <ShieldCheck aria-hidden className="size-5" /> : state === "failed" ? <ShieldAlert aria-hidden className="size-5" /> : <ShieldQuestion aria-hidden className="size-5" />}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[13.5px] text-fg">{r.basket_id.slice(0, 8)}</span>
-            <span className={`font-mono text-[10.5px] ${r.ok ? "text-accent" : "text-bad"}`}>{r.ok ? "verified" : r.bundle ? "check failed" : "no evidence"}</span>
+            <span className={`font-mono text-[10.5px] ${state === "verified" ? "text-accent" : state === "failed" ? "text-bad" : "text-muted"}`}>
+              {state === "verified" ? "verified" : state === "failed" ? "check failed" : noEvidence ? "smoke test · no evidence" : "chain record"}
+            </span>
           </span>
           <span className="block truncate font-mono text-[11px] text-faint">
             {r.created ? new Date(r.created).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"} · {r.payouts.length} vendor{r.payouts.length === 1 ? "" : "s"}
@@ -296,7 +315,7 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
       </button>
 
       {open && (
-        <div className="grid gap-5 border-t border-line px-4 pt-4 pb-5 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]" style={{ animation: "fade-up 300ms var(--ease-out-soft)" }}>
+        <div className="grid grid-cols-1 gap-5 border-t border-line px-4 pt-4 pb-5 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]" style={{ animation: "fade-up 300ms var(--ease-out-soft)" }}>
           <div>
             <p className="eyebrow">Payouts</p>
             <ul className="mt-2 divide-y divide-line">
@@ -328,13 +347,13 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
                 </button>
               )}
             </div>
-            {r.bundle && (
+            {(r.bundle || r.hash) && (
               <dl className="mt-4 space-y-2 font-mono text-[11px]">
                 {[
                   ["basket id", r.basket_id],
                   ["basket hash", r.hash],
-                  ["evidence hash", r.bundle.evidence_hash],
-                  ["rules hash", r.bundle.core.rules.rules_hash],
+                  ["evidence hash", r.bundle?.evidence_hash ?? (noEvidence ? null : r.chainEvidence)],
+                  ["rules hash", r.bundle?.core.rules.rules_hash],
                 ].map(([k, v]) =>
                   v ? (
                     <div key={k}>
@@ -353,7 +372,7 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
             )}
           </div>
 
-          <div className={`rounded-2xl p-4 ring-1 ring-inset ${r.ok ? "ring-line" : "bg-bad-soft ring-bad/40"}`}>
+          <div className={`rounded-2xl p-4 ring-1 ring-inset ${state === "failed" ? "bg-bad-soft ring-bad/40" : "ring-line"}`}>
             <p className="flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-muted uppercase">
               <FileSearch aria-hidden className="size-3.5" /> Checked in your browser
             </p>
@@ -378,11 +397,25 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
                 ))}
               </ul>
             ) : (
-              <p className="mt-3 text-[13px] text-bad">The evidence bundle couldn&apos;t be fetched, so nothing here is verified. {r.bundleError}</p>
+              <div className="mt-3 space-y-2 text-[13px] leading-relaxed text-muted">
+                <p>
+                  <span className="text-fg">The status and payouts are read straight from the Vault.</span>{" "}
+                  {noEvidence
+                    ? "This basket was approved with an empty evidence hash: a contract smoke test, not one the agents built, so there's no bundle to check."
+                    : "Its evidence bundle is kept by the agents service that built it, which this page can't reach, so the evidence hash and Guard's signature aren't rechecked here."}
+                </p>
+                {!noEvidence && r.bundleError && (
+                  <p className="truncate font-mono text-[10.5px] text-faint" title={r.bundleError}>
+                    {r.bundleError}
+                  </p>
+                )}
+              </div>
             )}
-            <p className="mt-4 flex items-center gap-1.5 text-[11px] text-faint">
-              <Terminal aria-hidden className="size-3.5" /> pnpm verify:audit {r.basket_id.slice(0, 8)}… runs the same checks
-            </p>
+            {!noEvidence && (
+              <p className="mt-4 flex items-center gap-1.5 text-[11px] text-faint">
+                <Terminal aria-hidden className="size-3.5" /> pnpm verify:audit {r.basket_id.slice(0, 8)}… runs the same checks
+              </p>
+            )}
           </div>
         </div>
       )}
