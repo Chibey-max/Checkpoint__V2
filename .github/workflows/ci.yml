@@ -1,5 +1,5 @@
 # CI (task D-7.2, FR-DX06): types, lint, tests and a secret scan on every PR and push to main.
-# The contracts job runs Rust unit tests and near-workspaces sandbox tests. `pnpm demo:sandbox` joins with H13.
+# The contracts job runs Rust unit tests and near-workspaces sandbox tests; demo-sandbox runs `pnpm demo:sandbox`.
 name: ci
 
 on:
@@ -51,6 +51,30 @@ jobs:
         run: CONTRACTS_BUILD=cargo bash scripts/contracts-build.sh
       # Unit tests (incl. the shared vector) and near-workspaces sandbox tests.
       - run: cargo test --workspace
+
+  demo-sandbox:
+    # FR-DX01 / FR-DX06: the whole loop plus attacks on a local sandbox, no keys.
+    runs-on: ubuntu-24.04
+    env:
+      LLM_PROVIDER: none
+    steps:
+      - uses: actions/checkout@v7
+      - name: Rust toolchain (pinned by rust-toolchain.toml)
+        run: rustup toolchain install && rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: near-sandbox binary cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.near/near-sandbox-2.14.0
+          key: near-sandbox-2.14.0-${{ runner.os }}
+      - run: pnpm install --frozen-lockfile
+      - run: CONTRACTS_BUILD=cargo bash scripts/contracts-build.sh
+      - run: pnpm demo:sandbox
 
   secrets:
     runs-on: ubuntu-24.04
