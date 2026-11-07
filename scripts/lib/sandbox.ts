@@ -70,7 +70,14 @@ export async function startSandbox(): Promise<Sandbox> {
   const bin = await ensureBinary();
   const home = mkdtempSync(join(tmpdir(), 'checkpoint-sandbox-'));
   const init = spawnSync(bin, ['--home', home, 'init', '--fast'], { encoding: 'utf8' });
-  if (init.status !== 0) throw new Error(`near-sandbox init failed: ${init.stderr.slice(-400)}`);
+  if (init.status !== 0) {
+    const glibc = /GLIBC_2\.\d+' not found/.test(init.stderr ?? '');
+    throw new Error(
+      glibc
+        ? `near-sandbox ${SANDBOX_VERSION} needs glibc 2.39+ (Ubuntu 24.04 or newer). Run it on a newer OS, or use pnpm cold-run (Docker).`
+        : `near-sandbox init failed: ${(init.stderr ?? '').slice(-400)}`,
+    );
+  }
   const key = JSON.parse(readFileSync(join(home, 'validator_key.json'), 'utf8')) as {
     account_id: string;
     secret_key: string;
