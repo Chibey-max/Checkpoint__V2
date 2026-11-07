@@ -7,5 +7,5 @@ tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 git clone --quiet --depth 1 "file://$repo" "$tmp/checkpoint"
 echo "cold run of $(git -C "$tmp/checkpoint" log --oneline -1)"
-docker build -q -f "$tmp/checkpoint/docker/coldrun.Dockerfile" -t checkpoint-coldrun "$tmp/checkpoint"
+docker build --progress=plain -f "$tmp/checkpoint/docker/coldrun.Dockerfile" -t checkpoint-coldrun "$tmp/checkpoint"
 docker run --rm checkpoint-coldrun
