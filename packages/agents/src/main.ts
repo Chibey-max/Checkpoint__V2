@@ -16,6 +16,7 @@ const { HttpGuardClient } = await import('./guard-client');
 const { Orchestrator } = await import('./orchestrator');
 const { createAgentsApp } = await import('./server');
 const { Store } = await import('./store');
+const { createIntentsClient } = await import('./intents');
 
 try {
   const cfg = loadAgentsConfig();
@@ -52,7 +53,19 @@ try {
     );
   }
   orch.resume();
-  const app = createAgentsApp(orch, { logger: log, corsOrigin: cfg.corsOrigin });
+  // D-6.2: dry NEAR Intents quotes (mainnet, display-only). AGENTS_INTENTS=off disables them.
+  const intents =
+    process.env.AGENTS_INTENTS === 'off'
+      ? undefined
+      : createIntentsClient({
+          ...(process.env.ONECLICK_URL ? { baseUrl: process.env.ONECLICK_URL } : {}),
+          ...(process.env.ONECLICK_API_KEY ? { apiKey: process.env.ONECLICK_API_KEY } : {}),
+        });
+  const app = createAgentsApp(orch, {
+    logger: log,
+    corsOrigin: cfg.corsOrigin,
+    ...(intents ? { intents } : {}),
+  });
   serve({ fetch: app.fetch, port: cfg.port }, (info) =>
     log.info('agents listening', {
       port: info.port,
