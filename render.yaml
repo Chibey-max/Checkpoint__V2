@@ -1,0 +1,46 @@
+# Render Blueprint for the optional judge-facing hosting (task D-8.2, D-06).
+# Secrets are `sync: false`: Render asks for them in the dashboard; nothing
+# secret lives in git. See docs/hosting.md.
+services:
+  - type: web
+    name: checkpoint-guard
+    runtime: node
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: pnpm exec tsx packages/guard/src/main.ts
+    healthCheckPath: /v1/health
+    envVars:
+      - { key: NODE_VERSION, value: '22' }
+      - { key: GUARD_PORT, value: '10000' }
+      - { key: NEAR_NETWORK, value: testnet }
+      - { key: NEAR_RPC_URL, sync: false }
+      - { key: VAULT_ID, value: vault.cpdemo.testnet }
+      - { key: TOKEN_ID, value: cpusd.cpdemo.testnet }
+      - { key: GUARD_VAULT, value: rpc }
+      - { key: GUARD_DEV, value: '0' }
+      - { key: GUARD_KEY_VERSION, value: '1' }
+      - { key: GUARD_SECRET_KEY, sync: false }
+      - { key: EVIDENCE_DIR, value: ./data/snapshot }
+      - { key: WEB_ORIGIN, sync: false }
+  - type: web
+    name: checkpoint-agents
+    runtime: node
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: pnpm exec tsx packages/agents/src/main.ts
+    healthCheckPath: /v1/health
+    envVars:
+      - { key: NODE_VERSION, value: '22' }
+      - { key: AGENTS_PORT, value: '10000' }
+      - { key: NEAR_NETWORK, value: testnet }
+      - { key: NEAR_RPC_URL, sync: false }
+      - { key: VAULT_ID, value: vault.cpdemo.testnet }
+      - { key: TOKEN_ID, value: cpusd.cpdemo.testnet }
+      - { key: AGENTS_CHAIN, value: rpc }
+      - { key: AGENT_ACCOUNT_ID, value: agent.cpdemo.testnet }
+      - { key: AGENT_FC_PRIVATE_KEY, sync: false }
+      - { key: GUARD_URL, sync: false }
+      - { key: EVIDENCE_DIR, value: ./data/snapshot }
+      - { key: AGENTS_DB_PATH, value: ./data/private/agents.sqlite }
+      - { key: LLM_PROVIDER, value: none }
+      - { key: WEB_ORIGIN, sync: false }
