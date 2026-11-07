@@ -9,6 +9,7 @@ import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { requestId, type RequestIdVariables } from 'hono/request-id';
 import { streamSSE } from 'hono/streaming';
+import { IntentsError, type IntentsClient } from './intents';
 import { HttpError, type Orchestrator } from './orchestrator';
 
 export interface AgentsAppOptions {
@@ -17,6 +18,8 @@ export interface AgentsAppOptions {
   /** Extra routes (the mock server mounts /v1/dev/* here). */
   extend?: (app: Hono<{ Variables: RequestIdVariables }>) => void;
   keepAliveMs?: number;
+  /** NEAR Intents dry quotes (D-6.2). Without it, /intents-quote answers 501. */
+  intents?: IntentsClient;
 }
 
 async function body(c: Context): Promise<unknown> {
@@ -116,6 +119,26 @@ export function createAgentsApp(orch: Orchestrator, opts: AgentsAppOptions = {})
   app.post('/v1/requests/:id/cancel', (c) => {
     orch.cancel(c.req.param('id'));
     return c.json({ ok: true });
+  });
+
+  // D-6.2 (P2): a labelled, display-only dry quote for paying the basket through NEAR Intents.
+  app.get('/v1/requests/:id/intents-quote', async (c) => {
+    if (!opts.intents)
+      return c.json(
+        { code: 'NOT_ENABLED', message: 'Intents quotes are off (AGENTS_INTENTS=off)' },
+        501,
+      );
+    const view = orch.view(c.req.param('id'));
+    const total = view.basket?.total;
+    if (!total)
+      return c.json({ code: 'NO_BASKET', message: 'this request has no basket yet' }, 409);
+    try {
+      return c.json({ basket_total: total, quote: await opts.intents.dryQuote(total) });
+    } catch (e) {
+      if (e instanceof IntentsError)
+        return c.json({ code: 'INTENTS_UNAVAILABLE', message: e.message }, 503);
+      throw e;
+    }
   });
 
   app.get('/v1/audit/:basket_id', (c) => c.json(orch.audit(c.req.param('basket_id'))));
