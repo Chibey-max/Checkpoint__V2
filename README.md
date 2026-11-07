@@ -119,7 +119,7 @@ A **Sputnik DAO** owns the rules: caps, allowlists, the Guard key and the rules 
 | `cpUSD` | Our own NEP-141 test token (6 decimals, no value) standing in for a USD stablecoin |
 | Vendor accounts `vendor-01…06` | Testnet accounts controlled by the team, each standing in for a real seller's offer |
 | Offers | Real public prices captured into a snapshot, not a live checkout |
-| Intents panel (stretch) | A mainnet **dry** quote showing what cross-chain settlement would cost. No funds move. |
+| Intents panel | On the request page: a mainnet **dry** 1Click quote for paying the basket total from wNEAR. Advisory; nothing is signed or moved, and Guard and the Vault never see it. |
 
 ---
 
@@ -917,7 +917,7 @@ Hackathon window: **1–14 Nov 2026** · our submission target: **14 Nov, 12:00 
 - [ ] **Freeze · Wed 12 Nov:** final deploy, cold README run, evidence table, hosted web app
 - [ ] Demo video ([shot list](docs/demo-script.md)), X post, submission by **Sat 14 Nov, 12:00 UTC**
 
-Stretch (only after the gate): vendor agents bidding for baskets, a NEAR Intents mainnet dry-quote panel, a governance risk preview.
+Stretch (only after the gate): vendor agents bidding for baskets and a governance risk preview. The NEAR Intents mainnet dry-quote panel is built: the request page shows it, labelled advisory.
 
 ---
 
