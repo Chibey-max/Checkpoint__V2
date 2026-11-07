@@ -45,13 +45,10 @@ jobs:
       - name: Rust toolchain (pinned by rust-toolchain.toml)
         run: rustup toolchain install && rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-bin: true
-      - name: cargo-near 0.23 (builds the wasm the sandbox tests deploy)
-        run: command -v cargo-near || cargo install cargo-near --version 0.23.0 --locked
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
-      - run: bash scripts/contracts-build.sh
+      - name: Build the wasm (plain cargo; cargo-near needs libudev and is only used for testnet deploys)
+        run: CONTRACTS_BUILD=cargo bash scripts/contracts-build.sh
       # Unit tests (incl. the shared vector) and near-workspaces sandbox tests.
       - run: cargo test --workspace
 
