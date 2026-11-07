@@ -21,7 +21,7 @@ Within about 10 s you will see offers, verdicts (one overpriced offer and one un
 
 ### Run the whole loop on a local NEAR sandbox (no keys)
 
-You need Rust (any recent stable; `rust-toolchain.toml` pins 1.96 with the wasm target), Node 22 and pnpm 9.
+You need Rust (any recent stable; `rust-toolchain.toml` pins 1.96 with the wasm target), Node 22 and pnpm 9, on Linux x86-64 with glibc 2.39+ (Ubuntu 24.04 or newer) or an Apple Silicon Mac. The `near-sandbox` 2.14 binary needs that glibc.
 
 ```bash
 pnpm install
