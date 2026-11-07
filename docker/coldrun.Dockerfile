@@ -6,8 +6,8 @@
 FROM rust:1.96-bookworm AS rust
 FROM node:22-bookworm AS node
 
-FROM ubuntu:24.04
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential ca-certificates
+# buildpack-deps:noble = Ubuntu 24.04 with gcc, make and CA certificates, so no apt step.
+FROM buildpack-deps:noble
 COPY --from=rust /usr/local/cargo /usr/local/cargo
 COPY --from=rust /usr/local/rustup /usr/local/rustup
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
