@@ -492,6 +492,20 @@ async function main(): Promise<number> {
       return `PASS (${checks} checks)`;
     });
 
+    // ---- D-6.2 (P2): NEAR Intents dry quote for the demo basket. Advisory and
+    // external (mainnet 1Click), so being offline is reported but not a failure.
+    await step('INTENTS', 'NEAR Intents dry quote for the basket (display-only)', async () => {
+      const res = await fetch(`${AGENTS_URL}/v1/requests/${demo!.id}/intents-quote`);
+      const j = (await res.json()) as {
+        code?: string;
+        message?: string;
+        quote?: { pay_amount_formatted: string; receive_amount_formatted: string; dry: boolean };
+      };
+      if (res.status === 503) return `skipped: 1Click unreachable (${j.message})`;
+      must(res.ok && j.quote?.dry === true, `HTTP ${res.status} ${j.code ?? ''}`);
+      return `pay ≈ ${Number(j.quote.pay_amount_formatted).toFixed(4)} wNEAR → ${j.quote.receive_amount_formatted} USDC (dry, mainnet)`;
+    });
+
     // ---- AT-01: a basket vendor-06 does not win → every payout Completed
     await step('AT-01', 'happy path: every payout Completed', async () => {
       const r = await signedBasket(owner, AT01_LIST);
