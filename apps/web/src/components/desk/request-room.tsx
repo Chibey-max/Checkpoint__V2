@@ -11,6 +11,7 @@ import { humanError } from "@/lib/errors";
 import { approveBasket } from "@/lib/tx";
 import { useWallet } from "@/lib/wallet";
 import { BasketCard } from "./basket-card";
+import { IntentsQuote } from "./intents-quote";
 import { OffersBoard } from "./offers-board";
 import { Timeline } from "./timeline";
 
@@ -222,6 +223,7 @@ export function RequestRoom({ id }: { id: string }) {
               <TrustLabel kind="advisory" /> <span>{view.explanations.basket.text}</span>
             </p>
           )}
+          {view.basket && !["refused", "cancelled"].includes(view.state) && <IntentsQuote requestId={id} total={view.basket.total} />}
         </div>
       </div>
 
