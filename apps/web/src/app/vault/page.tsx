@@ -108,7 +108,7 @@ export default function VaultPage() {
   }
 
   const header = (
-    <PageHeader eyebrow="Vault · cpUSD" title="Your vault" intro="cpUSD held by the Vault contract. Agents can spend it only through baskets you approve, inside your caps.">
+    <PageHeader eyebrow="Vault · cpUSD" title="Your vault" accent="vault" locks={["vault"]} intro="cpUSD held by the Vault contract. Agents can spend it only through baskets you approve, inside your caps.">
       <TrustLabel kind="onchain" />
       {shown && (
         <button onClick={() => reload()} aria-label="Refresh from chain" className="key key-ghost size-9">
@@ -132,7 +132,11 @@ export default function VaultPage() {
             </button>
           </div>
         </StateCard>
-        <Skeleton />
+        <div aria-hidden className="mt-6 grid gap-4 opacity-55 md:grid-cols-3">
+          {TILES.map((t) => (
+            <Tile key={t.label} {...t} value={null} />
+          ))}
+        </div>
       </>
     );
   }
@@ -166,9 +170,9 @@ export default function VaultPage() {
       ) : (
         <>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <Tile label="Available" hint="Spendable by baskets you approve" value={bal ? formatAmount(bal.available, { symbol: null }) : null} accent />
-            <Tile label="Reserved" hint="Locked for payouts in flight" value={bal ? formatAmount(bal.reserved, { symbol: null }) : null} />
-            <Tile label="Withdrawing" hint="On its way back to your wallet" value={bal ? formatAmount(bal.withdrawing, { symbol: null }) : null} />
+            {TILES.map((t) => (
+              <Tile key={t.label} {...t} value={bal ? formatAmount(bal[t.field], { symbol: null }) : null} />
+            ))}
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -347,6 +351,12 @@ function Enforced({ policy }: { policy: VaultPolicyView }) {
     </div>
   );
 }
+
+const TILES = [
+  { field: "available", label: "Available", hint: "Spendable by baskets you approve", accent: true },
+  { field: "reserved", label: "Reserved", hint: "Locked for payouts in flight" },
+  { field: "withdrawing", label: "Withdrawing", hint: "On its way back to your wallet" },
+] as const;
 
 function Tile({ label, hint, value, accent }: { label: string; hint: string; value: string | null; accent?: boolean }) {
   return (
