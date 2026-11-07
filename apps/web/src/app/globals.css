@@ -115,8 +115,9 @@
     color: var(--color-fg);
     transition: background-color 0.4s ease;
   }
+  /* No body background: html paints the page colour, so the fixed .cp-atmos (z-index -1) shows through. */
   body {
-    @apply bg-bg font-sans text-fg antialiased;
+    @apply font-sans text-fg antialiased;
     overflow-x: clip;
     font-feature-settings: "ss01", "cv11";
   }
@@ -293,3 +294,12 @@
 @keyframes word-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(8px); } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(14px); } }
 @keyframes sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+/* ---------- Page header: dial rings behind the title, the app's echo of the landing vault ---------- */
+.ph-rings-clip { mask-image: linear-gradient(to bottom, #000 55%, transparent); }
+.ph-rings { color: var(--color-fg); mask-image: radial-gradient(closest-side, #000 55%, transparent); }
+.ph-rings .ticks { opacity: 0.16; }
+.ph-rings .rim { opacity: 0.07; }
+[data-theme="light"] .ph-rings .ticks { opacity: 0.22; }
+[data-theme="light"] .ph-rings .rim { opacity: 0.1; }
+.ph-rings .lock { color: var(--color-accent); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 70%, transparent)); }

@@ -156,7 +156,7 @@ export default function AuditPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Audit" title="Every basket, with receipts" intro="Each basket you approved, its payouts and the evidence behind it. The evidence hash, the basket hash and Guard's signature are recomputed in your browser.">
+      <PageHeader eyebrow="Audit" title="Every basket, with receipts" accent="with receipts" locks={["guard", "you", "vault"]} intro="Each basket you approved, its payouts and the evidence behind it. The evidence hash, the basket hash and Guard's signature are recomputed in your browser.">
         <TrustLabel kind="onchain" />
       </PageHeader>
 

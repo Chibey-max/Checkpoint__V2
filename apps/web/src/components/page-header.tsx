@@ -1,11 +1,45 @@
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
 
-export function PageHeader({ eyebrow, title, intro, children }: { eyebrow: string; title: string; intro?: string; children?: React.ReactNode }) {
+export type LockName = 'guard' | 'you' | 'vault';
+
+/**
+ * Title block for every app page. `accent` is the part of the title set in the serif sheen the landing uses for
+ * "Three locks". `locks` lights the matching rings of the dial behind it: guard inside, you in the middle, vault outside.
+ */
+export function PageHeader({
+  eyebrow,
+  title,
+  accent,
+  intro,
+  locks = [],
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  intro?: string;
+  locks?: LockName[];
+  children?: React.ReactNode;
+}) {
+  const at = accent ? title.indexOf(accent) : -1;
   return (
-    <div className="flex flex-wrap items-end justify-between gap-6 pt-14 pb-10">
+    <div className="relative isolate flex flex-wrap items-end justify-between gap-6 pt-14 pb-10">
+      <HeaderRings locks={locks} />
       <div className="max-w-2xl">
         <p className="eyebrow">{eyebrow}</p>
-        <h1 className="mt-3 text-4xl font-semibold text-fg sm:text-5xl">{title}</h1>
+        <h1 className="hero-rise mt-3 text-4xl font-semibold text-fg sm:text-5xl">
+          {at < 0 ? (
+            title
+          ) : (
+            <>
+              {title.slice(0, at)}
+              <span className="font-serif font-normal tracking-[-0.02em] text-transparent bg-clip-text bg-[linear-gradient(100deg,var(--color-fg)_10%,var(--color-accent)_50%,var(--color-fg)_90%)] bg-[length:220%_100%] [animation:sheen_10s_ease-in-out_1s_infinite]">
+                {accent}
+              </span>
+              {title.slice(at + accent!.length)}
+            </>
+          )}
+        </h1>
         {intro && <p className="mt-4 text-[15px] leading-relaxed text-muted">{intro}</p>}
       </div>
       {children && <div className="flex items-center gap-2">{children}</div>}
@@ -13,8 +47,79 @@ export function PageHeader({ eyebrow, title, intro, children }: { eyebrow: strin
   );
 }
 
+const RINGS: { lock: LockName; r: number; start: number; spin: string }[] = [
+  { lock: 'vault', r: 280, start: 200, spin: 'animate-spin-rev' },
+  { lock: 'you', r: 220, start: 20, spin: 'animate-spin-slow' },
+  { lock: 'guard', r: 160, start: 110, spin: 'animate-spin-rev' },
+];
+
+/** Three tick rings, cropped at the top right of the header. A lit lock gets a mint arc on its ring. */
+function HeaderRings({ locks }: { locks: LockName[] }) {
+  return (
+    <div
+      aria-hidden
+      className="ph-rings-clip pointer-events-none absolute left-0 -right-40 -top-14 bottom-0 -z-10 hidden overflow-hidden md:block"
+    >
+      <svg viewBox="0 0 600 600" className="ph-rings absolute -top-8 -right-28 size-[520px]">
+        {RINGS.map(({ lock, r, start, spin }) => {
+          const c = 2 * Math.PI * r;
+          return (
+            <g key={lock} className={`dial-ring ${spin}`}>
+              <circle
+                className="rim"
+                cx="300"
+                cy="300"
+                r={r + 14}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <circle
+                className="ticks"
+                cx="300"
+                cy="300"
+                r={r}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="10"
+                strokeDasharray={`1.2 ${c / 144 - 1.2}`}
+              />
+              {locks.includes(lock) && (
+                <circle
+                  className="lock"
+                  cx="300"
+                  cy="300"
+                  r={r + 14}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeDasharray={`${c * 0.12} ${c}`}
+                  transform={`rotate(${start} 300 300)`}
+                />
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 /** Honest placeholder for a screen that lands in a later task: shows the shape of what's coming. */
-export function Planned({ task, needs, title, children, Icon }: { task: string; needs?: string; title: string; children: React.ReactNode; Icon: LucideIcon }) {
+export function Planned({
+  task,
+  needs,
+  title,
+  children,
+  Icon,
+}: {
+  task: string;
+  needs?: string;
+  title: string;
+  children: React.ReactNode;
+  Icon: LucideIcon;
+}) {
   return (
     <div className="panel edge-light rounded-[var(--radius-card)] p-6">
       <div className="flex items-start gap-4">
@@ -24,8 +129,14 @@ export function Planned({ task, needs, title, children, Icon }: { task: string; 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-semibold text-fg">{title}</h2>
-            <span className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-info uppercase ring-1 ring-inset ring-info/30">{task}</span>
-            {needs && <span className="font-mono text-[10px] tracking-[0.14em] text-faint uppercase">needs {needs}</span>}
+            <span className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-info uppercase ring-1 ring-inset ring-info/30">
+              {task}
+            </span>
+            {needs && (
+              <span className="font-mono text-[10px] tracking-[0.14em] text-faint uppercase">
+                needs {needs}
+              </span>
+            )}
           </div>
           <div className="mt-2 text-sm leading-relaxed text-muted">{children}</div>
         </div>
@@ -35,6 +146,10 @@ export function Planned({ task, needs, title, children, Icon }: { task: string; 
 }
 
 /** Skeleton block for placeholder layouts. */
-export function Ghost({ className = "" }: { className?: string }) {
-  return <div className={`rounded-lg bg-[color-mix(in_srgb,var(--color-fg)_5%,transparent)] ${className}`} />;
+export function Ghost({ className = '' }: { className?: string }) {
+  return (
+    <div
+      className={`rounded-lg bg-[color-mix(in_srgb,var(--color-fg)_5%,transparent)] ${className}`}
+    />
+  );
 }
