@@ -8,7 +8,8 @@
  *
  * Uniforms: uWheel (rad), uBolt (0 thrown → 1 retracted), uOpen (door swing, rad), uCam (0 resting shot →
  * 0.35 square on → 1 at the gold), uFrame (x: where the door sits on screen, y: zoom, z: vertical offset),
- * uTilt (pointer parallax), uShift (lens shift that makes room for the copy inside), uNarrow (0 wide → 1 phone).
+ * uTilt (pointer parallax), uShift (lens shift that makes room for the copy inside), uNarrow (0 wide → 1 phone),
+ * uLamps (each ceiling lamp's level, front to back: the vault sits on standby light until the Vault's lock engages).
  */
 export const VAULT_DOOR_FRAG = `#version 300 es
 precision highp float;
@@ -23,6 +24,7 @@ uniform vec3 uFrame;    // x: horizontal offset of the door on screen, y: zoom, 
 uniform vec2 uTilt;     // pointer parallax
 uniform vec2 uShift;    // lens shift, so the inside shot can leave room for the copy
 uniform float uNarrow;  // 0 wide screen, 1 tall phone: inside, the camera stands further back
+uniform vec3 uLamps;    // ceiling lamps, front to back: 0 off .. 1 full
 
 const float PI = 3.14159265;
 const float TAU = 6.2831853;
@@ -357,12 +359,12 @@ float lampPanels(vec2 xz, float blur) {
   float s = 0.0;
   for (int k = 0; k < 3; k++) {
     vec2 d = abs(xz - vec2(0.0, k == 0 ? -1.3 : (k == 1 ? -2.7 : -3.7))) - vec2(0.24);
-    s += 1.0 - smoothstep(-blur, blur + 0.006, max(d.x, d.y));
+    s += uLamps[k] * (1.0 - smoothstep(-blur, blur + 0.006, max(d.x, d.y)));
   }
   return s;
 }
 float lampFall(vec3 p) {
-  return 1.0 / (1.0 + 1.2 * dot(p - LMP0, p - LMP0)) + 1.0 / (1.0 + 1.2 * dot(p - LMP1, p - LMP1)) + 1.0 / (1.0 + 1.2 * dot(p - LMP2, p - LMP2));
+  return uLamps.x / (1.0 + 1.2 * dot(p - LMP0, p - LMP0)) + uLamps.y / (1.0 + 1.2 * dot(p - LMP1, p - LMP1)) + uLamps.z / (1.0 + 1.2 * dot(p - LMP2, p - LMP2));
 }
 vec3 roomRadiance(vec3 o, vec3 d, float rough, float seeGold) {
   vec3 inv = 1.0 / d;
@@ -411,7 +413,7 @@ vec3 env(vec3 d, float rough) {
   float strip = smoothstep(0.08 + w, 0.0, abs(d.x - 0.85)) * smoothstep(-0.4, 0.3, d.y) * step(0.0, d.z);
   c += vec3(0.5, 0.58, 0.72) * strip * 0.7;
   // the lit vault reflects in the door once it's open
-  c += LAMP * smoothstep(0.5, 1.0, -d.z) * smoothstep(0.2, 1.2, uOpen) * 0.3;
+  c += LAMP * smoothstep(0.5, 1.0, -d.z) * smoothstep(0.2, 1.2, uOpen) * 0.1 * (uLamps.x + uLamps.y + uLamps.z);
   return c;
 }
 
@@ -612,7 +614,7 @@ void main() {
         s1 = stackShadow(p + n * 0.002, normalize(LMP1 - p), 2.0);
         s2 = stackShadow(p + n * 0.002, normalize(LMP2 - p), 2.0);
       }
-      vec3 li = lamp(p, n, v, LMP0, F0, diffC, rough, 1.0) + lamp(p, n, v, LMP1, F0, diffC, rough, s1) + lamp(p, n, v, LMP2, F0, diffC, rough, s2);
+      vec3 li = lamp(p, n, v, LMP0, F0, diffC, rough, uLamps.x) + lamp(p, n, v, LMP1, F0, diffC, rough, s1 * uLamps.y) + lamp(p, n, v, LMP2, F0, diffC, rough, s2 * uLamps.z);
       lit += li * reach * mix(0.6, 1.0, occ);
     }
     // reflections: the studio outside, a picture of the room inside
@@ -639,7 +641,7 @@ void main() {
       float tl = dot(L - ro, rd);
       if (tl > 0.0 && (!hit || tl < t + 0.05)) {
         vec3 cp = ro + rd * tl - L;
-        glow += 0.0007 / (dot(cp, cp) + 0.0025);
+        glow += uLamps[k] * 0.0007 / (dot(cp, cp) + 0.0025);
       }
     }
     col += LAMP * glow * smoothstep(0.1, 0.9, uOpen);
@@ -650,7 +652,7 @@ void main() {
     float tc = dot(oc, rd);
     vec3 cp = ro + rd * max(tc, 0.0);
     float glow = exp(-pow(length(cp.xy) * 1.1, 2.0)) * smoothstep(0.2, 1.4, uOpen);
-    col += GOLD * glow * 0.07 * (1.0 - smoothstep(0.3, 0.5, uCam));
+    col += GOLD * glow * 0.07 * (1.0 - smoothstep(0.3, 0.5, uCam)) * (uLamps.x + uLamps.y + uLamps.z) / 3.0;
   }
 
   // vignette and grade

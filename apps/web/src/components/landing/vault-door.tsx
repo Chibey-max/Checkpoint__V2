@@ -50,7 +50,7 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     const loc = gl.getAttribLocation(prog, "aPos");
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const U = Object.fromEntries(["uRes", "uWheel", "uBolt", "uOpen", "uCam", "uFrame", "uTilt", "uShift", "uNarrow"].map((n) => [n, gl.getUniformLocation(prog, n)]));
+    const U = Object.fromEntries(["uRes", "uWheel", "uBolt", "uOpen", "uCam", "uFrame", "uTilt", "uShift", "uNarrow", "uLamps"].map((n) => [n, gl.getUniformLocation(prog, n)]));
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frame = { x: 0.55, zoom: 1, y: 0, sx: -0.24, sy: 0, narrow: 0 };
@@ -97,6 +97,7 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       gl!.uniform3f(U.uFrame!, frame.x, frame.zoom + (1 - frame.zoom) * (1 - c), frame.y * c);
       gl!.uniform2f(U.uShift!, frame.sx * pose.shift, frame.sy * pose.shift);
       gl!.uniform1f(U.uNarrow!, frame.narrow);
+      gl!.uniform3f(U.uLamps!, ...pose.lamps);
       // Parallax fades out once the door starts opening, so the camera move stays clean.
       const k = 1 - seg(p, 0.05, 0.3);
       gl!.uniform2f(U.uTilt!, tilt.x * k, tilt.y * k);
@@ -122,7 +123,8 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     let raf = 0;
     let visible = true;
     let prev = performance.now();
-    // frame times of consecutive redraws; if 24 in a row average over ~22 ms, drop to 70% of the pixels (floor 35%)
+    // frame times of consecutive redraws; if the median of 24 in a row is over ~22 ms, drop to 70% of the pixels
+    // (floor 35%). The median, so one-off hitches (a card painting for the first time) don't cost resolution.
     let slow: number[] = [];
     const loop = (now: number) => {
       const ms = now - prev;
@@ -135,9 +137,9 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
         draw();
         slow.push(ms);
         if (slow.length >= 24) {
-          const avg = slow.reduce((a, b) => a + b, 0) / slow.length;
+          const median = slow.sort((a, b) => a - b)[slow.length >> 1]!;
           slow = [];
-          if (avg > 22 && quality > 0.35) {
+          if (median > 22 && quality > 0.35) {
             quality = Math.max(0.35, quality * 0.7);
             resize();
           }
