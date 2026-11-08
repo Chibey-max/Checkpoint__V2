@@ -49,7 +49,7 @@ export function PageHeader({
 
 const LOCK_LABEL: Record<LockName, string> = { guard: "Guard", you: "You", vault: "Vault" };
 
-/** The landing's lock legend, for a request: each chip turns mint once the request has passed that lock. */
+/** The landing's lock legend, for a request: each chip turns gold once the request has passed that lock. */
 export function LockChips({ locks }: { locks: LockName[] }) {
   return (
     <ol aria-label="Locks passed" className="flex gap-1.5">
@@ -78,7 +78,7 @@ const RINGS: { lock: LockName; r: number; start: number; spin: string }[] = [
   { lock: "guard", r: 160, start: 110, spin: "animate-spin-rev" },
 ];
 
-/** Three tick rings, cropped at the top right of the header. A lit lock gets a mint arc on its ring. */
+/** Three tick rings, cropped at the top right of the header. A lit lock gets a gold arc on its ring. */
 export function HeaderRings({ locks }: { locks: LockName[] }) {
   return (
     <div aria-hidden className="ph-rings-clip pointer-events-none absolute left-0 -right-40 -top-14 bottom-0 -z-10 hidden overflow-hidden md:block">
