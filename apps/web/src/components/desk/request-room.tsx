@@ -204,7 +204,7 @@ export function RequestRoom({ id }: { id: string }) {
           )}
           {view.refusal && (
             <section role="alert" className="panel rounded-[var(--radius-card)] p-5 ring-1 ring-inset ring-bad/30">
-              <p className="eyebrow text-bad">Guard refused to sign</p>
+              <p className="eyebrow text-bad">{view.refusal.code === "GUARD_UNAVAILABLE" ? "Guard is unavailable" : "Guard refused to sign"}</p>
               <p className="mt-2 text-[13px] text-fg">{view.refusal.message}</p>
               <ul className="mt-2 space-y-1 text-[13px] text-bad">
                 {view.refusal.findings.map((f, i) => (
