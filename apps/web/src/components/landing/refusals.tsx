@@ -126,8 +126,8 @@ export function Refusals() {
     <section id="refusals" aria-labelledby="refusals-title" className="scroll-mt-28 py-24">
       <Reveal className="max-w-2xl">
         <p className="eyebrow">Threat model, tested</p>
-        <h2 id="refusals-title" className="mt-3 text-4xl font-semibold text-fg sm:text-5xl">
-          What it refuses, <span className="font-serif font-normal text-muted">and how you&apos;ll know.</span>
+        <h2 id="refusals-title" className="display mt-4 text-[2.75rem] text-fg sm:text-6xl">
+          What it refuses, <span className="gilt font-medium italic">and how you&apos;ll know.</span>
         </h2>
         <p className="mt-4 text-[16px] leading-relaxed text-muted">
           Each case is an acceptance test in the repo. The trace is the output that test expects, down to the error string the Vault panics with.

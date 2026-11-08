@@ -3,7 +3,9 @@
 /*
  * Checkpoint design system.
  * Theme is driven by <html data-theme="dark|light">, set before paint by the script in app/layout.tsx.
- * Dark ("night vault") is the default; light ("porcelain") swaps the same token names, so components never branch.
+ * Dark ("night vault": warm charcoal, ivory, brass) is the default; light ("ivory": paper, ink, deep brass) swaps
+ * the same token names, so components never branch. Materials follow the hero's vault door: brushed steel plates,
+ * brass hardware, gold for what's locked in.
  *
  * Colour rules:
  * - Vault gold means "locked / allowed / enforced on-chain". Never decoration.
@@ -12,16 +14,16 @@
 @custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
 
 @theme {
-  --color-bg: #06080c;
-  --color-bg-2: #0a0e15;
-  --color-surface: #0e131b;
-  --color-surface-2: #151b26;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.16);
-  --color-fg: #eef2f7;
-  --color-muted: #8d97a8;
-  --color-faint: #768094; /* 5.0:1 on bg, 4.7:1 on surface (NFR-09) */
-  --color-steel: #c9d2df;
+  --color-bg: #0b0a08;
+  --color-bg-2: #100e0b;
+  --color-surface: #15130f;
+  --color-surface-2: #1c1915;
+  --color-line: rgb(255 240 215 / 0.085);
+  --color-line-strong: rgb(255 240 215 / 0.17);
+  --color-fg: #f4eee3;
+  --color-muted: #a59d90;
+  --color-faint: #8c8477; /* 5.4:1 on bg, 5.0:1 on surface (NFR-09) */
+  --color-steel: #d6d0c4;
 
   --color-accent: #e3b45e;
   --color-accent-strong: #c99a43;
@@ -40,14 +42,16 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-serif: var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-serif: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-engrave: var(--font-engrave-face), var(--font-display-face), ui-serif, serif;
   --font-script: var(--font-script-face), "Snell Roundhand", cursive;
 
   --radius-card: 20px;
   --radius-control: 999px;
 
-  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 24px 60px -24px rgb(0 0 0 / 0.75);
-  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.6);
+  --shadow-float: 0 1px 0 rgb(255 240 210 / 0.07) inset, 0 -1px 0 rgb(0 0 0 / 0.45) inset, 0 24px 60px -24px rgb(0 0 0 / 0.8);
+  --shadow-soft: 0 1px 0 rgb(255 240 210 / 0.06) inset, 0 -1px 0 rgb(0 0 0 / 0.4) inset, 0 12px 32px -16px rgb(0 0 0 / 0.7);
 
   /* One easing and three speeds everywhere: fast 140 ms, base 220 ms, slow 700 ms. */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
@@ -81,16 +85,16 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --color-bg: #eef1f5;
-  --color-bg-2: #e6eaf0;
-  --color-surface: #ffffff;
-  --color-surface-2: #f4f6f9;
-  --color-line: rgb(13 18 25 / 0.09);
-  --color-line-strong: rgb(13 18 25 / 0.18);
-  --color-fg: #0c1118;
-  --color-muted: #566072;
-  --color-faint: #606979; /* 4.9:1 on bg, 5.6:1 on white panels (NFR-09) */
-  --color-steel: #3b4656;
+  --color-bg: #f3efe7;
+  --color-bg-2: #ebe5da;
+  --color-surface: #fffdf8;
+  --color-surface-2: #f8f4ec;
+  --color-line: rgb(48 36 18 / 0.1);
+  --color-line-strong: rgb(48 36 18 / 0.2);
+  --color-fg: #17130d;
+  --color-muted: #5c5448;
+  --color-faint: #675f52; /* 5.5:1 on bg, 6.2:1 on panels (NFR-09) */
+  --color-steel: #4a4338;
   --color-accent: #b07d1e;
   --color-accent-strong: #976816;
   --color-accent-ink: #7d5410; /* gold as small text: 5.8:1 on its own tint */
@@ -105,8 +109,8 @@
   --color-info: #2a5bd7;
   --color-info-soft: rgb(42 91 215 / 0.09);
   --color-testnet: #c2410c;
-  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 24px 50px -26px rgb(16 24 40 / 0.35);
-  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 8px 24px -14px rgb(16 24 40 / 0.22);
+  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 -1px 0 rgb(60 40 10 / 0.06) inset, 0 24px 50px -26px rgb(60 40 10 / 0.35);
+  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 -1px 0 rgb(60 40 10 / 0.05) inset, 0 10px 26px -14px rgb(60 40 10 / 0.25);
 }
 
 @layer base {
@@ -138,49 +142,75 @@
 /* ---------- Atmosphere: fixed behind every page ---------- */
 .cp-atmos { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--color-bg); }
 .cp-glow { position: absolute; border-radius: 9999px; filter: blur(80px); opacity: 0.9; }
-.cp-glow-a { width: 60vw; height: 46vw; left: 20vw; top: -26vw; background: radial-gradient(closest-side, rgb(227 180 94 / 0.14), transparent); }
-.cp-glow-b { width: 50vw; height: 50vw; right: -18vw; top: 8vh; background: radial-gradient(closest-side, rgb(80 105 160 / 0.14), transparent); }
-.cp-glow-c { width: 46vw; height: 40vw; left: -16vw; bottom: -14vw; background: radial-gradient(closest-side, rgb(176 110 50 / 0.12), transparent); }
-[data-theme="light"] .cp-glow-a { background: radial-gradient(closest-side, rgb(200 150 60 / 0.16), transparent); }
-[data-theme="light"] .cp-glow-b { background: radial-gradient(closest-side, rgb(90 115 170 / 0.12), transparent); }
+.cp-glow-a { width: 64vw; height: 46vw; left: 18vw; top: -28vw; background: radial-gradient(closest-side, rgb(236 190 110 / 0.13), transparent); }
+.cp-glow-b { width: 50vw; height: 50vw; right: -20vw; top: 10vh; background: radial-gradient(closest-side, rgb(170 140 100 / 0.08), transparent); }
+.cp-glow-c { width: 46vw; height: 40vw; left: -16vw; bottom: -14vw; background: radial-gradient(closest-side, rgb(176 110 50 / 0.1), transparent); }
+[data-theme="light"] .cp-glow-a { background: radial-gradient(closest-side, rgb(210 160 70 / 0.16), transparent); }
+[data-theme="light"] .cp-glow-b { background: radial-gradient(closest-side, rgb(180 150 110 / 0.12), transparent); }
 [data-theme="light"] .cp-glow-c { background: radial-gradient(closest-side, rgb(190 120 60 / 0.1), transparent); }
+/* the lathe rings of the vault door's face, very faint, turning out from the top of the page */
 .cp-grid {
   position: absolute; inset: 0;
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, #000 30%, transparent 75%);
+  background-image: repeating-radial-gradient(circle at 50% -30vh, rgb(255 236 200 / 0.03) 0 1px, transparent 1px 26px);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 0%, #000 25%, transparent 75%);
 }
-[data-theme="light"] .cp-grid {
-  background-image:
-    linear-gradient(to right, rgb(13 18 25 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(13 18 25 / 0.05) 1px, transparent 1px);
-}
+[data-theme="light"] .cp-grid { background-image: repeating-radial-gradient(circle at 50% -30vh, rgb(80 55 20 / 0.045) 0 1px, transparent 1px 26px); }
+/* edges fall off, like a lit room */
+.cp-atmos::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 120% 90% at 50% 30%, transparent 55%, rgb(0 0 0 / 0.45)); }
+[data-theme="light"] .cp-atmos::after { background: radial-gradient(ellipse 120% 90% at 50% 30%, transparent 60%, rgb(90 60 20 / 0.08)); }
 .cp-grain {
   position: absolute; inset: -50%; opacity: 0.06; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* ---------- Surfaces ---------- */
+/* ---------- Surfaces: brushed plates, like the steel round the vault door ---------- */
+/* Brushing: horizontal fractal noise, stretched, as an alpha-only texture. */
+:root {
+  --brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.96  0 0 0 0 0.9  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.045'/></svg>");
+}
+[data-theme="light"] {
+  --brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.26  0 0 0 0 0.12  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.06'/></svg>");
+}
 .glass {
-  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: var(--brushed), color-mix(in srgb, var(--color-surface) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
   border: 1px solid var(--color-line);
   box-shadow: var(--shadow-float);
 }
 .panel {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 85%, transparent), color-mix(in srgb, var(--color-surface) 92%, transparent));
+  background:
+    var(--brushed),
+    linear-gradient(180deg, rgb(255 240 210 / 0.035), transparent 38%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 88%, transparent), color-mix(in srgb, var(--color-surface) 94%, transparent));
   border: 1px solid var(--color-line);
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), 0 0 0 1px rgb(0 0 0 / 0.25);
 }
+[data-theme="light"] .panel { box-shadow: var(--shadow-soft); background: var(--brushed), linear-gradient(180deg, #fffefb, var(--color-surface-2)); }
+@layer components {
+/* gold hairline type and the engraved label face */
+.gilt {
+  color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(100deg, #b98a3a 0%, #f6dc9c 28%, #d4a24c 50%, #fbe6b0 70%, #b4812f 100%);
+  background-size: 200% 100%;
+  animation: sheen 12s ease-in-out infinite;
+}
+[data-theme="light"] .gilt { background-image: linear-gradient(100deg, #7d5410 0%, #b07d1e 30%, #8a5d0f 55%, #a8761c 75%, #6f4a0c 100%); }
+/* four slotted screws, one in each corner of a plate */
+.screw {
+  position: absolute; width: 7px; height: 7px; border-radius: 99px; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #d9cfbd, #7d7466 45%, #2b2721 80%);
+  box-shadow: 0 1px 0 rgb(255 240 210 / 0.08), inset 0 0 0 0.5px rgb(0 0 0 / 0.6);
+}
+.screw::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3px; height: 1px; background: rgb(20 17 13 / 0.85); transform: rotate(var(--r, 35deg)); }
+[data-theme="light"] .screw { background: radial-gradient(circle at 35% 30%, #fff8ea, #c1b49b 45%, #7e7058 85%); }
 /* hairline that catches light along the top edge of a card */
 .edge-light { position: relative; }
 .edge-light::before {
   content: ""; position: absolute; left: 12%; right: 12%; top: -1px; height: 1px; pointer-events: none;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-accent) 55%, transparent), transparent);
   opacity: 0.55;
+}
 }
 
 /* ---------- Buttons: machined keys ---------- */
@@ -191,27 +221,30 @@
 }
 .key:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
 .key:disabled { opacity: 0.45; cursor: not-allowed; }
+/* poured gold: a bright lip, a deep belly and a reflected rim, like the side of a bar */
 .key-primary {
-  color: var(--color-accent-fg);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 78%, white), var(--color-accent-strong));
+  color: #1c1405;
+  text-shadow: 0 1px 0 rgb(255 240 200 / 0.45);
+  background: linear-gradient(180deg, #fbe7b4 0%, #ecc675 22%, #d29f45 52%, #b8842f 78%, #dcb062 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.55),
-    inset 0 -2px 0 rgb(0 0 0 / 0.16),
-    0 10px 28px -10px color-mix(in srgb, var(--color-accent) 75%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--color-accent-strong) 70%, black);
+    inset 0 1px 0 rgb(255 250 230 / 0.8),
+    inset 0 -1px 0 rgb(90 55 10 / 0.35),
+    0 10px 28px -10px rgb(227 180 94 / 0.6),
+    0 0 0 1px #8a6223;
 }
 .key-primary:hover:not(:disabled) {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.6),
-    inset 0 -2px 0 rgb(0 0 0 / 0.16),
-    0 14px 34px -10px color-mix(in srgb, var(--color-accent) 90%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--color-accent-strong) 70%, black);
+    inset 0 1px 0 rgb(255 250 230 / 0.9),
+    inset 0 -1px 0 rgb(90 55 10 / 0.35),
+    0 14px 34px -10px rgb(227 180 94 / 0.8),
+    0 0 0 1px #8a6223;
   transform: translateY(-1px);
 }
+/* gunmetal: brushed, with a machined edge */
 .key-secondary {
   color: var(--color-fg);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 100%, white 4%), var(--color-surface));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 1px var(--color-line-strong), 0 8px 20px -12px rgb(0 0 0 / 0.6);
+  background: var(--brushed), linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 100%, white 5%), var(--color-surface));
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.09), inset 0 -1px 0 rgb(0 0 0 / 0.4), 0 0 0 1px var(--color-line-strong), 0 8px 20px -12px rgb(0 0 0 / 0.6);
 }
 [data-theme="light"] .key-secondary { box-shadow: inset 0 1px 0 #fff, 0 0 0 1px var(--color-line-strong), 0 8px 18px -12px rgb(16 24 40 / 0.3); }
 .key-secondary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 0 0 1px color-mix(in srgb, var(--color-fg) 30%, transparent), 0 12px 26px -12px rgb(0 0 0 / 0.6); }
@@ -222,8 +255,14 @@
 .key-ghost:hover:not(:disabled) { color: var(--color-fg); background: color-mix(in srgb, var(--color-fg) 6%, transparent); }
 
 /* ---------- Eyebrow: spaced mono label ---------- */
+@layer components {
 .eyebrow {
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-muted);
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 11.5px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--color-muted);
+}
+.eyebrow::before { content: ""; width: 1.6rem; height: 1px; background: linear-gradient(90deg, transparent, var(--color-accent)); }
+/* Display headings: banknote serif; tracking stays near zero because the face is already tight. */
+.display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.012em; line-height: 1.02; }
 }
 
 /* ---------- Vault dial ---------- */
@@ -325,4 +364,125 @@
 @keyframes ink-write { to { -webkit-mask-position: 0% 0; mask-position: 0% 0; } }
 @media (prefers-reduced-motion: reduce) {
   .ink { -webkit-mask-image: none; mask-image: none; }
+}
+
+/* Component classes live in the components layer, so Tailwind utilities (hidden, flex, sizes) still win over them. */
+@layer components {
+/* The dark brushing again, for parts that stay dark in both themes (the nav, the cards over the vault). */
+:root {
+  --brushed-dark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.96  0 0 0 0 0.9  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.065'/></svg>");
+}
+
+/* ---------- Navbar: a machined gunmetal rail, dark in both themes so it sits right over the vault ---------- */
+.nav-rail {
+  position: relative; color: #f2ebde;
+  background: var(--brushed-dark), linear-gradient(180deg, rgb(44 40 33 / 0.92) 0%, rgb(26 24 20 / 0.92) 50%, rgb(17 15 12 / 0.94) 100%);
+  border: 1px solid rgb(255 236 200 / 0.1);
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.13), inset 0 -1px 0 rgb(0 0 0 / 0.6), 0 0 0 1px rgb(0 0 0 / 0.45), 0 18px 40px -18px rgb(0 0 0 / 0.85);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+}
+/* a gold hairline catching the light along the bottom edge */
+.nav-rail::after {
+  content: ""; position: absolute; left: 10%; right: 10%; bottom: -1px; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(233 192 112 / 0.75), transparent);
+}
+/* brass socket the mark sits in */
+.nav-socket { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 99px; padding: 2px; flex: none;
+  background: conic-gradient(from 210deg, #6b4f22, #f1d48f, #9a7536, #fbe3a6, #7a5a28, #e6c27a, #6b4f22);
+  box-shadow: 0 4px 10px -4px rgb(0 0 0 / 0.9);
+}
+.nav-socket > span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 99px;
+  background: radial-gradient(circle at 50% 35%, #2a251d, #0b0a08 75%); box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.85); color: #e8dfcf; }
+.nav-word { font-family: var(--font-engrave); font-weight: 600; font-size: 14px; letter-spacing: 0.2em; color: #f2ebde; }
+/* engraved divider */
+.nav-div { width: 1px; height: 22px; background: rgb(0 0 0 / 0.65); box-shadow: 1px 0 0 rgb(255 240 210 / 0.08); flex: none; }
+.nav-link {
+  position: relative; display: block; border-radius: 99px; padding: 0.42rem 0.9rem;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 12px; letter-spacing: 0.15em; color: #b3aa9b;
+  transition: color 200ms, background 200ms, box-shadow 200ms;
+}
+.nav-link:hover { color: #f2ebde; }
+/* the current page: a recessed plate with a brass index mark above it, like the notch on a dial */
+.nav-link[aria-current="page"] {
+  color: #f0cf8a;
+  background: linear-gradient(180deg, #0d0c0a, #1a1713);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.85), 0 1px 0 rgb(255 240 210 / 0.08);
+}
+.nav-link[aria-current="page"]::before {
+  content: ""; position: absolute; left: 50%; top: -6px; width: 9px; height: 3px; margin-left: -4.5px; border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #f6dc9c, #b8842f); box-shadow: 0 0 8px rgb(233 192 112 / 0.7);
+}
+/* network status: an LED in a recessed bezel */
+.nav-led {
+  display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 99px; padding: 0.3rem 0.75rem;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em; color: #b3aa9b;
+  background: #0c0b09; box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.9), 0 1px 0 rgb(255 240 210 / 0.07);
+}
+.nav-led > i { width: 6px; height: 6px; border-radius: 99px; background: #f3c66d; box-shadow: 0 0 0 2px rgb(243 198 109 / 0.15), 0 0 10px 1px rgb(243 198 109 / 0.8); }
+/* round machined knob (the theme toggle) */
+.nav-knob { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 99px; color: #e8dfcf;
+  background: radial-gradient(circle at 50% 40%, #2b2722, #15130f 70%);
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.12), 0 0 0 1px rgb(0 0 0 / 0.6), 0 0 0 2.5px rgb(255 236 200 / 0.08), 0 4px 10px -4px rgb(0 0 0 / 0.9);
+  transition: transform 500ms var(--ease-out-soft), color 200ms;
+}
+.nav-knob:hover { color: #f0cf8a; transform: rotate(45deg); }
+.nav-plate {
+  background: var(--brushed-dark), linear-gradient(180deg, rgb(36 32 27 / 0.94), rgb(17 15 12 / 0.95));
+  border: 1px solid rgb(255 236 200 / 0.1);
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 10px 26px -14px rgb(0 0 0 / 0.85);
+  backdrop-filter: blur(14px);
+}
+
+/* ---------- Lock cards: brass-edged plates that ride over the vault as it opens ---------- */
+.vault-card {
+  position: relative; color: #f2ebde; border-radius: 22px; border: 1px solid transparent;
+  background:
+    var(--brushed-dark) padding-box,
+    linear-gradient(180deg, rgb(255 240 210 / 0.05), transparent 30%) padding-box,
+    linear-gradient(180deg, rgb(28 25 21 / 0.86), rgb(12 11 9 / 0.9)) padding-box,
+    linear-gradient(150deg, rgb(242 208 135 / 0.7), rgb(242 208 135 / 0.1) 32%, rgb(242 208 135 / 0.05) 62%, rgb(242 208 135 / 0.45)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 40px 90px -36px rgb(0 0 0 / 0.95);
+  backdrop-filter: blur(16px) saturate(115%);
+  -webkit-backdrop-filter: blur(16px) saturate(115%);
+}
+.medallion { width: 46px; height: 46px; border-radius: 99px; padding: 2px; flex: none;
+  background: conic-gradient(from 210deg, #6b4f22, #f1d48f, #9a7536, #fbe3a6, #7a5a28, #e6c27a, #6b4f22);
+  box-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.9);
+}
+.medallion > span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 99px;
+  background: radial-gradient(circle at 50% 35%, #2a251d, #0d0c09 75%); box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.85);
+  font-family: var(--font-engrave); font-weight: 600; font-size: 15px; color: #efcd84; letter-spacing: 0.04em;
+}
+/* a verdict lands like a rubber stamp */
+.stamp { opacity: 0; transform: scale(1.7) rotate(-10deg); transition: opacity 220ms ease, transform 460ms cubic-bezier(0.2, 1.5, 0.35, 1); }
+.stamp[data-on="true"] { opacity: 1; transform: scale(1) rotate(-2deg); }
+/* the scale a price is read against: under 50% review, 50-105% allow, 105-120% review, over 120% block */
+.guard-scale { background: linear-gradient(90deg, rgb(255 143 87 / 0.2) 0 31.25%, rgb(227 180 94 / 0.2) 31.25% 65.6%, rgb(255 143 87 / 0.2) 65.6% 75%, rgb(255 100 117 / 0.22) 75%); }
+.guard-needle { transition: left 700ms var(--ease-out-soft), opacity 300ms ease; }
+.ink-in { transition: opacity 500ms var(--ease-out-soft), transform 500ms var(--ease-out-soft), filter 500ms ease; }
+.ink-in[data-on="false"] { opacity: 0; transform: translateY(6px); filter: blur(3px); }
+/* the gold seal Guard presses on a basket it has signed */
+.seal { opacity: 0; transform: scale(1.8) rotate(-30deg); transition: opacity 260ms ease, transform 600ms cubic-bezier(0.2, 1.4, 0.35, 1); }
+.seal[data-on="true"] { opacity: 1; transform: scale(1) rotate(0deg); }
+.seal-disc {
+  background: radial-gradient(circle at 40% 35%, #fbe3a6, #d7a54b 45%, #8f6424 85%);
+  box-shadow: inset 0 0 0 2px rgb(255 240 200 / 0.35), inset 0 -3px 6px rgb(80 50 10 / 0.5), 0 6px 18px -6px rgb(227 180 94 / 0.8);
+}
+/* the approve key fills like a thumb pressing a reader */
+.press-fill { transform-origin: left; transform: scaleX(var(--press, 0)); }
+/* progress rail of the three locks */
+.lock-rail-fill { transform-origin: left; transform: scaleX(var(--rail, 0)); background: linear-gradient(90deg, #b8842f, #f6dc9c, #d29f45); box-shadow: 0 0 10px rgb(233 192 112 / 0.6); }
+}
+
+/* Keys inside always-dark plates. Unlayered, like .key-* itself, so these win. */
+.nav-rail .key-secondary, .nav-plate .key-secondary {
+  color: #f2ebde; background: var(--brushed-dark), linear-gradient(180deg, #26221c, #14120f);
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 0 0 1px rgb(255 236 200 / 0.14);
+}
+.nav-rail .key-ghost { color: #b3aa9b; }
+.nav-rail .key-ghost:hover:not(:disabled) { color: #f2ebde; background: rgb(255 240 210 / 0.06); }
+.vault-card .key-secondary {
+  color: #f2ebde; background: var(--brushed-dark), linear-gradient(180deg, #26221c, #14120f);
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 0 0 1px rgb(255 236 200 / 0.14);
 }

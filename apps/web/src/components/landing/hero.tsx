@@ -3,7 +3,9 @@
 import { ArrowRight, ChevronDown, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { ALL_DONE, GuardCard, VaultCard, YouCard, type LockSteps } from "./lock-story";
 import { VaultDoor } from "./vault-door";
+import { passed, seg, T, windowed } from "./vault-timeline";
 
 const HEADLINE = ["Your agents shop.", "Three locks decide."];
 const BODY =
@@ -29,23 +31,33 @@ function written(text: string, startMs: number, cps: number) {
   });
   return { words, end: at };
 }
+const spaced = (words: React.ReactNode[]) => words.reduce<React.ReactNode[]>((a, w, i) => (i ? [...a, " ", w] : [w]), []);
 
-const seg = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+const LOCKS = [
+  { key: "guard", label: "Guard", n: "I" },
+  { key: "you", label: "You", n: "II" },
+  { key: "vault", label: "Vault", n: "III" },
+] as const;
 
 /**
- * The landing hero: a vault door fills the screen. Scrolling pins it while the wheel spins, the bolts pull back,
- * the door swings open and the camera moves into the vault, which hands over to the rest of the page.
- * The copy on the left is handwritten in on load. With reduced motion there's no pinning: a still door and the text.
+ * The landing hero: a vault door fills the screen. Scrolling pins it and tells the three locks over the
+ * mechanism: Guard's card while the wheel turns, yours as the bolts pull back and the door swings, the Vault's
+ * as the camera walks up to the gold. The copy on the left is handwritten in on load.
+ * With reduced motion there's no pinning: a still door, the copy, and the three cards as a plain list.
  */
 export function Hero() {
   const section = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   const cue = useRef<HTMLDivElement>(null);
   const fade = useRef<HTMLDivElement>(null);
+  const rail = useRef<HTMLDivElement>(null);
+  const slots = useRef<(HTMLDivElement | null)[]>([]);
   const progress = useRef(0);
   const [webgl, setWebgl] = useState(true);
   const [go, setGo] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [steps, setSteps] = useState<LockSteps>({ guard: 0, you: 0, vault: 0 });
+  const [active, setActive] = useState(-1);
 
   // Start writing once the script face is in (or after a second, whichever comes first).
   useEffect(() => {
@@ -60,6 +72,7 @@ export function Hero() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setReduced(true);
     let raf = 0;
     let prev = performance.now();
+    let last = { g: -1, y: -1, v: -1, a: -2 };
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - prev) / 1000);
       prev = now;
@@ -72,13 +85,37 @@ export function Hero() {
         if (Math.abs(target - progress.current) < 1e-4) progress.current = target;
         const p = progress.current;
         if (copy.current) {
-          const k = seg(p, 0.03, 0.17);
+          const k = seg(p, ...T.copyOut);
           copy.current.style.opacity = String(1 - k);
           copy.current.style.transform = `translate3d(${-k * 40}px, 0, 0)`;
           copy.current.style.visibility = k >= 1 ? "hidden" : "visible";
         }
-        if (cue.current) cue.current.style.opacity = String(1 - seg(p, 0, 0.05));
-        if (fade.current) fade.current.style.opacity = String(seg(p, 0.7, 1));
+        if (cue.current) cue.current.style.opacity = String(1 - seg(p, 0, 0.04));
+        if (fade.current) fade.current.style.opacity = String(seg(p, ...T.fade));
+
+        // the three cards: in, hold, out; the Vault's comes from the right, the others from the left
+        const wins = [T.guard, T.you, T.vault] as const;
+        slots.current.forEach((s, i) => {
+          if (!s) return;
+          const w = wins[i]!;
+          const v = windowed(p, w);
+          const dir = i === 2 ? 1 : -1;
+          const into = 1 - seg(p, w[0], w[0] + 0.03);
+          s.style.opacity = String(v);
+          s.style.transform = `translate3d(${dir * into * 36}px, ${(1 - v) * 10}px, 0)`;
+          s.style.visibility = v <= 0 ? "hidden" : "visible";
+          s.style.setProperty("--press", String(i === 1 ? seg(p, ...T.press) : 0));
+        });
+        const a = p < T.guard[0] ? -1 : p < T.you[0] ? 0 : p < T.vault[0] ? 1 : 2;
+        if (rail.current) {
+          rail.current.style.opacity = String(seg(p, 0.06, 0.09) * (1 - seg(p, 0.97, 1)));
+          rail.current.style.setProperty("--r1", String(seg(p, T.rail[0], T.rail[1])));
+          rail.current.style.setProperty("--r2", String(seg(p, T.rail[2], T.rail[3])));
+        }
+        const g = passed(p, T.guardSteps), y = passed(p, T.youSteps), v = passed(p, T.vaultSteps);
+        if (g !== last.g || y !== last.y || v !== last.v) setSteps({ guard: g, you: y, vault: v });
+        if (a !== last.a) setActive(a);
+        last = { g, y, v, a };
       }
       raf = requestAnimationFrame(loop);
     };
@@ -90,58 +127,124 @@ export function Hero() {
   const h2 = written(HEADLINE[1]!, h1.end + 120, HEAD_CPS);
   const body = written(BODY, h2.end + 260, BODY_CPS);
   const after = Math.round(body.end + 150);
+  const cards = [<GuardCard key="g" step={steps.guard} />, <YouCard key="y" step={steps.you} />, <VaultCard key="v" step={steps.vault} />];
 
   return (
-    <section
-      ref={section}
-      aria-label="Checkpoint"
-      // Full-bleed, tucked up under the floating nav. The extra height is the scroll that opens the door.
-      className={`relative -mt-[106px] md:-mt-[68px] ${reduced ? "h-svh" : "h-[320svh]"}`}
-      style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
-    >
-      <div className="sticky top-0 h-svh overflow-hidden bg-[#050506]">
-        {webgl ? (
-          <VaultDoor progress={progress} onUnsupported={() => setWebgl(false)} />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src="/vault-door.jpg" alt="" className="absolute inset-0 size-full object-cover object-[70%_50%]" />
-        )}
-        {/* keep the copy legible over the wall */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(4_4_6/0.82)_0%,rgb(4_4_6/0.55)_36%,transparent_62%)] max-lg:bg-[linear-gradient(0deg,rgb(4_4_6/0.92)_0%,rgb(4_4_6/0.8)_45%,rgb(4_4_6/0.15)_72%,transparent_100%)]" />
-
-        <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 sm:px-6 lg:px-8">
-          <div ref={copy} className={`max-w-[34rem] will-change-transform ${go ? "ink-go" : ""}`}>
-            <p className="hero-rise inline-flex items-center gap-2 rounded-full bg-[rgb(10_10_12/0.55)] py-1 pr-3 pl-1.5 text-[12px] text-[#c9c0ae] ring-1 ring-[rgb(227_180_94/0.25)] backdrop-blur">
-              <span className="rounded-full bg-[rgb(227_180_94/0.14)] px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[#e3b45e] uppercase">NEAR Hackathon 2026</span>
-              AI Security &amp; Defense
-            </p>
-            <h1 className="mt-5 max-sm:mt-3 max-sm:text-[2.3rem] font-script text-[clamp(2.6rem,4.5vw,4.6rem)] leading-[1.08] whitespace-nowrap max-sm:whitespace-normal font-normal tracking-normal text-[#f4ead6]">
-              <span className="block">{h1.words.reduce<React.ReactNode[]>((a, w, i) => (i ? [...a, " ", w] : [w]), [])}</span>
-              <span className="block text-[#e3b45e]">{h2.words.reduce<React.ReactNode[]>((a, w, i) => (i ? [...a, " ", w] : [w]), [])}</span>
-            </h1>
-            <p className="mt-5 font-script text-[clamp(1.45rem,2.1vw,1.85rem)] leading-[1.4] text-[#ddd3bf] max-sm:mt-3 max-sm:text-[1.22rem] max-sm:leading-[1.38]">
-              {body.words.reduce<React.ReactNode[]>((a, w, i) => (i ? [...a, " ", w] : [w]), [])}
-            </p>
-            <div className={`mt-8 flex flex-wrap items-center gap-3 max-sm:mt-5 max-sm:gap-2 max-sm:[&>a]:h-11 max-sm:[&>a]:px-4 max-sm:[&>a]:text-sm ${go ? "hero-rise" : "opacity-0"}`} style={{ animationDelay: `${after}ms` }}>
-              <Link href="/desk" className="key key-primary h-12 px-6 text-[15px]">
-                Open the desk <ArrowRight aria-hidden className="size-4" />
-              </Link>
-              <Link href="#refusals" className="key h-12 bg-[rgb(10_10_12/0.55)] px-6 text-[15px] text-[#f4ead6] ring-1 ring-[rgb(255_255_255/0.16)] backdrop-blur hover:ring-[rgb(227_180_94/0.5)]">
-                <ShieldAlert aria-hidden className="size-4" /> What it refuses
-              </Link>
+    <>
+      <section
+        id="vault-hero"
+        ref={section}
+        aria-label="Checkpoint"
+        // Full-bleed, tucked up under the floating nav. The extra height is the scroll that opens the door.
+        className={`relative -mt-[106px] md:-mt-[68px] ${reduced ? "h-svh" : "h-[600svh]"}`}
+        style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
+      >
+        <div className="sticky top-0 h-svh overflow-hidden bg-[#050506]">
+          {webgl ? (
+            <VaultDoor progress={progress} onUnsupported={() => setWebgl(false)} />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/vault-door.jpg" alt="" className="absolute inset-0 size-full object-cover object-[70%_50%]" />
+          )}
+          {/* keep the copy legible over the wall */}
+          <div ref={copy} className="absolute inset-0">
+            <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(4_4_6/0.82)_0%,rgb(4_4_6/0.55)_36%,transparent_62%)] max-lg:bg-[linear-gradient(0deg,rgb(4_4_6/0.92)_0%,rgb(4_4_6/0.8)_45%,rgb(4_4_6/0.15)_72%,transparent_100%)]" />
+            <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 sm:px-6 lg:px-8">
+              <div className={`max-w-[34rem] ${go ? "ink-go" : ""}`}>
+                <p className="hero-rise inline-flex items-center gap-2 rounded-full bg-[rgb(10_10_12/0.55)] py-1 pr-3 pl-1.5 text-[12px] text-[#c9c0ae] ring-1 ring-[rgb(227_180_94/0.25)] backdrop-blur">
+                  <span className="rounded-full bg-[rgb(227_180_94/0.14)] px-2 py-0.5 font-engrave text-[10px] font-semibold tracking-[0.16em] text-[#e3b45e] uppercase">NEAR Hackathon 2026</span>
+                  AI Security &amp; Defense
+                </p>
+                <h1 className="mt-5 font-script text-[clamp(2.6rem,4.5vw,4.6rem)] leading-[1.08] font-normal tracking-normal whitespace-nowrap text-[#f4ead6] max-sm:mt-3 max-sm:text-[2.3rem] max-sm:whitespace-normal">
+                  <span className="block">{spaced(h1.words)}</span>
+                  <span className="block text-[#e3b45e]">{spaced(h2.words)}</span>
+                </h1>
+                <p className="mt-5 font-script text-[clamp(1.45rem,2.1vw,1.85rem)] leading-[1.4] text-[#ddd3bf] max-sm:mt-3 max-sm:text-[1.22rem] max-sm:leading-[1.38]">{spaced(body.words)}</p>
+                <div
+                  className={`mt-8 flex flex-wrap items-center gap-3 max-sm:mt-5 max-sm:gap-2 max-sm:[&>a]:h-11 max-sm:[&>a]:px-4 max-sm:[&>a]:text-sm ${go ? "hero-rise" : "opacity-0"}`}
+                  style={{ animationDelay: `${after}ms` }}
+                >
+                  <Link href="/desk" className="key key-primary h-12 px-6 text-[15px]">
+                    Open the desk <ArrowRight aria-hidden className="size-4" />
+                  </Link>
+                  <Link href="#refusals" className="key h-12 bg-[rgb(10_10_12/0.55)] px-6 text-[15px] text-[#f4ead6] ring-1 ring-[rgb(255_255_255/0.16)] backdrop-blur hover:ring-[rgb(227_180_94/0.5)]">
+                    <ShieldAlert aria-hidden className="size-4" /> What it refuses
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {!reduced && (
-          <div ref={cue} className="absolute inset-x-0 bottom-9 flex flex-col items-center gap-1.5 text-[#c9c0ae]">
-            <span className="font-mono text-[10.5px] tracking-[0.22em] uppercase">Scroll to open the vault</span>
-            <ChevronDown aria-hidden className="size-4 animate-bounce" />
+          {!reduced && (
+            <>
+              {/* the three locks, told over the mechanism */}
+              <h2 className="sr-only">Three locks, each one sees the others&apos; work</h2>
+              {cards.map((card, i) => (
+                <div
+                  key={i}
+                  ref={(el) => {
+                    slots.current[i] = el;
+                  }}
+                  aria-hidden={active !== i}
+                  style={{ opacity: 0, visibility: "hidden" }}
+                  className={`pointer-events-none absolute inset-0 mx-auto flex w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-5 sm:px-6 lg:px-8 ${
+                    i === 2 ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div className={`w-[min(30rem,100%)] ${active === i ? "pointer-events-auto" : ""}`}>{card}</div>
+                </div>
+              ))}
+
+              <div
+                ref={rail}
+                aria-hidden
+                style={{ opacity: 0 }}
+                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[124px] max-lg:bottom-auto md:max-lg:top-[92px]"
+              >
+                <ol className="nav-plate flex items-center gap-2 rounded-full px-3 py-1.5">
+                  {LOCKS.map((l, i) => (
+                    <li key={l.key} className="flex items-center gap-2">
+                      {i > 0 && (
+                        <span className="relative h-px w-10 overflow-hidden bg-[rgb(255_236_200/0.14)] max-sm:w-5">
+                          <span className="lock-rail-fill absolute inset-0" style={{ "--rail": `var(--r${i})` } as React.CSSProperties} />
+                        </span>
+                      )}
+                      <span
+                        className={`flex items-center gap-1.5 font-engrave text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors duration-500 ${
+                          i <= active ? "text-[#f0cf8a]" : "text-[#8c8477]"
+                        }`}
+                      >
+                        <span className="text-[10px] opacity-70">{l.n}</span> {l.label}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              <div ref={cue} className="absolute inset-x-0 bottom-9 flex flex-col items-center gap-1.5 text-[#c9c0ae]">
+                <span className="font-engrave text-[11px] font-semibold tracking-[0.24em] uppercase">Scroll to open the vault</span>
+                <ChevronDown aria-hidden className="size-4 animate-bounce" />
+              </div>
+            </>
+          )}
+          {/* the bottom of the vault melts into the page, so the next section rises out of it */}
+          <div ref={fade} aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_45%,var(--color-bg)_100%)] opacity-0" />
+        </div>
+      </section>
+
+      {reduced && (
+        <section aria-labelledby="locks-title" className="py-20">
+          <p className="eyebrow">How it works</p>
+          <h2 id="locks-title" className="display mt-4 text-5xl text-fg">
+            Three locks. <span className="gilt italic">Each one sees the others&apos; work.</span>
+          </h2>
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            <GuardCard step={ALL_DONE.guard} />
+            <YouCard step={ALL_DONE.you} />
+            <VaultCard step={ALL_DONE.vault} />
           </div>
-        )}
-        {/* the bottom of the vault melts into the page, so the next section rises out of it */}
-        <div ref={fade} aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_35%,var(--color-bg)_100%)] opacity-0" />
-      </div>
-    </section>
+        </section>
+      )}
+    </>
   );
 }

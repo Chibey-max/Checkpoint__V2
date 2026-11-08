@@ -3,8 +3,8 @@ import { Check, type LucideIcon } from "lucide-react";
 export type LockName = "guard" | "you" | "vault";
 
 /**
- * Title block for every app page. `accent` is the part of the title set in the serif sheen the landing uses for
- * "Three locks". `locks` lights the matching rings of the dial behind it: guard inside, you in the middle, vault outside.
+ * Title block for every app page. `accent` is the part of the title set in gilt italic, as on the landing.
+ * `locks` lights the matching rings of the dial behind it: guard inside, you in the middle, vault outside.
  */
 export function PageHeader({
   eyebrow,
@@ -27,13 +27,13 @@ export function PageHeader({
       <HeaderRings locks={locks} />
       <div className="max-w-2xl">
         <p className="eyebrow">{eyebrow}</p>
-        <h1 className="hero-rise mt-3 text-4xl font-semibold text-fg sm:text-5xl">
+        <h1 className="display hero-rise mt-4 text-[2.75rem] text-fg sm:text-6xl">
           {at < 0 ? (
             title
           ) : (
             <>
               {title.slice(0, at)}
-              <span className="font-serif font-normal tracking-[-0.02em] text-transparent bg-clip-text bg-[linear-gradient(100deg,var(--color-fg)_10%,var(--color-accent)_50%,var(--color-fg)_90%)] bg-[length:220%_100%] [animation:sheen_10s_ease-in-out_1s_infinite]">
+              <span className="gilt font-medium italic">
                 {accent}
               </span>
               {title.slice(at + accent!.length)}

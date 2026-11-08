@@ -88,8 +88,8 @@ export function RunStory() {
     return (
       <section aria-labelledby="run-title" className="py-20">
         <p className="eyebrow">One basket, four stops</p>
-        <h2 id="run-title" className="mt-3 text-4xl font-semibold text-fg">
-          Follow the money <span className="font-serif font-normal text-muted">through the locks.</span>
+        <h2 id="run-title" className="display mt-4 text-[2.75rem] text-fg">
+          Follow the money <span className="gilt font-medium italic">through the locks.</span>
         </h2>
         <ol className="mt-10 space-y-10">
           {STEPS.map((s, i) => (
@@ -119,8 +119,8 @@ export function RunStory() {
           {/* steps */}
           <div>
             <p className="eyebrow">One basket, four stops</p>
-            <h2 id="run-title" className="mt-3 text-4xl font-semibold text-fg sm:text-5xl">
-              Follow the money <span className="font-serif font-normal text-muted">through the locks.</span>
+            <h2 id="run-title" className="display mt-4 text-[2.75rem] text-fg sm:text-6xl">
+              Follow the money <span className="gilt font-medium italic">through the locks.</span>
             </h2>
             <ol className="mt-10 space-y-1">
               {STEPS.map((s, i) => {

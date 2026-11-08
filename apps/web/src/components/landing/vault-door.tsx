@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, type MutableRefObject } from "react";
 import { VAULT_DOOR_FRAG } from "./vault-door-shader";
+import { seg, vaultPose } from "./vault-timeline";
+
+export { vaultPose };
 
 /**
  * The hero background: the vault door, drawn by one full-screen fragment shader. `progress` (0..1, owned by the
  * hero's scroll handler) drives the whole sequence: the wheel spins, the bolts pull back, the door swings open on
- * its hinge and the camera moves into the vault. The canvas only redraws when something on screen changed
+ * its hinge and the camera walks into the vault to the gold (timeline in vault-timeline.ts). The canvas only redraws when something on screen changed
  * (progress, pointer or size), stops off-screen, and caps its pixel count. Callers get `onUnsupported` when
  * WebGL2 isn't there and show the still poster instead.
  */
@@ -14,21 +17,6 @@ import { VAULT_DOOR_FRAG } from "./vault-door-shader";
 const VERT = `#version 300 es
 in vec2 aPos;
 void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
-
-const seg = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-
-/** The scroll timeline, in one place: progress → what the mechanism is doing. */
-export function vaultPose(p: number) {
-  return {
-    wheel: easeInOut(seg(p, 0.05, 0.36)) * Math.PI * 2.4,
-    bolt: easeInOut(seg(p, 0.3, 0.44)),
-    open: easeInOut(seg(p, 0.42, 0.8)) * 1.85,
-    // ends just short of the gold, so the last frame is a composed shot rather than a wall of bars
-    cam: 0.35 * easeOut(seg(p, 0.06, 0.42)) + 0.47 * easeInOut(seg(p, 0.56, 1)),
-  };
-}
 
 export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObject<number>; onUnsupported?: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -62,16 +50,18 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     const loc = gl.getAttribLocation(prog, "aPos");
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const U = Object.fromEntries(["uRes", "uWheel", "uBolt", "uOpen", "uCam", "uFrame", "uTilt"].map((n) => [n, gl.getUniformLocation(prog, n)]));
+    const U = Object.fromEntries(["uRes", "uWheel", "uBolt", "uOpen", "uCam", "uFrame", "uTilt", "uShift", "uNarrow"].map((n) => [n, gl.getUniformLocation(prog, n)]));
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const frame = { x: 0.55, zoom: 1, y: 0 };
+    const frame = { x: 0.55, zoom: 1, y: 0, sx: -0.24, sy: 0, narrow: 0 };
     const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
+    // Pixel budget; it steps down if a slower GPU can't hold the frame rate while the door is moving.
+    let quality = 1;
 
     function resize() {
       const r = canvas!.getBoundingClientRect();
       // Ray marching is per pixel: render under the screen's resolution and let the browser scale it up.
-      const budget = r.width < 768 ? 420_000 : 900_000;
+      const budget = (r.width < 768 ? 420_000 : 900_000) * quality;
       let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const px = r.width * r.height * dpr * dpr;
       if (px > budget) dpr *= Math.sqrt(budget / px);
@@ -85,6 +75,10 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       frame.x = wide ? 0.55 : 0;
       frame.zoom = wide ? 1 : Math.min(1, Math.max(0.5, aspect * 1.15));
       frame.y = wide ? 0 : aspect < 0.55 ? -0.58 : aspect < 0.8 ? -0.42 : -0.2;
+      // Inside, the gold slides aside for the Vault's card: left of it on wide screens, above it on narrow ones.
+      frame.sx = wide ? -0.24 : 0;
+      frame.sy = wide ? 0 : aspect < 0.8 ? 0.2 : 0.12;
+      frame.narrow = wide ? 0 : Math.min(1, Math.max(0, (1.25 - aspect) / 0.8));
       dirty = true;
     }
 
@@ -98,9 +92,11 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       gl!.uniform1f(U.uBolt!, pose.bolt);
       gl!.uniform1f(U.uOpen!, pose.open);
       gl!.uniform1f(U.uCam!, pose.cam);
-      // The framing eases back to centre as the camera recentres on the door.
-      const c = 1 - seg(p, 0.06, 0.42);
+      // The framing eases back to centre as the camera squares up to the door.
+      const c = 1 - pose.centre;
       gl!.uniform3f(U.uFrame!, frame.x, frame.zoom + (1 - frame.zoom) * (1 - c), frame.y * c);
+      gl!.uniform2f(U.uShift!, frame.sx * pose.shift, frame.sy * pose.shift);
+      gl!.uniform1f(U.uNarrow!, frame.narrow);
       // Parallax fades out once the door starts opening, so the camera move stays clean.
       const k = 1 - seg(p, 0.05, 0.3);
       gl!.uniform2f(U.uTilt!, tilt.x * k, tilt.y * k);
@@ -126,13 +122,27 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     let raf = 0;
     let visible = true;
     let prev = performance.now();
+    // frame times of consecutive redraws; if 24 in a row average over ~22 ms, drop to 70% of the pixels (floor 35%)
+    let slow: number[] = [];
     const loop = (now: number) => {
-      const dt = Math.min(0.05, (now - prev) / 1000);
+      const ms = now - prev;
+      const dt = Math.min(0.05, ms / 1000);
       prev = now;
       tilt.x += (tilt.tx - tilt.x) * Math.min(1, dt * 2.5);
       tilt.y += (tilt.ty - tilt.y) * Math.min(1, dt * 2.5);
       const moved = Math.abs(progress.current - last.p) > 1e-4 || Math.abs(tilt.x - last.tx) > 1e-3 || Math.abs(tilt.y - last.ty) > 1e-3;
-      if (dirty || moved) draw();
+      if (dirty || moved) {
+        draw();
+        slow.push(ms);
+        if (slow.length >= 24) {
+          const avg = slow.reduce((a, b) => a + b, 0) / slow.length;
+          slow = [];
+          if (avg > 22 && quality > 0.35) {
+            quality = Math.max(0.35, quality * 0.7);
+            resize();
+          }
+        }
+      } else slow = [];
       raf = requestAnimationFrame(loop);
     };
     const start = () => {

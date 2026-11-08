@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { GeistSerif } from "geist/font/serif";
-import { Parisienne } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Parisienne } from "next/font/google";
 import { Atmosphere } from "@/components/site/atmosphere";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
@@ -13,6 +13,10 @@ import "./globals.css";
 
 /** The hero's handwriting. next/font downloads it at build time and serves it from this site. */
 const script = Parisienne({ weight: "400", subsets: ["latin"], variable: "--font-script-face", display: "swap" });
+/** Display headings: a banknote serif. */
+const display = Cormorant_Garamond({ weight: ["500", "600"], style: ["normal", "italic"], subsets: ["latin"], variable: "--font-display-face", display: "swap" });
+/** Engraved labels: Roman capitals, like the lettering on a vault door or a bank's brass plate. */
+const engrave = Cinzel({ weight: ["500", "600"], subsets: ["latin"], variable: "--font-engrave-face", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Checkpoint · Procurement Desk",
@@ -24,7 +28,7 @@ const THEME_SCRIPT = `try{var q=new URLSearchParams(location.search).get("theme"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSerif.variable} ${script.variable}`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSerif.variable} ${script.variable} ${display.variable} ${engrave.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
