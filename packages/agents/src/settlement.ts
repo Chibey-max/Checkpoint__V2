@@ -11,7 +11,7 @@
  * Payout outcomes arrive later through the callbacks; the orchestrator polls
  * get_basket for them (pollBasket here is the same loop, for the CLI).
  */
-import { Account, type KeyPairString } from 'near-api-js';
+import { Account, actions, type KeyPairString } from 'near-api-js';
 import type { VaultBasketView } from '@checkpoint/shared';
 import { ChainError, type Settlement, type VaultChain } from './chain/types';
 
@@ -23,6 +23,13 @@ export interface SettlementConfig {
 }
 
 export const EXECUTE_GAS = 300_000_000_000_000n; // 300 TGas
+
+/** The transaction hash a rejected execute_basket error carries, if any. */
+export function rejectedTxHash(e: unknown): string | undefined {
+  return /\(tx ([1-9A-HJ-NP-Za-km-z]{43,44})\)/.exec(
+    e instanceof Error ? e.message : String(e),
+  )?.[1];
+}
 
 /** First Vault error code in any error text or outcome. */
 export function vaultErrorCode(x: unknown): string | undefined {
@@ -66,13 +73,19 @@ export function createSettlement(cfg: SettlementConfig): Settlement {
     async execute(payloadB64: string, signatureB64: string) {
       let res: OutcomeLike;
       try {
-        res = (await account.callFunctionRaw({
-          contractId: cfg.vaultId,
-          methodName: 'execute_basket',
-          args: { payload_b64: payloadB64, signature_b64: signatureB64 },
-          gas: EXECUTE_GAS,
-          deposit: 0n,
+        // throwOnFailure: false keeps the transaction hash of a rejected call, for the evidence.
+        res = (await account.signAndSendTransaction({
+          receiverId: cfg.vaultId,
+          actions: [
+            actions.functionCall(
+              'execute_basket',
+              { payload_b64: payloadB64, signature_b64: signatureB64 },
+              EXECUTE_GAS,
+              0n,
+            ),
+          ],
           waitUntil: 'EXECUTED_OPTIMISTIC',
+          throwOnFailure: false,
         })) as OutcomeLike;
       } catch (e) {
         const code = vaultErrorCode(e);
@@ -82,16 +95,17 @@ export function createSettlement(cfg: SettlementConfig): Settlement {
             : `execute_basket failed: ${(e as Error).message}`,
         );
       }
+      const txHash = res.transaction_outcome?.id ?? res.transaction?.hash;
       const failure = failureOf(res);
       if (failure !== undefined) {
         const code = vaultErrorCode(failure);
+        const tx = txHash ? ` (tx ${txHash})` : '';
         throw new ChainError(
           code
-            ? `${code}: execute_basket was rejected`
-            : `execute_basket failed: ${JSON.stringify(failure)}`,
+            ? `${code}: execute_basket was rejected${tx}`
+            : `execute_basket failed${tx}: ${JSON.stringify(failure)}`,
         );
       }
-      const txHash = res.transaction_outcome?.id ?? res.transaction?.hash;
       if (!txHash) throw new ChainError('execute_basket: the RPC response had no transaction hash');
       return { tx_hash: txHash };
     },
