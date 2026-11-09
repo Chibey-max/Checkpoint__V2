@@ -1,12 +1,11 @@
 import { forwardRef } from "react";
 
 /**
- * The combination tumbler that carries the story from one lock to the next: a knurled bezel, three machined
- * rings (Guard inside, You, Vault outside) and a brass core showing the lock's numeral. It has no state of its own;
- * the hero sets CSS variables on it every frame while a handoff plays:
- *   --ts tumbler size (px) · --a1..--a3 ring angles (deg) · --l1..--l3 seam light per ring (0..1)
- *   --num numeral roll (0 = I, 1 = II, 2 = III) · --rings ring opacity (fades as it settles into a medallion)
- *   --flash the gold flare when a ring clunks home.
+ * A combination tumbler in CSS: a knurled bezel, three machined rings (Guard inside, You, Vault outside) and a
+ * brass core showing the lock's numeral. The intro shows it in place of the WebGL ring lock when WebGL2 isn't
+ * there. It has no state of its own; the caller sets CSS variables:
+ *   --ts size · --a1..--a3 ring angles (deg) · --l1..--l3 seam light per ring (0..1)
+ *   --num numeral roll (0 = I, 1 = II, 2 = III) · --rings ring opacity · --flash a gold flare
  */
 const RINGS = [
   // inset (% of the tumbler), band (% of the ring's own size, for the notch), mask stop where the band starts (% of radius)

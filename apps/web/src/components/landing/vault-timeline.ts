@@ -3,9 +3,9 @@
  * and the lock cards (hero.tsx) both read from here, so the story stays in step:
  *   Guard's card plays while the wheel turns, your approval releases the bolts and swings the door,
  *   and the Vault's card arrives as you walk up to the gold.
- * Between locks there's a handoff: the finished card seals and folds into a seam of light, a combination tumbler
- * rises out of it, turns the next ring home and rolls to the next numeral, then flies into the new card's medallion
- * as that card unfolds. The second handoff also switches the vault's lamps on, front to back.
+ * Between locks there's a handoff: the finished card swings open on its hinge like the vault door, and the next
+ * comes forward from behind it or swings shut into place. The second handoff also switches the vault's lamps on,
+ * front to back.
  */
 export const T = {
   copyOut: [0.02, 0.065],

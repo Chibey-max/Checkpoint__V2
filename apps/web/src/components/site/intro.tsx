@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Tumbler } from "@/components/landing/tumbler";
+import { Tumbler } from "./tumbler";
 import { RingLock } from "./ring-lock";
 
 const LOCKS = [
