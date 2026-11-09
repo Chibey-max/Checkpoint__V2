@@ -36,6 +36,14 @@
       "contract": "checkpoint-council.sputnik-v2.testnet",
       "tx": "5weSAGuoD7bofyPTR5wpudkVxXcdoUreYiFUoE5hyUC8",
       "note": "Sputnik v2 factory create, default policy (council 1/2 threshold), proposal bond 1 NEAR"
+    },
+    {
+      "date": "2026-11-09",
+      "contract": "vault.cpdemo.testnet",
+      "code_hash": "G9cZQeMRyvM6Uni3mPujsPYUqyhDnJpxoNn6Nnp6K6K",
+      "tx": "64HRM8X8o5ZnF2LGgmmZNqahAQUeND32heVfJHYSziyG",
+      "build": "cargo-near 0.23 non-reproducible-wasm, rust 1.96.0, from the repo (pnpm freeze:check MATCH); code-only redeploy, no init, state kept",
+      "policy_version": 4
     }
   ],
   "rpc_url": "https://rpc.testnet.near.org (provisional until D-04)",
@@ -70,6 +78,10 @@
     {
       "what": "DAO proposal 1 max_vendors 7 (out of bounds): passed, Vault refused ERR_BOUNDS",
       "tx": "Ako9g1m194WSs9H93hFQPxNPZN7HSUoJ2o54rxXpUwT6"
+    },
+    {
+      "what": "after the redeploy: 1 cpUSD to vendor-01 via pnpm settle, Completed",
+      "tx": "CdidzKvqGtV5zsJ5K4dsbimvLcc6LRmgy1AdLUCZ22Rv"
     }
   ],
   "council": ["david-checkpoint.testnet", "isaac-cp.testnet", "patrick-checkpoint.testnet"]
