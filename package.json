@@ -39,7 +39,8 @@
     "dao:propose": "tsx scripts/dao.ts propose",
     "dao:vote": "tsx scripts/dao.ts vote",
     "dao:show": "tsx scripts/dao.ts show",
-    "setup:testnet": "bash scripts/testnet/setup.sh"
+    "setup:testnet": "bash scripts/testnet/setup.sh",
+    "freeze:check": "bash scripts/testnet/freeze-check.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
