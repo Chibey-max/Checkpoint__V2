@@ -84,3 +84,18 @@ pnpm verify:audit <basket_id> --rpc $NEAR_RPC_URL --vault vault.cpdemo.testnet
 ```
 
 This recomputes the evidence hash and the basket hash, verifies Guard's signature with the key stored in the Vault, and compares everything with `get_basket` on chain. It prints PASS or FAIL per check.
+
+### Commands for the testnet deployment
+
+These sign with keys from `~/.near-credentials/testnet/` (near-cli-rs legacy keychain) and `.env`. Every rejected call still prints its nearblocks link.
+
+| Command | What it does |
+|---|---|
+| `pnpm setup:testnet` | Creates or checks the account tree, cpUSD, the Vault and the agent's function-call key. Safe to run twice (FR-DX02). |
+| `pnpm vault:check` | Reads the live Vault views and parses them with the shared schemas |
+| `pnpm gate:testnet` | The gate loop through the running Guard and agents: AT-01, AT-10 (with `verify:audit`), AT-05, AT-06 |
+| `pnpm settle -- <payload_b64> <signature_b64>` | Sends one `execute_basket` with the agent key and waits for the payouts |
+| `pnpm attack:stolen-key` / `attack:over-cap` / `attack:expired` / `attack:unlisted-vendor` | AT-08 / AT-09 / AT-07 / AT-04 on testnet |
+| `pnpm dao:propose -- <method> '<json>' --as <council>` | Creates a Sputnik FunctionCall proposal on the Vault, with 1 yocto, 50 TGas and the bond (FR-G07) |
+| `pnpm dao:vote -- <id> --as <council>` / `pnpm dao:show [-- <id>]` | Votes on a proposal / shows the council policy or one proposal |
+| `pnpm verify:audit -- <basket_id>` | Checks a basket's evidence against the chain |
