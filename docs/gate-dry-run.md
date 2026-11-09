@@ -18,6 +18,6 @@ Earlier, on 6 Nov, a 1 cpUSD payout to vendor-01 went through `pnpm settle` and 
 
 ## Notes for Monday
 
-- **AT-01 needs a different request.** Vendor-06 wins storage in the demo list, so that list always ends PartiallyPaid (decisions-pending #6). For AT-01, use a list where vendor-06 has no cheapest offer, e.g. VPS and domain only.
+- **AT-01 needs a different request.** Vendor-06 wins storage in the demo list, so that list always ends PartiallyPaid (decisions-pending #6). For AT-01 use `2× VPS 2 vCPU/4 GB for 1 month, 1× .com domain for 1 year, 10k transactional emails for 1 month`: 3 items, 2 vendors, all Completed (checked in `pnpm demo:sandbox`).
 - **The public RPC is slow and once dropped a request.** Guard's health check takes about 3.2 s, and one call failed on 6 Nov. Pick the RPC provider (D-04) before the gate.
 - **owner-demo has 139.29 cpUSD left in the Vault.** That's enough for the gate. Mint more with `cpusd.mint` (signed by cpusd.cpdemo.testnet) if needed.

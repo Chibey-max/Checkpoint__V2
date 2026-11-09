@@ -344,20 +344,27 @@ export class Orchestrator {
       });
     }
 
-    const ex = await this.explainer.explain({ verdicts: assessed.verdicts, basket: null });
-    if (ex.llmError)
-      this.emit(id, 'error', {
-        code: 'LLM_EXPLAIN_FAILED',
-        message: `Explanations use templates (${ex.llmError}).`,
-        recoverable: true,
-      });
-    for (const v of ex.verdicts)
-      this.emit(id, 'explain.verdict', {
-        offer_id: v.offer_id,
-        text: v.text,
-        source: v.source,
-        advisory: true,
-      });
+    // Explanations are advisory: they stream in when ready and never hold up
+    // planning or signing (NFR-07 measures request → signed basket).
+    void this.explainer
+      .explain({ verdicts: assessed.verdicts, basket: null })
+      .then((ex) => {
+        if (!this.current(id, gen)) return;
+        if (ex.llmError)
+          this.emit(id, 'error', {
+            code: 'LLM_EXPLAIN_FAILED',
+            message: `Explanations use templates (${ex.llmError}).`,
+            recoverable: true,
+          });
+        for (const v of ex.verdicts)
+          this.emit(id, 'explain.verdict', {
+            offer_id: v.offer_id,
+            text: v.text,
+            source: v.source,
+            advisory: true,
+          });
+      })
+      .catch(() => undefined);
 
     await this.planAndSign(id, gen);
   }
@@ -529,16 +536,17 @@ export class Orchestrator {
       findings: signed.findings,
     });
 
-    const ex = await this.explainer.explain({
-      verdicts: [],
-      basket: { ...plan.basket, evidence_hash: evidenceHash },
-    });
-    if (ex.basket)
-      this.emit(id, 'explain.basket', {
-        text: ex.basket.text,
-        source: ex.basket.source,
-        advisory: true,
-      });
+    void this.explainer
+      .explain({ verdicts: [], basket: { ...plan.basket, evidence_hash: evidenceHash } })
+      .then((ex) => {
+        if (ex.basket && this.current(id, gen))
+          this.emit(id, 'explain.basket', {
+            text: ex.basket.text,
+            source: ex.basket.source,
+            advisory: true,
+          });
+      })
+      .catch(() => undefined);
 
     await this.watchApproval(id, gen, sb, true);
   }

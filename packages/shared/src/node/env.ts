@@ -18,8 +18,12 @@ export function resolveFromRoot(p: string): string {
   return isAbsolute(p) ? p : resolve(findRepoRoot(), p);
 }
 
-/** Load <root>/.env into process.env if present. Existing variables win. */
+/**
+ * Load <root>/.env into process.env if present. Existing variables win.
+ * CHECKPOINT_NO_DOTENV=1 skips it (pnpm demo:sandbox runs isolated from .env).
+ */
 export function loadRootEnv(): void {
+  if (envFlag(process.env.CHECKPOINT_NO_DOTENV)) return;
   const path = join(findRepoRoot(), '.env');
   if (existsSync(path)) process.loadEnvFile(path);
 }

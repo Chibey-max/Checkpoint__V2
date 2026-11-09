@@ -98,6 +98,7 @@ Signatures are valid for 15 minutes, capped by the Vault's `max_ttl_ms`.
 | `GET /v1/requests/:id/events` | SSE stream (below) |
 | `POST /v1/requests/:id/acknowledge` | `{ offer_ids }` → `202`. Only REVIEW offers; triggers re-plan and re-sign. `409` in a state where acknowledging makes no sense. |
 | `POST /v1/requests/:id/cancel` | Stops the approval watcher. `409` once executing or finished. |
+| `GET /v1/requests/:id/intents-quote` **(added, D-6.2, P2)** | A **dry** NEAR Intents 1Click quote (mainnet) for paying the basket total as USDC on NEAR from wNEAR: `{ basket_total, quote: { label, dry: true, network: "mainnet", pay_asset, pay_amount, pay_amount_formatted, pay_usd, receive_asset, receive_amount, receive_amount_formatted, time_estimate_s, quoted_at, correlation_id } }`. Display-only: nothing is signed or moved, and Guard and the Vault never see it. `409 NO_BASKET` before a basket exists, `503 INTENTS_UNAVAILABLE` if 1Click can't be reached, `501 NOT_ENABLED` with `AGENTS_INTENTS=off`. |
 | `GET /v1/audit/:basket_id` | The evidence bundle |
 | `GET /v1/catalog` | `{ items: CatalogItem[] }` (each with `aliases` for list hints) |
 | `GET /v1/health` | `{ ok: true }` |

@@ -9,6 +9,7 @@
   "dependencies": {
     "@checkpoint/agents": "workspace:*",
     "@checkpoint/guard": "workspace:*",
-    "@checkpoint/shared": "workspace:*"
+    "@checkpoint/shared": "workspace:*",
+    "near-api-js": "7.4.0"
   }
 }
