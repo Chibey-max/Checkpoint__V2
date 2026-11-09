@@ -10,7 +10,7 @@ Read on 6 Nov 2026 from `rpc.testnet.fastnear.com` (`view_account`, `get_policy`
 
 | What | Account / value | Check |
 |---|---|---|
-| Vault | `vault.cpdemo.testnet` · code hash `4GcxzNMdU3dVLw8H3w2sydZ8RcZG56uXsmC9fQGaZQfS` | deploy + `new` [HXALtS…](https://testnet.nearblocks.io/txns/HXALtS5eXQkFm5rqoGUcLYNhCVKwRTcwjM7LW5cevABb) · account [9QLFyp…](https://testnet.nearblocks.io/txns/9QLFypmFV9Tf1rRZYBssbNp2P9TJske2fBiQZz1zMJvK) |
+| Vault | `vault.cpdemo.testnet` | code hash `G9cZQeMRyvM6Uni3mPujsPYUqyhDnJpxoNn6Nnp6K6K` (built from the repo; `pnpm freeze:check` MATCH), redeploy [64HR…ziyG](https://testnet.nearblocks.io/txns/64HRM8X8o5ZnF2LGgmmZNqahAQUeND32heVfJHYSziyG) (9 Nov, code only, state kept). First deploy [HXAL…evABb](https://testnet.nearblocks.io/txns/HXALtS5eXQkFm5rqoGUcLYNhCVKwRTcwjM7LW5cevABb) (6 Nov) |
 | cpUSD (NEP-141, 6 decimals) | `cpusd.cpdemo.testnet` · code hash `EjXGxRYJk8nmQNHi6xs5MMJtrPgfSo6njWGA9bJbZG9N` | deploy + `new` [7Q82hh…](https://testnet.nearblocks.io/txns/7Q82hhbrqUeq2pb15j8sD3N1rvHBCuBUA98aj11mt27J) · mint [7QNGNG…](https://testnet.nearblocks.io/txns/7QNGNGJ99YCEax3qUFwGNdDm911kdrxjKpzqbv9A1dmU) |
 | Council (Sputnik v2) | `checkpoint-council.sputnik-v2.testnet`: council david-checkpoint, isaac-cp, patrick-checkpoint (2 of 3) | create [5weS…yUC8](https://testnet.nearblocks.io/txns/5weSAGuoD7bofyPTR5wpudkVxXcdoUreYiFUoE5hyUC8); Vault `dao_id` since [6nSB…7bEy](https://testnet.nearblocks.io/txns/6nSBzPQbQxAVERwhLNFoCFzGN6mqnHV3yQNrn7357bEy) |
 | Guardian | `guardian.cpdemo.testnet` | `get_policy().guardian` ✓ |
