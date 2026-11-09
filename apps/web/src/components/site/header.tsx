@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { config } from "@/lib/config";
 import { LogoMark } from "./logo";
+import { TestnetStrip } from "./testnet-strip";
 import { ThemeToggle } from "./theme-toggle";
 import { WalletButton } from "./wallet-button";
 
@@ -61,6 +62,7 @@ export function Header() {
           </li>
         ))}
       </ul>
+      <TestnetStrip />
     </header>
   );
 }

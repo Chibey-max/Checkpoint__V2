@@ -46,6 +46,7 @@
   --font-display: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
   --font-engrave: var(--font-engrave-face), var(--font-display-face), ui-serif, serif;
   --font-script: var(--font-script-face), "Snell Roundhand", cursive;
+  --font-lede: var(--font-lede-face), var(--font-geist-sans), ui-sans-serif, sans-serif;
 
   --radius-card: 20px;
   --radius-control: 999px;
@@ -465,6 +466,12 @@
   transition: transform 500ms var(--ease-out-soft), color 200ms;
 }
 .nav-knob:hover { color: #f0cf8a; transform: rotate(60deg); }
+/* the testnet notice: a small steel tag hanging under the rail */
+.nav-tag {
+  color: #ff9a5c; background: var(--steel-plate); border: 1px solid rgb(0 0 0 / 0.75);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 8px 18px -10px rgb(0 0 0 / 0.85);
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.8);
+}
 .nav-plate {
   background: var(--steel-plate);
   border: 1px solid rgb(0 0 0 / 0.75);

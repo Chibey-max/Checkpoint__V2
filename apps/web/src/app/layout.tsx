@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { GeistSerif } from "geist/font/serif";
-import { Cinzel, Cormorant_Garamond, Parisienne } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Parisienne, Raleway } from "next/font/google";
 import { Atmosphere } from "@/components/site/atmosphere";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
 import { Intro } from "@/components/site/intro";
-import { TestnetStrip } from "@/components/site/testnet-strip";
 import { Spotlight } from "@/components/ui/spotlight";
 import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
@@ -17,6 +16,8 @@ const script = Parisienne({ weight: "400", subsets: ["latin"], variable: "--font
 /** Display headings: a banknote serif. */
 const display = Cormorant_Garamond({ weight: ["500", "600"], style: ["normal", "italic"], subsets: ["latin"], variable: "--font-display-face", display: "swap" });
 /** Engraved labels: Roman capitals, like the lettering on a vault door or a bank's brass plate. */
+/** The hero's lede under the handwritten headline: a refined sans, so the script stays the only flourish. */
+const lede = Raleway({ weight: ["400", "500"], subsets: ["latin"], variable: "--font-lede-face", display: "swap" });
 const engrave = Cinzel({ weight: ["500", "600"], subsets: ["latin"], variable: "--font-engrave-face", display: "swap" });
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ const INTRO_SCRIPT = `try{var i=new URLSearchParams(location.search).get("intro"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSerif.variable} ${script.variable} ${display.variable} ${engrave.variable}`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSerif.variable} ${script.variable} ${display.variable} ${engrave.variable} ${lede.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + INTRO_SCRIPT }} />
       </head>
@@ -43,7 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WalletProvider>
           <Atmosphere />
           <Spotlight />
-          <TestnetStrip />
           <Header />
           <main className="mx-auto w-full max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">{children}</main>
           <Footer />

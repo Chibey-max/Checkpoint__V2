@@ -207,7 +207,7 @@ export function Hero() {
         ref={section}
         aria-label="Checkpoint"
         // Full-bleed, tucked up under the floating nav. The extra height is the scroll that opens the door.
-        className={`relative -mt-[101px] md:-mt-[60px] ${reduced ? "h-svh" : "h-[600svh]"}`}
+        className={`relative -mt-[130px] md:-mt-[90px] ${reduced ? "h-svh" : "h-[600svh]"}`}
         style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
       >
         <div className="sticky top-0 h-svh overflow-hidden bg-[#050506]">
@@ -229,7 +229,7 @@ export function Hero() {
                 <h1 className="mt-6 font-script text-[clamp(3.4rem,7.2vw,8.6rem)] leading-[1.04] font-normal tracking-normal whitespace-nowrap text-[#f4ead6] max-sm:mt-3 max-sm:text-[10.6vw]">
                   {headline}
                 </h1>
-                <p className="hero-follow mt-6 max-w-[34rem] font-script text-[clamp(1.45rem,2.1vw,1.85rem)] leading-[1.4] text-[#ddd3bf] max-sm:mt-3 max-sm:text-[1.22rem] max-sm:leading-[1.38]">
+                <p className="hero-follow mt-7 max-w-[36rem] font-lede text-[clamp(1.05rem,1.3vw,1.25rem)] leading-[1.7] font-normal tracking-[0.01em] text-[#ddd3bf] max-sm:mt-4 max-sm:text-[0.98rem] max-sm:leading-[1.6]">
                   {BODY}
                 </p>
                 <div className="hero-follow hero-follow-late mt-8 flex flex-wrap items-center gap-3 max-sm:mt-5 max-sm:gap-2 max-sm:[&>a]:h-11 max-sm:[&>a]:px-4 max-sm:[&>a]:text-sm">
@@ -268,7 +268,7 @@ export function Hero() {
                 ref={rail}
                 aria-hidden
                 style={{ opacity: 0 }}
-                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[112px] max-lg:bottom-auto md:max-lg:top-[80px]"
+                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[140px] max-lg:bottom-auto md:max-lg:top-[102px]"
               >
                 <ol className="nav-plate flex items-center gap-2 rounded-full px-3 py-1.5">
                   {LOCKS.map((l, i) => (
