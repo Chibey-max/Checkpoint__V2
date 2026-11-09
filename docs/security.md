@@ -1,6 +1,6 @@
 # Security checklist and permission inventory (I-6.2, FR-G06)
 
-As of 9 Nov 2026, testnet, Vault policy v2. Re-check against `near account list-keys` and `get_policy` before the freeze (I-7.1).
+As of 9 Nov 2026, testnet, Vault policy v4. Re-check against `near account list-keys` and `get_policy` before the freeze (I-7.1).
 
 ## Who can call what on the Vault
 
@@ -19,7 +19,7 @@ As of 9 Nov 2026, testnet, Vault policy v2. Re-check against `near account list-
 | `emergency_pause(reason)`, `disable_guard_key()` | guardian or `dao_id` | exactly 1 yocto | The guardian has no other power: unpause and setters fail `ERR_NOT_DAO`. |
 | views | anyone | – | `get_policy`, `get_status`, `get_balance`, `get_owner_state`, `get_liabilities`, `get_approval`, `get_basket`, `get_baskets` |
 
-`dao_id` is **`cpdemo.testnet`** until the hand-over to `checkpoint-council.sputnik-v2.testnet` (I-0.5 / I-5.1).
+`dao_id` is **`checkpoint-council.sputnik-v2.testnet`** since 9 Nov (I-5.1). The council is `david-checkpoint.testnet`, `isaac-cp.testnet` and `patrick-checkpoint.testnet`, and 2 of 3 votes pass a proposal. `cpdemo.testnet` lost admin rights at the hand-over: its `set_vendor` now fails `ERR_NOT_DAO`.
 
 ## Access keys (testnet, 9 Nov)
 
@@ -30,11 +30,12 @@ As of 9 Nov 2026, testnet, Vault policy v2. Re-check against `near account list-
 | `agent.cpdemo.testnet` | Function-call key `ed25519:719F…FREG`: receiver `vault.cpdemo.testnet`, methods `execute_basket` only, 1 NEAR allowance (0.98 left). Plus 1 full access, kept offline. | The function-call key lives in the agents' `.env`. AT-08 shows it can't call anything else or attach deposits. |
 | `guardian.cpdemo.testnet` | 1 full access | Pause and disable-key only |
 | `owner-demo.cpdemo.testnet` | 1 full access | Demo owner. Approvals need this key, not a function-call key. |
-| `cpdemo.testnet` | 1 full access | Root of the account tree, and the Vault admin until the hand-over |
+| `cpdemo.testnet` | 1 full access | Root of the account tree. No Vault powers since the hand-over. |
+| `david-checkpoint`, `isaac-cp`, `patrick-checkpoint.testnet` | 1 full access each | Council members. **All three keys were created on David's machine.** Give Isaac and Patrick their keys through the password manager, or have each add their own wallet's key to their account and delete this one. |
 
 All the full-access keys are currently in one person's `~/.near-credentials/testnet/`. **Copy them to the team password manager.**
 
-Sputnik factory upgrade setting: to fill in when the DAO is created (I-0.5).
+DAO: created from the `sputnik-v2.testnet` factory with the default policy (council threshold 1/2, proposal bond 1 NEAR, proposal period 7 days). Upgrades are meant to go through council-voted `UpgradeSelf` proposals. Check what powers the factory itself keeps over its DAOs before the README claims this.
 
 ## Checklist
 
