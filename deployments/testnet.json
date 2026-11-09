@@ -14,7 +14,7 @@
     "vendor-05": "vendor-05.cpdemo.testnet (not allowlisted, AT-04)",
     "vendor-06": "vendor-06.cpdemo.testnet (not registered on cpUSD, AT-10)"
   },
-  "dao": "checkpoint-council.sputnik-v2.testnet (not created yet; dao_id is cpdemo.testnet until the hand-over)",
+  "dao": "checkpoint-council.sputnik-v2.testnet",
   "deploys": [
     {
       "date": "2026-11-06",
@@ -30,6 +30,12 @@
       "tx": "HXALtS5eXQkFm5rqoGUcLYNhCVKwRTcwjM7LW5cevABb",
       "build": "cargo-near 0.23 non-reproducible-wasm, rust 1.96.0",
       "policy_version": 1
+    },
+    {
+      "date": "2026-11-09",
+      "contract": "checkpoint-council.sputnik-v2.testnet",
+      "tx": "5weSAGuoD7bofyPTR5wpudkVxXcdoUreYiFUoE5hyUC8",
+      "note": "Sputnik v2 factory create, default policy (council 1/2 threshold), proposal bond 1 NEAR"
     }
   ],
   "rpc_url": "https://rpc.testnet.near.org (provisional until D-04)",
@@ -52,6 +58,19 @@
     {
       "what": "pnpm settle with the FC key: Completed, vendor-01 received 1 cpUSD; replay rejected ERR_ALREADY_USED",
       "tx": "2ptpZr2o4WnfkTmuXfxfunoDDePV9KsB5F8KS3iaF2p4"
+    },
+    {
+      "what": "Vault transfer_admin cpdemo.testnet \u2192 checkpoint-council.sputnik-v2.testnet (policy v3)",
+      "tx": "6nSBzPQbQxAVERwhLNFoCFzGN6mqnHV3yQNrn7357bEy"
+    },
+    {
+      "what": "DAO proposal 0 set_limits max basket 400 cpUSD, 2 of 3 votes, applied (policy v4)",
+      "tx": "9rLKi1UwDKLPpLGJPgpSpoN5CmpaXu6ifwZxys7RikXa"
+    },
+    {
+      "what": "DAO proposal 1 max_vendors 7 (out of bounds): passed, Vault refused ERR_BOUNDS",
+      "tx": "Ako9g1m194WSs9H93hFQPxNPZN7HSUoJ2o54rxXpUwT6"
     }
-  ]
+  ],
+  "council": ["david-checkpoint.testnet", "isaac-cp.testnet", "patrick-checkpoint.testnet"]
 }
