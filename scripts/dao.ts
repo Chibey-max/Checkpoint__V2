@@ -46,7 +46,8 @@ async function call(
   const r = (await signer(as).signAndSendTransaction({
     receiverId: DAO,
     actions: [actions.functionCall(method, args, gas, deposit)],
-    waitUntil: 'EXECUTED_OPTIMISTIC',
+    // FINAL, so a vote that executes the proposal reports the proposal's final status.
+    waitUntil: 'FINAL',
     throwOnFailure: false,
   })) as {
     transaction_outcome: { id: string };
@@ -120,7 +121,16 @@ async function main(): Promise<number> {
       0n,
       200n * TGAS,
     );
-    if (r.failed) throw new Error(`act_proposal failed: ${r.failed} (${NB}${r.tx})`);
+    // A vote that passes the proposal also runs the Vault call; if the Vault refuses
+    // it (e.g. ERR_BOUNDS), the vote still counted. Report that instead of failing.
+    const vaultErr = /ERR_(?!PROPOSAL)[A-Z_]+/.exec(r.failed)?.[0];
+    if (r.failed && !vaultErr) throw new Error(`act_proposal failed: ${r.failed} (${NB}${r.tx})`);
+    if (vaultErr) {
+      console.log(
+        `voted on ${id} as ${as}: proposal executed, the Vault refused it with ${vaultErr}  tx ${NB}${r.tx}`,
+      );
+      return 0;
+    }
     const after = (await viewFunction(RPC, DAO, 'get_proposal', { id })) as { status: string };
     console.log(
       `voted ${values.reject ? 'reject' : 'approve'} on ${id} as ${as}: status ${after.status}${r.inner ? `, Vault call failed: ${r.inner}` : ''}  tx ${NB}${r.tx}`,
