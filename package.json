@@ -35,7 +35,11 @@
     "attack:stolen-key": "tsx attacks/stolen-key.ts",
     "attack:over-cap": "tsx attacks/over-cap.ts",
     "attack:expired": "tsx attacks/expired.ts",
-    "attack:unlisted-vendor": "tsx attacks/unlisted-vendor.ts"
+    "attack:unlisted-vendor": "tsx attacks/unlisted-vendor.ts",
+    "dao:propose": "tsx scripts/dao.ts propose",
+    "dao:vote": "tsx scripts/dao.ts vote",
+    "dao:show": "tsx scripts/dao.ts show",
+    "setup:testnet": "bash scripts/testnet/setup.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
