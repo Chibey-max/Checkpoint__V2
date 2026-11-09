@@ -69,3 +69,15 @@ DAO: created from the `sputnik-v2.testnet` factory with the default policy (coun
 - **Reconciliation** skips when balances move during the check, and treats in-flight funds conservatively.
 - **A stuck payout** (callback out of gas) needs a DAO vote, `resolve_stuck_payout`, at least 10 minutes later.
 - **Testnet only.** Mainnet is refused by Guard and the agents (NFR-02).
+
+## Handing over the council accounts
+
+Isaac and Patrick each send **only their public key** (`ed25519:…`), never a private key. To find it: in their wallet, export or add an access key; with near-cli, `near account create-account fund-later use-auto-generation …`, or any key they generate locally. Then:
+
+```bash
+bash scripts/testnet/handover-key.sh isaac-cp.testnet ed25519:<Isaac's public key>
+bash scripts/testnet/handover-key.sh patrick-checkpoint.testnet ed25519:<Patrick's public key>
+```
+
+The script adds their key, checks it is on chain, and only then deletes the key that was created on David's machine. After that, only they can vote for their seat.
+
