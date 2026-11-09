@@ -31,7 +31,11 @@
     "vault:check": "tsx scripts/vault-views-check.ts",
     "demo:sandbox": "tsx scripts/demo-sandbox.ts",
     "cold-run": "bash scripts/cold-run.sh",
-    "gate:testnet": "tsx scripts/gate-testnet.ts"
+    "gate:testnet": "tsx scripts/gate-testnet.ts",
+    "attack:stolen-key": "tsx attacks/stolen-key.ts",
+    "attack:over-cap": "tsx attacks/over-cap.ts",
+    "attack:expired": "tsx attacks/expired.ts",
+    "attack:unlisted-vendor": "tsx attacks/unlisted-vendor.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
