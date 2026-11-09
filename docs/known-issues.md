@@ -6,7 +6,7 @@ Found while wiring Guard and the agents to the real Vault (testnet on 6–7 Nov,
 
 | Issue | Impact | Workaround / owner |
 |---|---|---|
-| Testnet NEAR | The root account has 9.5 NEAR after a faucet top-up (9 Nov); the Vault's free balance is still about 1 NEAR, below the FR-V09 target of ≥ 3 | Top the Vault up from `cpdemo.testnet` before the freeze. |
+| Council keys live on one machine | `isaac-cp` and `patrick-checkpoint.testnet` were created on David's machine to run the hand-over and votes on 9 Nov | Give Isaac and Patrick their keys through the password manager, or have each add their own wallet key and delete this one. **David** |
 | `cpdemo.testnet` keys live on one machine | All the testnet signing keys are in David's `~/.near-credentials/testnet/` | Copy them to the team password manager. **David** |
 | The demo list always ends PartiallyPaid | Vendor-06 (unregistered, AT-10) wins storage | Intended (decisions-pending #6). Use the AT-01 list in [gate-dry-run.md](gate-dry-run.md) for "all Completed". |
 | Groq latency varies | Request → signed basket with the LLM on: median 8 s, max 10.8 s (NFR-07 limit 20 s) | Record with the cache warm, or fall back to `LLM_PROVIDER=none` (D-8.1). |
@@ -16,6 +16,7 @@ Found while wiring Guard and the agents to the real Vault (testnet on 6–7 Nov,
 | Issue | Fix |
 |---|---|
 | The public RPC dropped calls during the gate (Guard failed closed with `GUARD_UNAVAILABLE`) | `.env` uses FastNEAR (about 0.9 s against 3.9 s); `viewFunction` retries a network failure once. Proposed for D-04. |
+| Testnet NEAR was short | A faucet top-up (9 Nov) paid for the DAO (6 NEAR). The Vault now holds 6 NEAR, about 3 free (FR-V09); the root has 1.5. |
 | The agent account ran out of NEAR (each `execute_basket` reserves 300 TGas up front) | Topped up to 2.49 NEAR on 9 Nov. Watch it before demos. |
 | LLM explanations held up signing and the approval prompt. Under Groq load a request sat in `signed` for over 60 s. | Explanations now stream in afterwards and never block planning or signing (`orchestrator.ts`). |
 | near-workspaces JS 5.0 runs nearcore 2.6.2 (protocol 77), which rejects rustc 1.87+ wasm (`PrepareWasmError: Deserialization`) | `pnpm demo:sandbox` runs the official near-sandbox 2.14 binary directly (`scripts/lib/sandbox.ts`), the same version the Rust tests use |
