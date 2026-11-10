@@ -19,7 +19,7 @@ As of 9 Nov 2026, testnet, Vault policy v4. Re-check against `near account list-
 | `emergency_pause(reason)`, `disable_guard_key()` | guardian or `dao_id` | exactly 1 yocto | The guardian has no other power: unpause and setters fail `ERR_NOT_DAO`. |
 | views | anyone | – | `get_policy`, `get_status`, `get_balance`, `get_owner_state`, `get_liabilities`, `get_approval`, `get_basket`, `get_baskets` |
 
-`dao_id` is **`checkpoint-council.sputnik-v2.testnet`** since 9 Nov (I-5.1). The council is `david-checkpoint.testnet`, `isaac-cp.testnet` and `patrick-checkpoint.testnet`, and 2 of 3 votes pass a proposal. `cpdemo.testnet` lost admin rights at the hand-over: its `set_vendor` now fails `ERR_NOT_DAO`.
+`dao_id` is **`checkpoint-council.sputnik-v2.testnet`** since 9 Nov (I-5.1). Since 10 Nov the council is `david-checkpoint.testnet` and `patrick-checkpoint.testnet`, and **both** must approve (Sputnik ratio 1/2 of 2 members needs 2 votes). `isaac-cp.testnet` was removed by proposal 2 when the team became two people. `cpdemo.testnet` lost admin rights at the hand-over: its `set_vendor` now fails `ERR_NOT_DAO`.
 
 ## Access keys (testnet, 9 Nov)
 
@@ -31,7 +31,9 @@ As of 9 Nov 2026, testnet, Vault policy v4. Re-check against `near account list-
 | `guardian.cpdemo.testnet` | 1 full access | Pause and disable-key only |
 | `owner-demo.cpdemo.testnet` | 1 full access | Demo owner. Approvals need this key, not a function-call key. |
 | `cpdemo.testnet` | 1 full access | Root of the account tree. No Vault powers since the hand-over. |
-| `david-checkpoint`, `isaac-cp`, `patrick-checkpoint.testnet` | 1 full access each | Council members. **All three keys were created on David's machine.** Give Isaac and Patrick their keys through the password manager, or have each add their own wallet's key to their account and delete this one. |
+| `david-checkpoint.testnet` | 1 full access (David) | Council member |
+| `patrick-checkpoint.testnet` | 1 full access (**Patrick's own key**, since 10 Nov) | Council member. The key created on David's machine was deleted. |
+| `isaac-cp.testnet` | 1 full access (on David's machine) | No longer on the council (proposal 2). No powers. |
 
 All the full-access keys are currently in one person's `~/.near-credentials/testnet/`. **Copy them to the team password manager.**
 
@@ -70,14 +72,12 @@ DAO: created from the `sputnik-v2.testnet` factory with the default policy (coun
 - **A stuck payout** (callback out of gas) needs a DAO vote, `resolve_stuck_payout`, at least 10 minutes later.
 - **Testnet only.** Mainnet is refused by Guard and the agents (NFR-02).
 
-## Handing over the council accounts
+## Handing over a council account
 
-Isaac and Patrick each send **only their public key** (`ed25519:…`), never a private key. To find it: in their wallet, export or add an access key; with near-cli, `near account create-account fund-later use-auto-generation …`, or any key they generate locally. Then:
+A new member sends **only their public key** (`ed25519:…`), never a private key; for example from `near account create-account fund-later use-auto-generation save-to-folder ~/.near-credentials/implicit`. Then:
 
 ```bash
-bash scripts/testnet/handover-key.sh isaac-cp.testnet ed25519:<Isaac's public key>
-bash scripts/testnet/handover-key.sh patrick-checkpoint.testnet ed25519:<Patrick's public key>
+bash scripts/testnet/handover-key.sh <account>.testnet ed25519:<their public key>
 ```
 
-The script adds their key, checks it is on chain, and only then deletes the key that was created on David's machine. After that, only they can vote for their seat.
-
+The script adds their key, checks it is on chain, and only then deletes the key created on this machine. Patrick's seat was handed over this way on 10 Nov.
