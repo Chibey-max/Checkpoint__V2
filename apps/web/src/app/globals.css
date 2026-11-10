@@ -3,7 +3,9 @@
 /*
  * Checkpoint design system.
  * Theme is driven by <html data-theme="dark|light">, set before paint by the script in app/layout.tsx.
- * Dark ("night vault") is the default; light ("porcelain") swaps the same token names, so components never branch.
+ * Dark ("night vault": warm charcoal, ivory, brass) is the default; light ("ivory": paper, ink, deep brass) swaps
+ * the same token names, so components never branch. Materials follow the hero's vault door: brushed steel plates,
+ * brass hardware, gold for what's locked in.
  *
  * Colour rules:
  * - Vault gold means "locked / allowed / enforced on-chain". Never decoration.
@@ -12,16 +14,16 @@
 @custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
 
 @theme {
-  --color-bg: #06080c;
-  --color-bg-2: #0a0e15;
-  --color-surface: #0e131b;
-  --color-surface-2: #151b26;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.16);
-  --color-fg: #eef2f7;
-  --color-muted: #8d97a8;
-  --color-faint: #768094; /* 5.0:1 on bg, 4.7:1 on surface (NFR-09) */
-  --color-steel: #c9d2df;
+  --color-bg: #0b0a08;
+  --color-bg-2: #100e0b;
+  --color-surface: #15130f;
+  --color-surface-2: #1c1915;
+  --color-line: rgb(255 240 215 / 0.085);
+  --color-line-strong: rgb(255 240 215 / 0.17);
+  --color-fg: #f4eee3;
+  --color-muted: #a59d90;
+  --color-faint: #8c8477; /* 5.4:1 on bg, 5.0:1 on surface (NFR-09) */
+  --color-steel: #d6d0c4;
 
   --color-accent: #e3b45e;
   --color-accent-strong: #c99a43;
@@ -40,14 +42,17 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-serif: var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-serif: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-engrave: var(--font-engrave-face), var(--font-display-face), ui-serif, serif;
   --font-script: var(--font-script-face), "Snell Roundhand", cursive;
+  --font-lede: var(--font-lede-face), var(--font-geist-sans), ui-sans-serif, sans-serif;
 
   --radius-card: 20px;
   --radius-control: 999px;
 
-  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 24px 60px -24px rgb(0 0 0 / 0.75);
-  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.6);
+  --shadow-float: 0 1px 0 rgb(255 240 210 / 0.07) inset, 0 -1px 0 rgb(0 0 0 / 0.45) inset, 0 24px 60px -24px rgb(0 0 0 / 0.8);
+  --shadow-soft: 0 1px 0 rgb(255 240 210 / 0.06) inset, 0 -1px 0 rgb(0 0 0 / 0.4) inset, 0 12px 32px -16px rgb(0 0 0 / 0.7);
 
   /* One easing and three speeds everywhere: fast 140 ms, base 220 ms, slow 700 ms. */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
@@ -70,8 +75,8 @@
     to { transform: translate3d(3%, 2%, 0) scale(1.08); }
   }
   @keyframes pulse-dot {
-    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent); }
-    50% { box-shadow: 0 0 0 5px transparent; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.8); }
   }
   @keyframes marquee {
     from { transform: translateX(0); }
@@ -81,16 +86,16 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --color-bg: #eef1f5;
-  --color-bg-2: #e6eaf0;
-  --color-surface: #ffffff;
-  --color-surface-2: #f4f6f9;
-  --color-line: rgb(13 18 25 / 0.09);
-  --color-line-strong: rgb(13 18 25 / 0.18);
-  --color-fg: #0c1118;
-  --color-muted: #566072;
-  --color-faint: #606979; /* 4.9:1 on bg, 5.6:1 on white panels (NFR-09) */
-  --color-steel: #3b4656;
+  --color-bg: #f3efe7;
+  --color-bg-2: #ebe5da;
+  --color-surface: #fffdf8;
+  --color-surface-2: #f8f4ec;
+  --color-line: rgb(48 36 18 / 0.1);
+  --color-line-strong: rgb(48 36 18 / 0.2);
+  --color-fg: #17130d;
+  --color-muted: #5c5448;
+  --color-faint: #675f52; /* 5.5:1 on bg, 6.2:1 on panels (NFR-09) */
+  --color-steel: #4a4338;
   --color-accent: #b07d1e;
   --color-accent-strong: #976816;
   --color-accent-ink: #7d5410; /* gold as small text: 5.8:1 on its own tint */
@@ -105,8 +110,8 @@
   --color-info: #2a5bd7;
   --color-info-soft: rgb(42 91 215 / 0.09);
   --color-testnet: #c2410c;
-  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 24px 50px -26px rgb(16 24 40 / 0.35);
-  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 8px 24px -14px rgb(16 24 40 / 0.22);
+  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 -1px 0 rgb(60 40 10 / 0.06) inset, 0 24px 50px -26px rgb(60 40 10 / 0.35);
+  --shadow-soft: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 -1px 0 rgb(60 40 10 / 0.05) inset, 0 10px 26px -14px rgb(60 40 10 / 0.25);
 }
 
 @layer base {
@@ -137,50 +142,88 @@
 
 /* ---------- Atmosphere: fixed behind every page ---------- */
 .cp-atmos { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--color-bg); }
-.cp-glow { position: absolute; border-radius: 9999px; filter: blur(80px); opacity: 0.9; }
-.cp-glow-a { width: 60vw; height: 46vw; left: 20vw; top: -26vw; background: radial-gradient(closest-side, rgb(227 180 94 / 0.14), transparent); }
-.cp-glow-b { width: 50vw; height: 50vw; right: -18vw; top: 8vh; background: radial-gradient(closest-side, rgb(80 105 160 / 0.14), transparent); }
-.cp-glow-c { width: 46vw; height: 40vw; left: -16vw; bottom: -14vw; background: radial-gradient(closest-side, rgb(176 110 50 / 0.12), transparent); }
-[data-theme="light"] .cp-glow-a { background: radial-gradient(closest-side, rgb(200 150 60 / 0.16), transparent); }
-[data-theme="light"] .cp-glow-b { background: radial-gradient(closest-side, rgb(90 115 170 / 0.12), transparent); }
+.cp-glow { position: absolute; border-radius: 9999px; opacity: 0.9; will-change: transform; }
+.cp-glow-a { width: 64vw; height: 46vw; left: 18vw; top: -28vw; background: radial-gradient(closest-side, rgb(236 190 110 / 0.13), transparent); }
+.cp-glow-b { width: 50vw; height: 50vw; right: -20vw; top: 10vh; background: radial-gradient(closest-side, rgb(170 140 100 / 0.08), transparent); }
+.cp-glow-c { width: 46vw; height: 40vw; left: -16vw; bottom: -14vw; background: radial-gradient(closest-side, rgb(176 110 50 / 0.1), transparent); }
+[data-theme="light"] .cp-glow-a { background: radial-gradient(closest-side, rgb(210 160 70 / 0.16), transparent); }
+[data-theme="light"] .cp-glow-b { background: radial-gradient(closest-side, rgb(180 150 110 / 0.12), transparent); }
 [data-theme="light"] .cp-glow-c { background: radial-gradient(closest-side, rgb(190 120 60 / 0.1), transparent); }
+/* the vault door itself, a ghost behind every page: the hero's door, still, faded into the wall */
+.cp-door {
+  position: absolute; inset: 0;
+  background: url("/vault-backdrop.webp") 49% 52% / auto max(112vh, 640px) no-repeat;
+  opacity: 0.13; filter: saturate(0.75);
+  -webkit-mask-image: radial-gradient(ellipse 46% 60% at 50% 52%, #000 35%, transparent 78%);
+  mask-image: radial-gradient(ellipse 46% 60% at 50% 52%, #000 35%, transparent 78%);
+}
+[data-theme="light"] .cp-door { opacity: 0.075; filter: grayscale(1) contrast(1.1); mix-blend-mode: multiply; }
+/* the lathe rings of the vault door's face, very faint, turning out from the top of the page */
 .cp-grid {
   position: absolute; inset: 0;
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, #000 30%, transparent 75%);
+  background-image: repeating-radial-gradient(circle at 50% -30vh, rgb(255 236 200 / 0.03) 0 1px, transparent 1px 26px);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 0%, #000 25%, transparent 75%);
 }
-[data-theme="light"] .cp-grid {
-  background-image:
-    linear-gradient(to right, rgb(13 18 25 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(13 18 25 / 0.05) 1px, transparent 1px);
-}
+[data-theme="light"] .cp-grid { background-image: repeating-radial-gradient(circle at 50% -30vh, rgb(80 55 20 / 0.045) 0 1px, transparent 1px 26px); }
+/* edges fall off, like a lit room */
+.cp-atmos::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 120% 90% at 50% 30%, transparent 55%, rgb(0 0 0 / 0.45)); }
+[data-theme="light"] .cp-atmos::after { background: radial-gradient(ellipse 120% 90% at 50% 30%, transparent 60%, rgb(90 60 20 / 0.08)); }
 .cp-grain {
   position: absolute; inset: -50%; opacity: 0.06; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* ---------- Surfaces ---------- */
+/* ---------- Surfaces: brushed plates, like the steel round the vault door ---------- */
+/* Brushing: horizontal fractal noise, stretched, as an alpha-only texture. */
+:root {
+  --brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.96  0 0 0 0 0.9  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.045'/></svg>");
+}
+[data-theme="light"] {
+  --brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.26  0 0 0 0 0.12  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.06'/></svg>");
+}
 .glass {
-  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: var(--brushed), color-mix(in srgb, var(--color-surface) 95%, transparent);
   border: 1px solid var(--color-line);
-  box-shadow: var(--shadow-float);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), var(--shadow-float);
 }
+/* a plate of brushed steel: polished sheen across it, a lit top bevel, a dark lower edge */
 .panel {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 85%, transparent), color-mix(in srgb, var(--color-surface) 92%, transparent));
+  background:
+    linear-gradient(115deg, transparent 22%, rgb(255 255 255 / 0.028) 38%, transparent 52%, transparent 70%, rgb(255 255 255 / 0.018) 82%, transparent 92%),
+    var(--brushed),
+    linear-gradient(180deg, rgb(255 240 210 / 0.035), transparent 38%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 88%, transparent), color-mix(in srgb, var(--color-surface) 94%, transparent));
   border: 1px solid var(--color-line);
-  box-shadow: var(--shadow-soft);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), inset 0 -1px 0 rgb(0 0 0 / 0.45), var(--shadow-soft), 0 0 0 1px rgb(0 0 0 / 0.35);
 }
+[data-theme="light"] .panel {
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(90 70 40 / 0.08), var(--shadow-soft);
+  background:
+    linear-gradient(115deg, transparent 22%, rgb(255 255 255 / 0.55) 38%, transparent 52%),
+    var(--brushed), linear-gradient(180deg, #fffefb, var(--color-surface-2));
+}
+@layer components {
+/* gold hairline type and the engraved label face */
+.gilt {
+  color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(100deg, #b98a3a 0%, #f6dc9c 28%, #d4a24c 50%, #fbe6b0 70%, #b4812f 100%);
+}
+[data-theme="light"] .gilt { background-image: linear-gradient(100deg, #7d5410 0%, #b07d1e 30%, #8a5d0f 55%, #a8761c 75%, #6f4a0c 100%); }
+/* four slotted screws, one in each corner of a plate */
+.screw {
+  position: absolute; width: 7px; height: 7px; border-radius: 99px; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #d9cfbd, #7d7466 45%, #2b2721 80%);
+  box-shadow: 0 1px 0 rgb(255 240 210 / 0.08), inset 0 0 0 0.5px rgb(0 0 0 / 0.6);
+}
+.screw::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3px; height: 1px; background: rgb(20 17 13 / 0.85); transform: rotate(var(--r, 35deg)); }
+[data-theme="light"] .screw { background: radial-gradient(circle at 35% 30%, #fff8ea, #c1b49b 45%, #7e7058 85%); }
 /* hairline that catches light along the top edge of a card */
 .edge-light { position: relative; }
 .edge-light::before {
   content: ""; position: absolute; left: 12%; right: 12%; top: -1px; height: 1px; pointer-events: none;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-accent) 55%, transparent), transparent);
   opacity: 0.55;
+}
 }
 
 /* ---------- Buttons: machined keys ---------- */
@@ -191,27 +234,30 @@
 }
 .key:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
 .key:disabled { opacity: 0.45; cursor: not-allowed; }
+/* poured gold: a bright lip, a deep belly and a reflected rim, like the side of a bar */
 .key-primary {
-  color: var(--color-accent-fg);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 78%, white), var(--color-accent-strong));
+  color: #1c1405;
+  text-shadow: 0 1px 0 rgb(255 240 200 / 0.45);
+  background: linear-gradient(180deg, #fbe7b4 0%, #ecc675 22%, #d29f45 52%, #b8842f 78%, #dcb062 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.55),
-    inset 0 -2px 0 rgb(0 0 0 / 0.16),
-    0 10px 28px -10px color-mix(in srgb, var(--color-accent) 75%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--color-accent-strong) 70%, black);
+    inset 0 1px 0 rgb(255 250 230 / 0.8),
+    inset 0 -1px 0 rgb(90 55 10 / 0.35),
+    0 10px 28px -10px rgb(227 180 94 / 0.6),
+    0 0 0 1px #8a6223;
 }
 .key-primary:hover:not(:disabled) {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.6),
-    inset 0 -2px 0 rgb(0 0 0 / 0.16),
-    0 14px 34px -10px color-mix(in srgb, var(--color-accent) 90%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--color-accent-strong) 70%, black);
+    inset 0 1px 0 rgb(255 250 230 / 0.9),
+    inset 0 -1px 0 rgb(90 55 10 / 0.35),
+    0 14px 34px -10px rgb(227 180 94 / 0.8),
+    0 0 0 1px #8a6223;
   transform: translateY(-1px);
 }
+/* gunmetal: brushed, with a machined edge */
 .key-secondary {
   color: var(--color-fg);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 100%, white 4%), var(--color-surface));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 1px var(--color-line-strong), 0 8px 20px -12px rgb(0 0 0 / 0.6);
+  background: var(--brushed), linear-gradient(180deg, color-mix(in srgb, var(--color-surface-2) 100%, white 5%), var(--color-surface));
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.09), inset 0 -1px 0 rgb(0 0 0 / 0.4), 0 0 0 1px var(--color-line-strong), 0 8px 20px -12px rgb(0 0 0 / 0.6);
 }
 [data-theme="light"] .key-secondary { box-shadow: inset 0 1px 0 #fff, 0 0 0 1px var(--color-line-strong), 0 8px 18px -12px rgb(16 24 40 / 0.3); }
 .key-secondary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 0 0 1px color-mix(in srgb, var(--color-fg) 30%, transparent), 0 12px 26px -12px rgb(0 0 0 / 0.6); }
@@ -222,8 +268,14 @@
 .key-ghost:hover:not(:disabled) { color: var(--color-fg); background: color-mix(in srgb, var(--color-fg) 6%, transparent); }
 
 /* ---------- Eyebrow: spaced mono label ---------- */
+@layer components {
 .eyebrow {
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-muted);
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 11.5px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--color-muted);
+}
+.eyebrow::before { content: ""; width: 1.6rem; height: 1px; background: linear-gradient(90deg, transparent, var(--color-accent)); }
+/* Display headings: banknote serif; tracking stays near zero because the face is already tight. */
+.display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.012em; line-height: 1.02; }
 }
 
 /* ---------- Vault dial ---------- */
@@ -292,9 +344,8 @@
 /* ---------- Hero entrance ---------- */
 .hero-word { animation: word-in 900ms var(--ease-out-soft) both; display: inline-block; }
 .hero-rise { animation: rise-in 900ms var(--ease-out-soft) both; }
-@keyframes word-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(8px); } }
+@keyframes word-in { from { opacity: 0; transform: translateY(0.35em); } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(14px); } }
-@keyframes sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
 /* ---------- Page header: dial rings behind the title, the app's echo of the landing vault ---------- */
 .ph-rings-clip { mask-image: linear-gradient(to bottom, #000 55%, transparent); }
@@ -305,24 +356,453 @@
 [data-theme="light"] .ph-rings .rim { opacity: 0.1; }
 .ph-rings .lock { color: var(--color-accent); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-accent) 70%, transparent)); }
 
-/* ---------- Handwriting: each word is uncovered left to right, as if a pen were writing it ---------- */
-/* Padding gives the script's swashes room inside the mask; the matching negative margin keeps the layout. */
-.ink {
-  display: inline-block;
-  padding: 0.14em 0.24em 0.3em;
-  margin: -0.14em -0.24em -0.3em;
-  -webkit-mask-image: linear-gradient(90deg, #000 42%, transparent 58%);
-  mask-image: linear-gradient(90deg, #000 42%, transparent 58%);
-  -webkit-mask-size: 260% 100%;
-  mask-size: 260% 100%;
-  -webkit-mask-position: 100% 0;
-  mask-position: 100% 0;
-  animation: ink-write var(--ink-d, 400ms) cubic-bezier(0.45, 0.05, 0.55, 0.95) var(--ink-at, 0ms) forwards;
-  animation-play-state: paused;
+/* ---------- Handwriting: each headline line is written by one continuous pen stroke ---------- */
+/* A clipping window slides right while the text inside counter-slides left, so the text stays put and is
+   uncovered left to right. Both are transforms, so the compositor runs it smoothly even while the page is busy.
+   The window's leading edge is feathered like a wet nib. The padding is on the text (so both move by exactly the
+   same distance) and gives the script's swashes and the nib's feather room. */
+.ink-line {
+  display: block; width: max-content; overflow: hidden;
+  margin: -0.12em -1.6em -0.28em -0.3em;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 1.5em), transparent calc(100% - 0.2em));
+  mask-image: linear-gradient(90deg, #000 calc(100% - 1.5em), transparent calc(100% - 0.2em));
+  transform: translateX(-100%);
+  animation: pen-window var(--ink-d, 1500ms) cubic-bezier(0.3, 0.08, 0.6, 0.94) var(--ink-at, 0ms) forwards;
+  animation-play-state: paused; will-change: transform;
 }
+.ink-pen { display: block; padding: 0.12em 1.6em 0.28em 0.3em; transform: translateX(100%); animation: pen-text var(--ink-d, 1500ms) cubic-bezier(0.3, 0.08, 0.6, 0.94) var(--ink-at, 0ms) forwards; animation-play-state: paused; will-change: transform; }
+@keyframes pen-window { to { transform: translateX(0); } }
+@keyframes pen-text { to { transform: translateX(0); } }
+/* the paragraph and buttons rise in underneath while the headline is written */
+.hero-follow { opacity: 0; animation: follow-in 1200ms var(--ease-out-soft) 700ms forwards; animation-play-state: paused; }
+@keyframes follow-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.hero-follow-late { animation-delay: 1150ms; }
 /* Writing starts once the script face has loaded, so it never begins in the fallback font. */
-.ink-go .ink { animation-play-state: running; }
-@keyframes ink-write { to { -webkit-mask-position: 0% 0; mask-position: 0% 0; } }
+.ink-go .ink-line, .ink-go .ink-pen, .ink-go .hero-follow { animation-play-state: running; }
 @media (prefers-reduced-motion: reduce) {
-  .ink { -webkit-mask-image: none; mask-image: none; }
+  .ink-line, .ink-pen { transform: none; animation: none; -webkit-mask-image: none; mask-image: none; }
+  .hero-follow { opacity: 1; animation: none; }
+}
+
+
+/* Component classes live in the components layer, so Tailwind utilities (hidden, flex, sizes) still win over them. */
+@layer components {
+/* The dark brushing again, for parts that stay dark in both themes (the nav, the cards over the vault). */
+:root {
+  --brushed-dark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.96  0 0 0 0 0.9  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.065'/></svg>");
+}
+
+/* ---------- Navbar: a slim rail of brushed steel with brass inlay, dark in both themes so it sits over the vault ---------- */
+:root {
+  --brushed-steel: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.004 0.9' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.3 0 0 0 -0.38'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.09'/></svg>");
+  /* polished steel: a bright top bevel, a broad soft reflection, a dark belly */
+  --steel-plate:
+    linear-gradient(90deg, transparent 0 6%, rgb(255 255 255 / 0.055) 20%, transparent 34%, transparent 62%, rgb(255 255 255 / 0.04) 76%, transparent 90%),
+    var(--brushed-steel),
+    linear-gradient(180deg, #4a4c50 0%, #2e3033 20%, #1d1e21 58%, #131416 100%);
+}
+/* Liquid gold: a dark molten body under a glossy lens, inside a poured rim that catches the light unevenly. */
+:root {
+  --gold-body:
+    radial-gradient(120% 150% at 24% -70%, rgb(255 232 178 / 0.3), transparent 56%),
+    radial-gradient(80% 130% at 80% 175%, rgb(233 180 90 / 0.26), transparent 60%),
+    linear-gradient(180deg, #3a2b14 0%, #20180b 46%, #110d06 100%);
+  --gold-rim: linear-gradient(100deg, #6e4d1a 0%, #f7dc9b 13%, #a7792f 29%, #fff0c4 46%, #94682a 62%, #efcb80 80%, #6e4d1a 100%);
+  --gold-glass:
+    radial-gradient(120% 150% at 24% -70%, rgb(255 232 178 / 0.3), transparent 56%),
+    radial-gradient(80% 130% at 80% 175%, rgb(233 180 90 / 0.24), transparent 60%),
+    linear-gradient(180deg, rgb(58 43 20 / 0.8) 0%, rgb(32 24 11 / 0.8) 46%, rgb(17 13 6 / 0.84) 100%);
+}
+.nav-rail {
+  position: relative; isolation: isolate; color: #f3e6c8;
+  border: 1.5px solid transparent;
+  background: var(--gold-glass) padding-box;
+  -webkit-backdrop-filter: blur(12px) saturate(140%); backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 214 / 0.42), inset 0 -8px 16px -8px rgb(0 0 0 / 0.75), inset 0 0 24px rgb(240 190 100 / 0.07),
+    0 0 0 1px rgb(0 0 0 / 0.55), 0 20px 44px -20px rgb(0 0 0 / 0.95), 0 0 40px -16px rgb(233 180 94 / 0.5);
+}
+/* the poured rim, as a ring of its own over the border */
+.nav-rail::after {
+  content: ""; position: absolute; inset: -1.5px; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: var(--gold-rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* the lens: a soft specular band across the upper half, like light lying on poured metal */
+.nav-rail::before {
+  content: ""; position: absolute; inset: 2px 18px 52% 18px; border-radius: 99px; pointer-events: none; z-index: -1;
+  background: linear-gradient(180deg, rgb(255 246 222 / 0.15), rgb(255 246 222 / 0.015));
+}
+/* now and then a glint runs along the metal (transform only, so it costs nothing per frame) */
+.nav-glint { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: -1; }
+.nav-glint::after {
+  content: ""; position: absolute; top: -40%; bottom: -40%; left: 0; width: 18%;
+  background: linear-gradient(100deg, transparent, rgb(255 238 190 / 0.13) 42%, rgb(255 250 232 / 0.26) 50%, rgb(255 238 190 / 0.13) 58%, transparent);
+  transform: translate3d(-130%, 0, 0) skewX(-20deg); will-change: transform;
+  animation: nav-glint 10s cubic-bezier(0.45, 0, 0.2, 1) 3s infinite;
+}
+@keyframes nav-glint { 0% { transform: translate3d(-130%, 0, 0) skewX(-20deg); } 26%, 100% { transform: translate3d(680%, 0, 0) skewX(-20deg); } }
+/* gold socket the mark sits in */
+.nav-socket { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 99px; padding: 1.5px; flex: none;
+  background: conic-gradient(from 210deg, #6b4f22, #f1d48f, #9a7536, #fbe3a6, #7a5a28, #e6c27a, #6b4f22);
+  box-shadow: 0 3px 10px -3px rgb(0 0 0 / 0.95);
+}
+.nav-socket > span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 99px;
+  background: radial-gradient(circle at 50% 35%, #2e2414, #0c0905 75%); box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.85); color: #f6e7c4; }
+/* the wordmark: engraved capitals in polished gold */
+.nav-word { font-family: var(--font-engrave); font-weight: 600; font-size: 13.5px; letter-spacing: 0.22em;
+  color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(180deg, #fff5d6 8%, #ecc77d 55%, #a8792e 100%);
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.85)); }
+/* a hairline of light standing in the metal */
+.nav-div { width: 1px; height: 22px; flex: none; background: linear-gradient(180deg, transparent, rgb(255 226 160 / 0.4), transparent); }
+.nav-link {
+  position: relative; display: block; border-radius: 99px; padding: 0.5rem 1rem;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 11.5px; letter-spacing: 0.16em; color: #d6c29b;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.85);
+  transition: color 200ms ease, background-color 200ms ease;
+}
+.nav-link:hover { color: #fff3d2; background-color: rgb(255 226 160 / 0.07); }
+/* the current page: a drop of liquid gold */
+.nav-link[aria-current="page"] {
+  color: #1d1405; text-shadow: 0 1px 0 rgb(255 240 200 / 0.5);
+  background: linear-gradient(180deg, #fde9b8 0%, #ecc675 30%, #cf9c43 62%, #b07c2b 84%, #d9ad5e 100%);
+  box-shadow: inset 0 1px 0 rgb(255 252 236 / 0.85), inset 0 -1px 0 rgb(90 55 10 / 0.4), 0 0 0 1px rgb(60 38 8 / 0.7), 0 6px 18px -8px rgb(240 190 100 / 0.8);
+}
+/* round knurled knob (the theme toggle), in gold */
+.nav-knob { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 99px; color: #f6e7c4;
+  background:
+    radial-gradient(circle at 50% 38%, #3a2d17, #17110a 62%, transparent 63%),
+    repeating-conic-gradient(#2a1e0d 0 6deg, #a07434 6deg 12deg);
+  box-shadow: inset 0 1px 0 rgb(255 240 200 / 0.25), 0 0 0 1px rgb(0 0 0 / 0.7), 0 3px 10px -3px rgb(0 0 0 / 0.95);
+  transition: transform 500ms var(--ease-out-soft), color 200ms;
+}
+.nav-knob:hover { color: #fde9b8; transform: rotate(60deg); }
+/* the testnet notice: a small tag hanging under the rail */
+.nav-tag {
+  color: #ff9a5c; border: 1px solid transparent;
+  background: var(--gold-body) padding-box, linear-gradient(100deg, rgb(120 85 30 / 0.9), rgb(240 205 140 / 0.7) 50%, rgb(120 85 30 / 0.9)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 240 200 / 0.18), 0 8px 18px -10px rgb(0 0 0 / 0.85);
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.8);
+}
+.nav-plate {
+  color: #f3e6c8; border: 1px solid transparent;
+  background: var(--gold-body) padding-box, var(--gold-rim) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 244 214 / 0.35), inset 0 -4px 10px -4px rgb(0 0 0 / 0.7), 0 12px 28px -14px rgb(0 0 0 / 0.9);
+}
+.nav-plate .nav-link { padding: 0.32rem 0.7rem; font-size: 10px; }
+
+/* ---------- Lock cards: brass-edged plates that ride over the vault as it opens ---------- */
+.vault-card {
+  position: relative; color: #f2ebde; border-radius: 22px; border: 1px solid transparent;
+  background:
+    var(--brushed-dark) padding-box,
+    linear-gradient(180deg, rgb(255 240 210 / 0.05), transparent 30%) padding-box,
+    linear-gradient(180deg, rgb(28 25 21 / 0.95), rgb(12 11 9 / 0.97)) padding-box,
+    linear-gradient(150deg, rgb(242 208 135 / 0.7), rgb(242 208 135 / 0.1) 32%, rgb(242 208 135 / 0.05) 62%, rgb(242 208 135 / 0.45)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 40px 90px -36px rgb(0 0 0 / 0.95);
+  backface-visibility: hidden; will-change: transform;
+}
+.medallion { width: 46px; height: 46px; border-radius: 99px; padding: 2px; flex: none;
+  background: conic-gradient(from 210deg, #6b4f22, #f1d48f, #9a7536, #fbe3a6, #7a5a28, #e6c27a, #6b4f22);
+  box-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.9);
+}
+.medallion > span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 99px;
+  background: radial-gradient(circle at 50% 35%, #2a251d, #0d0c09 75%); box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.85);
+  font-family: var(--font-engrave); font-weight: 600; font-size: 15px; color: #efcd84; letter-spacing: 0.04em;
+}
+/* a verdict lands like a rubber stamp */
+.stamp { opacity: 0; transform: scale(1.7) rotate(-10deg); transition: opacity 220ms ease, transform 460ms cubic-bezier(0.2, 1.5, 0.35, 1); }
+.stamp[data-on="true"] { opacity: 1; transform: scale(1) rotate(-2deg); }
+/* the scale a price is read against: under 50% review, 50-105% allow, 105-120% review, over 120% block */
+.guard-scale { background: linear-gradient(90deg, rgb(255 143 87 / 0.2) 0 31.25%, rgb(227 180 94 / 0.2) 31.25% 65.6%, rgb(255 143 87 / 0.2) 65.6% 75%, rgb(255 100 117 / 0.22) 75%); }
+.guard-needle { transition: left 700ms var(--ease-out-soft), opacity 300ms ease; }
+.ink-in { transition: opacity 500ms var(--ease-out-soft), transform 500ms var(--ease-out-soft); }
+.ink-in[data-on="false"] { opacity: 0; transform: translateY(6px); }
+/* the gold seal Guard presses on a basket it has signed */
+.seal { opacity: 0; transform: scale(1.8) rotate(-30deg); transition: opacity 260ms ease, transform 600ms cubic-bezier(0.2, 1.4, 0.35, 1); }
+.seal[data-on="true"] { opacity: 1; transform: scale(1) rotate(0deg); }
+.seal-disc {
+  background: radial-gradient(circle at 40% 35%, #fbe3a6, #d7a54b 45%, #8f6424 85%);
+  box-shadow: inset 0 0 0 2px rgb(255 240 200 / 0.35), inset 0 -3px 6px rgb(80 50 10 / 0.5), 0 6px 18px -6px rgb(227 180 94 / 0.8);
+}
+/* the approve key fills like a thumb pressing a reader */
+.press-fill { transform-origin: left; transform: scaleX(var(--press, 0)); }
+/* progress rail of the three locks */
+.lock-rail-fill { transform-origin: left; transform: scaleX(var(--rail, 0)); background: linear-gradient(90deg, #b8842f, #f6dc9c, #d29f45); box-shadow: 0 0 10px rgb(233 192 112 / 0.6); }
+
+/* ---------- Handoffs between locks (hero.tsx sets the variables from scroll) ---------- */
+/* a lock that's done: light runs round its brass edge, its screws turn, and it swings open on its hinge */
+.vault-card::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: linear-gradient(105deg, transparent 42%, rgb(255 236 190 / 0.95) 50%, transparent 58%) 0 0 / 300% 100% no-repeat;
+  background-position: calc((1 - var(--sweep, 0)) * 100%) 0;
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: calc(var(--sweep-on, 0));
+  filter: drop-shadow(0 0 6px rgb(240 190 100 / 0.9));
+}
+/* as a plate turns away from the light it darkens */
+.vault-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: #050403; opacity: var(--shade, 0); }
+.vault-card .screw::after { transform: rotate(calc(var(--r, 35deg) + var(--spin, 0) * 540deg)); }
+
+/* The ring tumbler: the intro's stand-in when there's no WebGL (intro.tsx). */
+/* the tumbler: knurled bezel, three machined rings and a brass core. Sizes are fractions of --ts. */
+.tumbler { position: absolute; left: 0; top: 0; width: var(--ts, 240px); height: var(--ts, 240px); pointer-events: none; will-change: transform, opacity; }
+.tumbler > *, .tb-rings > * { position: absolute; border-radius: 9999px; }
+.tb-halo { inset: -30%; background: radial-gradient(closest-side, rgb(255 200 110 / 0.55), rgb(255 170 70 / 0.18) 45%, transparent 70%); opacity: var(--flash, 0); }
+.tb-bezel {
+  inset: 0;
+  background:
+    linear-gradient(160deg, rgb(255 255 255 / 0.32), transparent 38%, transparent 62%, rgb(0 0 0 / 0.5)),
+    repeating-conic-gradient(#232326 0 1.5deg, #5c5e63 1.5deg 3deg);
+  box-shadow: 0 34px 70px -24px #000, 0 0 0 1px rgb(0 0 0 / 0.7);
+}
+.tb-bezel::after { content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(closest-side, transparent 92.5%, rgb(255 255 255 / 0.35) 93.5%, transparent 95%, transparent 98.5%, rgb(0 0 0 / 0.7)); }
+.tb-well { inset: 4.6%; background: radial-gradient(circle at 50% 40%, #121214, #050506 70%); box-shadow: inset 0 3px 10px rgb(0 0 0 / 0.95), 0 1px 0 rgb(255 255 255 / 0.12); }
+.tb-rings { inset: 0; opacity: var(--rings, 1); }
+.tb-ring {
+  will-change: transform;
+  -webkit-mask: radial-gradient(closest-side, transparent calc(var(--hole) - 0.6%), #000 var(--hole));
+  mask: radial-gradient(closest-side, transparent calc(var(--hole) - 0.6%), #000 var(--hole));
+  background:
+    /* bevels: a bright inner lip, a dark outer edge */
+    radial-gradient(closest-side, transparent var(--hole), rgb(255 255 255 / 0.4) calc(var(--hole) + 0.8%), transparent calc(var(--hole) + 2.5%), transparent 97%, rgb(0 0 0 / 0.75) 99.5%),
+    /* lathe grooves */
+    repeating-radial-gradient(circle, rgb(255 255 255 / 0.045) 0 1px, transparent 1px 3px),
+    linear-gradient(165deg, #85888d 0%, #505257 30%, #26272b 58%, #4b4d52 82%, #6c6f74 100%);
+}
+/* engraved ticks round the outer edge of each band: majors every 30 degrees, minors every 6 */
+.tb-ring::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background:
+    repeating-conic-gradient(from -0.8deg, rgb(6 6 8 / 0.9) 0 1.6deg, transparent 1.6deg 30deg),
+    repeating-conic-gradient(from -0.3deg, rgb(6 6 8 / 0.6) 0 0.6deg, transparent 0.6deg 6deg);
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - (100% - var(--hole)) * 0.42), #000 calc(100% - (100% - var(--hole)) * 0.4), #000 95%, transparent 95.5%);
+  mask: radial-gradient(closest-side, transparent calc(100% - (100% - var(--hole)) * 0.42), #000 calc(100% - (100% - var(--hole)) * 0.4), #000 95%, transparent 95.5%);
+}
+.tb-notch { position: absolute; left: 50%; top: 0; width: 7%; min-width: 5px; max-width: 9px; transform: translateX(-50%); border-radius: 0 0 2px 2px;
+  background: linear-gradient(180deg, #030304, #17171a); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.8), 1px 0 0 rgb(255 255 255 / 0.15); }
+.tb-seam { border: 2px solid #ffdb8c; box-shadow: 0 0 12px 2px rgb(255 188 84 / 0.95), inset 0 0 8px 1px rgb(255 188 84 / 0.8); }
+/* lathe highlight that stays put while the rings turn under it */
+.tb-sheen {
+  inset: 7%;
+  background: conic-gradient(from 290deg, transparent 0deg, rgb(255 248 235 / 0.34) 32deg, transparent 72deg, transparent 165deg, rgb(255 248 235 / 0.18) 205deg, transparent 245deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 29%, #000 30%); mask: radial-gradient(closest-side, transparent 29%, #000 30%);
+  mix-blend-mode: screen;
+}
+.tb-core { inset: 37.5%; padding: 2px;
+  background: conic-gradient(from 210deg, #6b4f22, #f1d48f, #9a7536, #fbe3a6, #7a5a28, #e6c27a, #6b4f22);
+  box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.95); }
+.tb-core > span { display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 9999px;
+  background: radial-gradient(circle at 50% 35%, #2a251d, #0d0c09 75%); box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.85); }
+.tb-num { display: flex; flex-direction: column; height: 100%; transform: translateY(calc(var(--num, 0) * -100%)); }
+.tb-num > b { flex: none; display: grid; place-items: center; height: 100%;
+  font-family: var(--font-engrave); font-weight: 600; font-size: calc(var(--ts, 240px) * 0.075); color: #efcd84; letter-spacing: 0.04em; }
+.tb-index { left: 50%; top: 1.2%; width: 0; height: 0; margin-left: -5px; border-radius: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #f0cf8a;
+  filter: drop-shadow(0 0 4px rgb(240 190 100 / 0.8)); }
+}
+
+/* Keys inside always-dark plates. Unlayered, like .key-* itself, so these win. */
+.nav-rail .key-secondary, .nav-plate .key-secondary {
+  color: #f6e7c4; background: linear-gradient(180deg, #2e2414, #120d07);
+  box-shadow: inset 0 1px 0 rgb(255 240 200 / 0.16), 0 0 0 1px rgb(0 0 0 / 0.8), 0 0 0 2px rgb(240 205 140 / 0.12);
+}
+.nav-rail .key-ghost { color: #d6c29b; }
+.nav-rail .key-ghost:hover:not(:disabled) { color: #fff3d2; background: rgb(255 226 160 / 0.08); }
+.nav-rail .key { height: 38px; font-size: 12.5px; padding-inline: 1rem; }
+.nav-rail .key-ghost { width: 38px; padding: 0; }
+.vault-card .key-secondary {
+  color: #f2ebde; background: var(--brushed-dark), linear-gradient(180deg, #26221c, #14120f);
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 0 0 1px rgb(255 236 200 / 0.14);
+}
+
+/* ---------- Intro: the ring lock dials its combination, then irises open onto the page (intro.tsx) ---------- */
+@property --hole { syntax: "<length>"; inherits: true; initial-value: 0px; }
+html[data-intro="skip"] .cp-intro, html[data-intro="done"] .cp-intro { display: none; }
+.cp-intro {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; color: #f2ebde; cursor: pointer;
+  background:
+    repeating-radial-gradient(circle at 50% 46%, rgb(255 236 200 / 0.032) 0 1px, transparent 1px 22px),
+    radial-gradient(ellipse 70% 60% at 50% 46%, #1b1813 0%, #0c0b09 55%, #050404 100%);
+  --hole: 0px;
+  -webkit-mask: radial-gradient(circle at 50% 46%, transparent var(--hole), #000 calc(var(--hole) + 1px));
+  mask: radial-gradient(circle at 50% 46%, transparent var(--hole), #000 calc(var(--hole) + 1px));
+  /* if the script never runs, get out of the way anyway */
+  animation: cp-intro-failsafe 400ms ease 7s forwards;
+}
+@keyframes cp-intro-failsafe { to { opacity: 0; visibility: hidden; } }
+.cp-intro[data-open="true"] { --hole: 150vmax; opacity: 0; transition: --hole 850ms cubic-bezier(0.65, 0, 0.25, 1), opacity 260ms ease 600ms; }
+/* the gold lip of the opening */
+.cp-intro-rim {
+  position: absolute; left: 50%; top: 46%; width: calc(var(--hole) * 2); height: calc(var(--hole) * 2); border-radius: 9999px;
+  transform: translate(-50%, -50%); pointer-events: none;
+  box-shadow: 0 0 0 2px rgb(246 220 156 / 0.85), 0 0 46px 10px rgb(240 186 96 / 0.45);
+  opacity: 0; transition: opacity 200ms ease;
+}
+.cp-intro[data-open="true"] .cp-intro-rim { opacity: 1; }
+.cp-intro-stage {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.9rem; margin-top: -6vh;
+  animation: cp-intro-in 700ms var(--ease-out-soft) both;
+  transition: transform 850ms cubic-bezier(0.6, 0, 0.3, 1), opacity 450ms ease, filter 600ms ease;
+}
+.cp-intro[data-open="true"] .cp-intro-stage { transform: scale(1.5); opacity: 0; filter: blur(4px); }
+@keyframes cp-intro-in { from { opacity: 0; transform: scale(0.94); } }
+.cp-intro-word {
+  font-family: var(--font-engrave); font-weight: 600; font-size: 13px; letter-spacing: 0.42em; padding-left: 0.42em;
+  color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(180deg, #ffffff 10%, #c9c7c2 55%, #8f8d88 100%);
+}
+.cp-intro-dial { position: relative; width: min(62vmin, 440px); aspect-ratio: 1; }
+@media (max-width: 640px) { .cp-intro-dial { width: 80vw; } }
+.cp-intro-locks { display: flex; gap: 1.6rem; font-family: var(--font-engrave); font-weight: 600; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; }
+.cp-intro-locks > li { display: flex; align-items: baseline; gap: 0.45rem; color: #77716a; transition: color 400ms ease, text-shadow 400ms ease; }
+.cp-intro-locks > li[data-on="true"] { color: #f0cf8a; text-shadow: 0 0 14px rgb(240 190 100 / 0.5); }
+.cp-intro-n { font-size: 10px; opacity: 0.7; }
+.cp-intro-code { font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.06em; color: #b3aa9b; min-width: 2ch; }
+.cp-intro-locks > li[data-on="true"] .cp-intro-code { color: #f6dc9c; }
+@media (max-width: 420px) { .cp-intro-locks { gap: 0.9rem; font-size: 10px; letter-spacing: 0.14em; } }
+.cp-intro-skip {
+  position: absolute; right: 1.5rem; bottom: 1.4rem; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 99px; padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #aeaca7;
+  background: var(--steel-plate); border: 1px solid rgb(0 0 0 / 0.75); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16);
+  transition: color 200ms;
+}
+.cp-intro-skip:hover, .cp-intro-skip:focus-visible { color: #f4f2ed; }
+.cp-intro-skip kbd { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0; padding: 0.1rem 0.4rem; border-radius: 6px; background: #0a0a0b; box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.9); }
+
+/* ---------- Run story: one basket, four stops, played as a short film in one screen (run-story.tsx) ---------- */
+@layer components {
+/* a brass-edged plate, light or dark with the theme */
+.rs-card {
+  position: relative; overflow: hidden; border-radius: 24px; border: 1px solid transparent;
+  background:
+    var(--brushed) padding-box,
+    linear-gradient(180deg, rgb(255 240 210 / 0.04), transparent 30%) padding-box,
+    linear-gradient(180deg, var(--color-surface-2), var(--color-surface)) padding-box,
+    linear-gradient(150deg, rgb(242 208 135 / 0.6), rgb(242 208 135 / 0.08) 32%, rgb(242 208 135 / 0.04) 62%, rgb(242 208 135 / 0.4)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.08), 0 40px 90px -40px rgb(0 0 0 / 0.9);
+}
+[data-theme="light"] .rs-card {
+  background:
+    var(--brushed) padding-box,
+    linear-gradient(180deg, #fffefb, var(--color-surface-2)) padding-box,
+    linear-gradient(150deg, rgb(176 125 30 / 0.55), rgb(176 125 30 / 0.1) 32%, rgb(176 125 30 / 0.06) 62%, rgb(176 125 30 / 0.4)) border-box;
+  box-shadow: inset 0 1px 0 #fff, 0 30px 70px -40px rgb(90 60 20 / 0.35);
+}
+/*
+ * One handover for titles and cards. "on" plays in after the leaving one has started to go; "out" leaves fast;
+ * "wait" jumps back to the start with no transition at all (its children too), so nothing ever plays in reverse.
+ * Opacity and transform only, so it all runs on the compositor.
+ */
+.rs-swap {
+  --in: 0px, 20px; --out: 0px, -16px;
+  transition: opacity 700ms var(--ease-out-soft) 220ms, transform 1000ms var(--ease-out-soft) 220ms;
+}
+.rs-layer { --in: 34px, 0px; --out: -34px, 0px; }
+.rs-swap[data-pos="out"] { opacity: 0; transform: translate3d(var(--out), 0); pointer-events: none;
+  transition: opacity 360ms cubic-bezier(0.4, 0, 1, 1), transform 620ms cubic-bezier(0.4, 0, 0.6, 1); }
+.rs-swap[data-pos="wait"] { opacity: 0; transform: translate3d(var(--in), 0); visibility: hidden; pointer-events: none; transition: none; }
+.rs-swap[data-pos="wait"] * { transition: none !important; }
+.rs-title { will-change: transform, opacity; }
+.rs-layer { will-change: transform, opacity; }
+
+/* pieces inside a card */
+.rs-tile { transition: opacity 600ms var(--ease-out-soft), transform 700ms var(--ease-out-soft); }
+.rs-tile[data-on="false"] { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+.rs-tile[data-off="true"] { opacity: 0.4; }
+.rs-stamp { transition: opacity 260ms ease, transform 520ms cubic-bezier(0.2, 1.45, 0.35, 1); transform-origin: left center; }
+.rs-stamp[data-on="false"] { opacity: 0; transform: scale(1.35); }
+.rs-rise { transition: opacity 600ms var(--ease-out-soft), transform 700ms var(--ease-out-soft); }
+.rs-rise[data-on="false"] { opacity: 0; transform: translate3d(0, 10px, 0); }
+.rs-sheet { transition: opacity 500ms var(--ease-out-soft), transform 900ms var(--ease-out-soft); }
+.rs-sheet[data-on="false"] { opacity: 0; transform: translate3d(0, 40px, 0); }
+.rs-press { transition: transform 300ms cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 300ms; }
+.rs-press[data-on="true"] { transform: scale(0.97); }
+.rs-tick { transition: opacity 240ms ease, transform 420ms cubic-bezier(0.2, 1.5, 0.35, 1); }
+.rs-tick[data-on="false"] { opacity: 0; transform: scale(0.3); }
+.rs-dim { transition: opacity 500ms var(--ease-out-soft); }
+.rs-dim[data-on="false"] { opacity: 0.35; }
+
+/* the rail */
+.rs-fill { transform: scaleX(0); transform-origin: left center; background: linear-gradient(90deg, #b8842f, #f6dc9c); will-change: transform; }
+[data-theme="light"] .rs-fill { background: linear-gradient(90deg, #8a5d0f, #c99634); }
+.rs-seg:focus-visible { outline-offset: 4px; }
+}
+
+/* ---------- The header gets out of the way: it slides up as you scroll down and back as you scroll up (header.tsx).
+   The testnet tag stays, pinned at the top edge, because FR-UI07 says it is on every screen. ---------- */
+@layer components {
+.site-header { transition: transform 560ms var(--ease-out-soft); will-change: transform; }
+.site-header > nav, .site-header > ul { transition: opacity 360ms ease, transform 560ms var(--ease-out-soft); }
+.site-header[data-hidden="true"] { transform: translate3d(0, calc(-1 * var(--hide-by, 80px)), 0); }
+.site-header[data-hidden="true"] > nav, .site-header[data-hidden="true"] > ul { opacity: 0; pointer-events: none; transform: translate3d(0, -10px, 0) scale(0.97); }
+.site-header:has(:focus-visible) { transform: none; }
+.site-header:has(:focus-visible) > nav, .site-header:has(:focus-visible) > ul { opacity: 1; pointer-events: auto; transform: none; }
+}
+
+/* ---------- The hero's copy, for either theme (the vault behind it is lit to match: uDay in the shader) ---------- */
+@layer components {
+.hero-stage { background: #050506; }
+.hero-scrim { background: linear-gradient(90deg, rgb(4 4 6 / 0.86) 0%, rgb(4 4 6 / 0.62) 42%, transparent 72%); }
+.hero-ink { color: #f4ead6; }
+.hero-ink-gold { color: #e3b45e; }
+.hero-lede { color: #ddd3bf; }
+.hero-chip { color: #c9c0ae; background: rgb(10 10 12 / 0.78); --tw-ring-color: rgb(227 180 94 / 0.25); }
+.hero-ghost { color: #f4ead6; background: rgb(10 10 12 / 0.78); --tw-ring-color: rgb(255 255 255 / 0.16); }
+.hero-ghost:hover { --tw-ring-color: rgb(227 180 94 / 0.5); }
+.hero-cue { color: #c9c0ae; }
+@media (max-width: 1023px) {
+  .hero-scrim { background: linear-gradient(0deg, rgb(4 4 6 / 0.92) 0%, rgb(4 4 6 / 0.8) 45%, rgb(4 4 6 / 0.15) 72%, transparent 100%); }
+}
+[data-theme="light"] .hero-stage { background: #d9d2c5; }
+[data-theme="light"] .hero-scrim { background: linear-gradient(90deg, rgb(243 239 231 / 0.9) 0%, rgb(243 239 231 / 0.66) 42%, transparent 72%); }
+[data-theme="light"] .hero-ink { color: #1c150b; }
+[data-theme="light"] .hero-ink-gold { color: #94650f; }
+[data-theme="light"] .hero-lede { color: #3b3226; }
+[data-theme="light"] .hero-chip { color: #4a4034; background: rgb(255 253 248 / 0.82); --tw-ring-color: rgb(176 125 30 / 0.3); }
+[data-theme="light"] .hero-ghost { color: #1c150b; background: rgb(255 253 248 / 0.82); --tw-ring-color: rgb(48 36 18 / 0.18); }
+[data-theme="light"] .hero-ghost:hover { --tw-ring-color: rgb(176 125 30 / 0.55); }
+[data-theme="light"] .hero-cue { color: #3b3226; }
+@media (max-width: 1023px) {
+  [data-theme="light"] .hero-scrim { background: linear-gradient(0deg, rgb(243 239 231 / 0.94) 0%, rgb(243 239 231 / 0.82) 45%, rgb(243 239 231 / 0.15) 72%, transparent 100%); }
+}
+}
+
+/* ---------- Theme switch: the new theme opens out of the toggle in a circle (theme-toggle.tsx drives the clip) ---------- */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }
+::view-transition-old(root) { z-index: 1; }
+html[data-theme-switching] *, html[data-theme-switching] *::before, html[data-theme-switching] *::after { transition: none !important; }
+
+/* ---------- Scrollbar: a poured-gold thumb in a dark machined groove, like the nav ----------
+   Chromium/Safari get the full treatment through ::-webkit-scrollbar. Firefox only takes two colours, so it gets
+   scrollbar-color; that is kept away from Chromium, where setting it would switch off the custom bar. */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #0b0906, #16120c 50%, #0b0906);
+  box-shadow: inset 1px 0 0 rgb(255 226 160 / 0.06), inset -1px 0 0 rgb(0 0 0 / 0.6);
+}
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent; border-radius: 99px; background-clip: padding-box;
+  background-color: #b8842f;
+  background-image: linear-gradient(90deg, #8a6223 0%, #f1d48f 32%, #d4a24c 55%, #fbe6b0 72%, #9a7536 100%);
+  box-shadow: inset 0 1px 0 rgb(255 250 230 / 0.5);
+}
+::-webkit-scrollbar-thumb:hover { background-image: linear-gradient(90deg, #a07434 0%, #fde9b8 32%, #e3b45e 55%, #fff1cc 72%, #b08435 100%); }
+::-webkit-scrollbar-thumb:active { background-image: linear-gradient(90deg, #7a5a28 0%, #e6c27a 35%, #c08f3e 60%, #f1d48f 75%, #8a6223 100%); }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: #0b0906; }
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #e4ddd0, #efe9df 50%, #e4ddd0);
+  box-shadow: inset 1px 0 0 rgb(90 60 20 / 0.12);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb { background-image: linear-gradient(90deg, #7d5410 0%, #d6a64e 35%, #b07d1e 58%, #e9c57c 74%, #6f4a0c 100%); }
+[data-theme="light"] ::-webkit-scrollbar-corner { background: #e4ddd0; }
+@supports not selector(::-webkit-scrollbar) {
+  html { scrollbar-color: #d4a24c #120e08; scrollbar-width: thin; }
+  html[data-theme="light"] { scrollbar-color: #b07d1e #e4ddd0; }
 }

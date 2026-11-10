@@ -3,10 +3,11 @@ import { LogoMark } from "./logo";
 
 export function Footer() {
   return (
-    <footer className="border-t border-line">
+    <footer className="relative border-t border-line">
+      <div aria-hidden className="absolute inset-x-0 -top-px mx-auto h-px max-w-3xl bg-[linear-gradient(90deg,transparent,var(--color-accent),transparent)] opacity-60" />
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
-          <span className="flex items-center gap-2 font-semibold">
+          <span className="flex items-center gap-2.5 font-engrave text-[14px] font-semibold tracking-[0.2em] text-fg uppercase">
             <LogoMark className="size-6" /> Checkpoint
           </span>
           <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">

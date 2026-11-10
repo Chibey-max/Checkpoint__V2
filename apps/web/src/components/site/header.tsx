@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { config } from "@/lib/config";
-import { Logo } from "./logo";
+import { useEffect, useRef, useState } from "react";
+import { LogoMark } from "./logo";
+import { TestnetStrip } from "./testnet-strip";
 import { ThemeToggle } from "./theme-toggle";
 import { WalletButton } from "./wallet-button";
 
@@ -14,54 +15,93 @@ const LINKS = [
   { href: "/governance", label: "Governance" },
 ] as const;
 
+/**
+ * The site's nav: a short, thick pill of liquid gold, dark in both themes so it sits right over the vault hero.
+ * A glossy lens lies across the top, a glint runs along it now and then, and the current page is a drop of poured gold.
+ * The network is on the tag under it, so the pill only carries what you click.
+ *
+ * It gets out of the way: scrolling down slides it up out of view, scrolling up (or reaching the top) brings it back.
+ * The testnet tag under it stays, pinned to the top edge (FR-UI07). Keyboard focus inside it always shows it.
+ */
 export function Header() {
   const path = usePathname();
+  const isOn = (href: string) => path === href || path.startsWith(`${href}/`);
+  const ref = useRef<HTMLElement>(null);
+  const tag = useRef<HTMLDivElement>(null);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const y = window.scrollY;
+      const dy = y - lastY;
+      if (y < 60) setHidden(false);
+      else if (dy > 6) setHidden(true);
+      else if (dy < -6) setHidden(false);
+      if (Math.abs(dy) > 6 || y < 60) lastY = y;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    // how far up the header goes: everything above the tag, leaving the tag 8px below the top edge
+    const measure = () => {
+      if (ref.current && tag.current) ref.current.style.setProperty("--hide-by", `${tag.current.offsetTop + 12 - 8}px`);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (ref.current) ro.observe(ref.current);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
+  // a new page starts with the nav showing
+  useEffect(() => setHidden(false), [path]);
+
   return (
-    <header className="sticky top-3 z-40 mx-auto mt-3 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-      <nav aria-label="Main" className="glass flex h-14 items-center gap-2 rounded-full pr-2 pl-4">
-        <Link href="/" aria-label="Checkpoint home" className="mr-2 shrink-0">
-          <Logo />
-        </Link>
-        <ul className="hidden items-center gap-0.5 md:flex">
-          {LINKS.map(({ href, label }) => {
-            const active = path === href || path.startsWith(`${href}/`);
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  aria-current={active ? "page" : undefined}
-                  className={`relative rounded-full px-3.5 py-1.5 text-[13.5px] transition-colors ${
-                    active ? "bg-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] text-fg" : "text-muted hover:text-fg"
-                  }`}
-                >
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="ml-auto flex items-center gap-1.5">
-          <span className="mr-1 hidden items-center gap-2 rounded-full border border-line px-3 py-1 font-mono text-[11px] text-muted lg:flex">
-            <span className="size-1.5 rounded-full bg-accent text-accent animate-pulse-dot" />
-            NEAR {config.network}
+    <header ref={ref} data-hidden={hidden} className="site-header sticky top-3 z-40 mx-auto mt-3 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <nav aria-label="Main" className="nav-rail mx-auto flex h-[60px] w-full items-center gap-2 rounded-full px-2.5 md:w-fit">
+        <span aria-hidden className="nav-glint" />
+        <Link href="/" aria-label="Checkpoint home" className="mr-1 flex shrink-0 items-center gap-2 rounded-full">
+          <span className="nav-socket">
+            <span>
+              <LogoMark className="size-5" />
+            </span>
           </span>
-          <ThemeToggle />
+          <span className="nav-word pr-1 max-[380px]:hidden">Checkpoint</span>
+        </Link>
+        <span aria-hidden className="nav-div mx-1 hidden md:block" />
+        <ul className="hidden items-center gap-0.5 md:flex">
+          {LINKS.map(({ href, label }) => (
+            <li key={href}>
+              <Link href={href} aria-current={isOn(href) ? "page" : undefined} className="nav-link">
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <span aria-hidden className="nav-div mx-1 hidden md:block" />
+        <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <ThemeToggle className="nav-knob" />
           <WalletButton />
         </div>
       </nav>
-      <ul className="glass mx-auto mt-2 flex w-fit justify-center gap-0.5 rounded-full p-1 md:hidden">
+      <ul className="nav-plate mx-auto mt-2 flex w-fit justify-center gap-0.5 rounded-full p-1 md:hidden">
         {LINKS.map(({ href, label }) => (
           <li key={href}>
-            <Link
-              href={href}
-              aria-current={path.startsWith(href) ? "page" : undefined}
-              className={`block rounded-full px-3 py-1 text-xs ${path.startsWith(href) ? "bg-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] text-fg" : "text-muted"}`}
-            >
+            <Link href={href} aria-current={isOn(href) ? "page" : undefined} className="nav-link">
               {label}
             </Link>
           </li>
         ))}
       </ul>
+      <div ref={tag}>
+        <TestnetStrip />
+      </div>
     </header>
   );
 }

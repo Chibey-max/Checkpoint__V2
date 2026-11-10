@@ -126,8 +126,8 @@ export function Refusals() {
     <section id="refusals" aria-labelledby="refusals-title" className="scroll-mt-28 py-24">
       <Reveal className="max-w-2xl">
         <p className="eyebrow">Threat model, tested</p>
-        <h2 id="refusals-title" className="mt-3 text-4xl font-semibold text-fg sm:text-5xl">
-          What it refuses, <span className="font-serif font-normal text-muted">and how you&apos;ll know.</span>
+        <h2 id="refusals-title" className="display mt-4 text-[2.75rem] text-fg sm:text-6xl">
+          What it refuses, <span className="gilt font-medium italic">and how you&apos;ll know.</span>
         </h2>
         <p className="mt-4 text-[16px] leading-relaxed text-muted">
           Each case is an acceptance test in the repo. The trace is the output that test expects, down to the error string the Vault panics with.
@@ -146,7 +146,7 @@ export function Refusals() {
                     aria-selected={on}
                     onClick={() => pick(i)}
                     data-spotlight
-                    className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl px-3 py-2.5 text-left transition-all duration-300 ${
+                    className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl px-3 py-2.5 text-left transition-[background-color,box-shadow,color] duration-300 ${
                       on ? "panel" : "hover:bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]"
                     }`}
                   >
@@ -223,7 +223,7 @@ function Terminal({ lines }: { lines: Line[] }) {
       {lines.map((l, i) => (
         <p
           key={i}
-          className={`transition-all duration-300 ${TONE[l.t]} ${l.t === "note" ? "mt-5 border-t border-white/[0.07] pt-4" : ""}`}
+          className={`transition-[opacity,transform] duration-300 ease-[var(--ease-out-soft)] ${TONE[l.t]} ${l.t === "note" ? "mt-5 border-t border-white/[0.07] pt-4" : ""}`}
           style={{ opacity: i < n ? 1 : 0, transform: i < n ? "none" : "translateX(-6px)" }}
         >
           {l.t === "cmd" && <span className="mr-2 text-[#f0c674]">$</span>}

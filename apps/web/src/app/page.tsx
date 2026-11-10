@@ -1,7 +1,6 @@
 import { EventTape } from "@/components/landing/event-tape";
 import { FinalCta } from "@/components/landing/final-cta";
 import { Hero } from "@/components/landing/hero";
-import { Locks } from "@/components/landing/locks";
 import { ProductWindow } from "@/components/landing/product-window";
 import { Refusals } from "@/components/landing/refusals";
 import { RunStory } from "@/components/landing/run-story";
@@ -12,13 +11,12 @@ export default function Home() {
     <>
       <Hero />
       <EventTape />
-      <Locks />
       <RunStory />
       <section aria-labelledby="desk-title" className="pt-16">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">The desk</p>
-          <h2 id="desk-title" className="mt-3 text-4xl font-semibold text-fg sm:text-5xl">
-            Every number <span className="font-serif font-normal text-muted">shows its work.</span>
+          <h2 id="desk-title" className="display mt-4 text-[2.75rem] text-fg sm:text-6xl">
+            Every number <span className="gilt font-medium italic">shows its work.</span>
           </h2>
           <p className="mt-4 text-[16px] leading-relaxed text-muted">
             Each offer carries its source, its distance from the market median and the rule that decided it. The basket you approve is decoded
