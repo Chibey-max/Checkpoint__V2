@@ -207,7 +207,7 @@ export function Hero() {
         ref={section}
         aria-label="Checkpoint"
         // Full-bleed, tucked up under the floating nav. The extra height is the scroll that opens the door.
-        className={`relative -mt-[130px] md:-mt-[90px] ${reduced ? "h-svh" : "h-[600svh]"}`}
+        className={`relative -mt-[140px] md:-mt-[100px] ${reduced ? "h-svh" : "h-[600svh]"}`}
         style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
       >
         <div className="sticky top-0 h-svh overflow-hidden bg-[#050506]">
@@ -222,7 +222,7 @@ export function Hero() {
             <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(4_4_6/0.86)_0%,rgb(4_4_6/0.62)_42%,transparent_72%)] max-lg:bg-[linear-gradient(0deg,rgb(4_4_6/0.92)_0%,rgb(4_4_6/0.8)_45%,rgb(4_4_6/0.15)_72%,transparent_100%)]" />
             <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 sm:px-6 lg:px-8">
               <div className={go ? "ink-go" : ""}>
-                <p className="hero-rise inline-flex items-center gap-2 rounded-full bg-[rgb(10_10_12/0.55)] py-1 pr-3 pl-1.5 text-[12px] text-[#c9c0ae] ring-1 ring-[rgb(227_180_94/0.25)] backdrop-blur">
+                <p className="hero-rise inline-flex items-center gap-2 rounded-full bg-[rgb(10_10_12/0.78)] py-1 pr-3 pl-1.5 text-[12px] text-[#c9c0ae] ring-1 ring-[rgb(227_180_94/0.25)]">
                   <span className="rounded-full bg-[rgb(227_180_94/0.14)] px-2 py-0.5 font-engrave text-[10px] font-semibold tracking-[0.16em] text-[#e3b45e] uppercase">NEAR Hackathon 2026</span>
                   AI Security &amp; Defense
                 </p>
@@ -236,7 +236,7 @@ export function Hero() {
                   <Link href="/desk" className="key key-primary h-12 px-6 text-[15px]">
                     Open the desk <ArrowRight aria-hidden className="size-4" />
                   </Link>
-                  <Link href="#refusals" className="key h-12 bg-[rgb(10_10_12/0.55)] px-6 text-[15px] text-[#f4ead6] ring-1 ring-[rgb(255_255_255/0.16)] backdrop-blur hover:ring-[rgb(227_180_94/0.5)]">
+                  <Link href="#refusals" className="key h-12 bg-[rgb(10_10_12/0.78)] px-6 text-[15px] text-[#f4ead6] ring-1 ring-[rgb(255_255_255/0.16)] hover:ring-[rgb(227_180_94/0.5)]">
                     <ShieldAlert aria-hidden className="size-4" /> What it refuses
                   </Link>
                 </div>
@@ -268,7 +268,7 @@ export function Hero() {
                 ref={rail}
                 aria-hidden
                 style={{ opacity: 0 }}
-                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[140px] max-lg:bottom-auto md:max-lg:top-[102px]"
+                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[150px] max-lg:bottom-auto md:max-lg:top-[112px]"
               >
                 <ol className="nav-plate flex items-center gap-2 rounded-full px-3 py-1.5">
                   {LOCKS.map((l, i) => (

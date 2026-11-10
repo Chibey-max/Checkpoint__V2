@@ -75,8 +75,8 @@
     to { transform: translate3d(3%, 2%, 0) scale(1.08); }
   }
   @keyframes pulse-dot {
-    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent); }
-    50% { box-shadow: 0 0 0 5px transparent; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.8); }
   }
   @keyframes marquee {
     from { transform: translateX(0); }
@@ -142,7 +142,7 @@
 
 /* ---------- Atmosphere: fixed behind every page ---------- */
 .cp-atmos { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--color-bg); }
-.cp-glow { position: absolute; border-radius: 9999px; filter: blur(80px); opacity: 0.9; }
+.cp-glow { position: absolute; border-radius: 9999px; opacity: 0.9; will-change: transform; }
 .cp-glow-a { width: 64vw; height: 46vw; left: 18vw; top: -28vw; background: radial-gradient(closest-side, rgb(236 190 110 / 0.13), transparent); }
 .cp-glow-b { width: 50vw; height: 50vw; right: -20vw; top: 10vh; background: radial-gradient(closest-side, rgb(170 140 100 / 0.08), transparent); }
 .cp-glow-c { width: 46vw; height: 40vw; left: -16vw; bottom: -14vw; background: radial-gradient(closest-side, rgb(176 110 50 / 0.1), transparent); }
@@ -182,9 +182,7 @@
   --brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='240'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.0035 0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.26  0 0 0 0 0.12  1.2 0 0 0 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23b)' opacity='0.06'/></svg>");
 }
 .glass {
-  background: var(--brushed), color-mix(in srgb, var(--color-surface) 78%, transparent);
-  backdrop-filter: blur(18px) saturate(130%);
-  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  background: var(--brushed), color-mix(in srgb, var(--color-surface) 95%, transparent);
   border: 1px solid var(--color-line);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), var(--shadow-float);
 }
@@ -209,8 +207,6 @@
 .gilt {
   color: transparent; -webkit-background-clip: text; background-clip: text;
   background-image: linear-gradient(100deg, #b98a3a 0%, #f6dc9c 28%, #d4a24c 50%, #fbe6b0 70%, #b4812f 100%);
-  background-size: 200% 100%;
-  animation: sheen 12s ease-in-out infinite;
 }
 [data-theme="light"] .gilt { background-image: linear-gradient(100deg, #7d5410 0%, #b07d1e 30%, #8a5d0f 55%, #a8761c 75%, #6f4a0c 100%); }
 /* four slotted screws, one in each corner of a plate */
@@ -348,9 +344,8 @@
 /* ---------- Hero entrance ---------- */
 .hero-word { animation: word-in 900ms var(--ease-out-soft) both; display: inline-block; }
 .hero-rise { animation: rise-in 900ms var(--ease-out-soft) both; }
-@keyframes word-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(8px); } }
+@keyframes word-in { from { opacity: 0; transform: translateY(0.35em); } }
 @keyframes rise-in { from { opacity: 0; transform: translateY(14px); } }
-@keyframes sheen { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
 /* ---------- Page header: dial rings behind the title, the app's echo of the landing vault ---------- */
 .ph-rings-clip { mask-image: linear-gradient(to bottom, #000 55%, transparent); }
@@ -406,77 +401,85 @@
     var(--brushed-steel),
     linear-gradient(180deg, #4a4c50 0%, #2e3033 20%, #1d1e21 58%, #131416 100%);
 }
+/* Liquid gold: a dark molten body under a glossy lens, inside a poured rim that catches the light unevenly. */
+:root {
+  --gold-body:
+    radial-gradient(120% 150% at 24% -70%, rgb(255 232 178 / 0.3), transparent 56%),
+    radial-gradient(80% 130% at 80% 175%, rgb(233 180 90 / 0.26), transparent 60%),
+    linear-gradient(180deg, #3a2b14 0%, #20180b 46%, #110d06 100%);
+  --gold-rim: linear-gradient(100deg, #6e4d1a 0%, #f7dc9b 13%, #a7792f 29%, #fff0c4 46%, #94682a 62%, #efcb80 80%, #6e4d1a 100%);
+}
 .nav-rail {
-  position: relative; color: #ecebe7;
-  background: var(--steel-plate);
-  border: 1px solid rgb(0 0 0 / 0.75);
+  position: relative; isolation: isolate; color: #f3e6c8;
+  border: 1.5px solid transparent;
+  background: var(--gold-body) padding-box, var(--gold-rim) border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.035),
-    0 1px 0 rgb(255 255 255 / 0.05), 0 16px 34px -16px rgb(0 0 0 / 0.95);
+    inset 0 1px 0 rgb(255 244 214 / 0.42), inset 0 -8px 16px -8px rgb(0 0 0 / 0.75), inset 0 0 24px rgb(240 190 100 / 0.07),
+    0 0 0 1px rgb(0 0 0 / 0.55), 0 20px 44px -20px rgb(0 0 0 / 0.95), 0 0 40px -16px rgb(233 180 94 / 0.5);
 }
-/* the brass inlay along the bottom edge */
-.nav-rail::after {
-  content: ""; position: absolute; left: 12%; right: 12%; bottom: -1px; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgb(233 192 112 / 0.8), transparent);
+/* the lens: a soft specular band across the upper half, like light lying on poured metal */
+.nav-rail::before {
+  content: ""; position: absolute; inset: 2px 18px 52% 18px; border-radius: 99px; pointer-events: none; z-index: -1;
+  background: linear-gradient(180deg, rgb(255 246 222 / 0.15), rgb(255 246 222 / 0.015));
 }
-/* brass socket the mark sits in */
-.nav-socket { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 99px; padding: 1.5px; flex: none;
+/* now and then a glint runs along the metal (transform only, so it costs nothing per frame) */
+.nav-glint { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: -1; }
+.nav-glint::after {
+  content: ""; position: absolute; top: -40%; bottom: -40%; left: 0; width: 18%;
+  background: linear-gradient(100deg, transparent, rgb(255 238 190 / 0.13) 42%, rgb(255 250 232 / 0.26) 50%, rgb(255 238 190 / 0.13) 58%, transparent);
+  transform: translate3d(-130%, 0, 0) skewX(-20deg); will-change: transform;
+  animation: nav-glint 10s cubic-bezier(0.45, 0, 0.2, 1) 3s infinite;
+}
+@keyframes nav-glint { 0% { transform: translate3d(-130%, 0, 0) skewX(-20deg); } 26%, 100% { transform: translate3d(680%, 0, 0) skewX(-20deg); } }
+/* gold socket the mark sits in */
+.nav-socket { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 99px; padding: 1.5px; flex: none;
   background: conic-gradient(from 210deg, #6b4f22, #f1d48f, #9a7536, #fbe3a6, #7a5a28, #e6c27a, #6b4f22);
-  box-shadow: 0 3px 8px -3px rgb(0 0 0 / 0.95);
+  box-shadow: 0 3px 10px -3px rgb(0 0 0 / 0.95);
 }
 .nav-socket > span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 99px;
-  background: radial-gradient(circle at 50% 35%, #2b2c2f, #0b0b0c 75%); box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.85); color: #ecebe7; }
-/* the wordmark: engraved capitals in polished steel */
-.nav-word { font-family: var(--font-engrave); font-weight: 600; font-size: 13px; letter-spacing: 0.22em;
+  background: radial-gradient(circle at 50% 35%, #2e2414, #0c0905 75%); box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.85); color: #f6e7c4; }
+/* the wordmark: engraved capitals in polished gold */
+.nav-word { font-family: var(--font-engrave); font-weight: 600; font-size: 13.5px; letter-spacing: 0.22em;
   color: transparent; -webkit-background-clip: text; background-clip: text;
-  background-image: linear-gradient(180deg, #ffffff 10%, #c9c7c2 55%, #8f8d88 100%);
+  background-image: linear-gradient(180deg, #fff5d6 8%, #ecc77d 55%, #a8792e 100%);
   filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.85)); }
-/* engraved divider */
-.nav-div { width: 1px; height: 18px; background: rgb(0 0 0 / 0.75); box-shadow: 1px 0 0 rgb(255 255 255 / 0.1); flex: none; }
+/* a hairline of light standing in the metal */
+.nav-div { width: 1px; height: 22px; flex: none; background: linear-gradient(180deg, transparent, rgb(255 226 160 / 0.4), transparent); }
 .nav-link {
-  position: relative; display: block; border-radius: 99px; padding: 0.34rem 0.8rem;
-  font-family: var(--font-engrave); font-weight: 600; font-size: 11px; letter-spacing: 0.16em; color: #aeaca7;
+  position: relative; display: block; border-radius: 99px; padding: 0.5rem 1rem;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 11.5px; letter-spacing: 0.16em; color: #d6c29b;
   text-shadow: 0 1px 0 rgb(0 0 0 / 0.85);
-  transition: color 200ms, background 200ms, box-shadow 200ms;
+  transition: color 200ms ease, background-color 200ms ease;
 }
-.nav-link:hover { color: #f4f2ed; }
-/* the current page: a recessed slot with a brass index mark above it, like the notch on a dial */
+.nav-link:hover { color: #fff3d2; background-color: rgb(255 226 160 / 0.07); }
+/* the current page: a drop of liquid gold */
 .nav-link[aria-current="page"] {
-  color: #f0cf8a;
-  background: linear-gradient(180deg, #08090a, #17181a);
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.9), 0 1px 0 rgb(255 255 255 / 0.1);
+  color: #1d1405; text-shadow: 0 1px 0 rgb(255 240 200 / 0.5);
+  background: linear-gradient(180deg, #fde9b8 0%, #ecc675 30%, #cf9c43 62%, #b07c2b 84%, #d9ad5e 100%);
+  box-shadow: inset 0 1px 0 rgb(255 252 236 / 0.85), inset 0 -1px 0 rgb(90 55 10 / 0.4), 0 0 0 1px rgb(60 38 8 / 0.7), 0 6px 18px -8px rgb(240 190 100 / 0.8);
 }
-.nav-link[aria-current="page"]::before {
-  content: ""; position: absolute; left: 50%; top: -5px; width: 8px; height: 3px; margin-left: -4px; border-radius: 0 0 3px 3px;
-  background: linear-gradient(180deg, #f6dc9c, #b8842f); box-shadow: 0 0 8px rgb(233 192 112 / 0.7);
-}
-/* network status: an LED in a recessed bezel */
-.nav-led {
-  display: inline-flex; align-items: center; gap: 0.45rem; border-radius: 99px; padding: 0.22rem 0.65rem;
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: #aeaca7;
-  background: #0a0a0b; box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.95), 0 1px 0 rgb(255 255 255 / 0.09);
-}
-.nav-led > i { width: 5px; height: 5px; border-radius: 99px; background: #f3c66d; box-shadow: 0 0 0 2px rgb(243 198 109 / 0.15), 0 0 9px 1px rgb(243 198 109 / 0.8); }
-/* round knurled knob (the theme toggle) */
-.nav-knob { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 99px; color: #ecebe7;
+/* round knurled knob (the theme toggle), in gold */
+.nav-knob { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 99px; color: #f6e7c4;
   background:
-    radial-gradient(circle at 50% 38%, #3a3c40, #1a1b1d 62%, transparent 63%),
-    repeating-conic-gradient(#1b1c1e 0 6deg, #4a4c50 6deg 12deg);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15), 0 0 0 1px rgb(0 0 0 / 0.75), 0 3px 8px -3px rgb(0 0 0 / 0.95);
+    radial-gradient(circle at 50% 38%, #3a2d17, #17110a 62%, transparent 63%),
+    repeating-conic-gradient(#2a1e0d 0 6deg, #a07434 6deg 12deg);
+  box-shadow: inset 0 1px 0 rgb(255 240 200 / 0.25), 0 0 0 1px rgb(0 0 0 / 0.7), 0 3px 10px -3px rgb(0 0 0 / 0.95);
   transition: transform 500ms var(--ease-out-soft), color 200ms;
 }
-.nav-knob:hover { color: #f0cf8a; transform: rotate(60deg); }
-/* the testnet notice: a small steel tag hanging under the rail */
+.nav-knob:hover { color: #fde9b8; transform: rotate(60deg); }
+/* the testnet notice: a small tag hanging under the rail */
 .nav-tag {
-  color: #ff9a5c; background: var(--steel-plate); border: 1px solid rgb(0 0 0 / 0.75);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 8px 18px -10px rgb(0 0 0 / 0.85);
+  color: #ff9a5c; border: 1px solid transparent;
+  background: var(--gold-body) padding-box, linear-gradient(100deg, rgb(120 85 30 / 0.9), rgb(240 205 140 / 0.7) 50%, rgb(120 85 30 / 0.9)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 240 200 / 0.18), 0 8px 18px -10px rgb(0 0 0 / 0.85);
   text-shadow: 0 1px 0 rgb(0 0 0 / 0.8);
 }
 .nav-plate {
-  background: var(--steel-plate);
-  border: 1px solid rgb(0 0 0 / 0.75);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16), inset 0 -1px 0 rgb(0 0 0 / 0.55), 0 10px 26px -14px rgb(0 0 0 / 0.9);
+  color: #f3e6c8; border: 1px solid transparent;
+  background: var(--gold-body) padding-box, var(--gold-rim) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 244 214 / 0.35), inset 0 -4px 10px -4px rgb(0 0 0 / 0.7), 0 12px 28px -14px rgb(0 0 0 / 0.9);
 }
+.nav-plate .nav-link { padding: 0.32rem 0.7rem; font-size: 10px; }
 
 /* ---------- Lock cards: brass-edged plates that ride over the vault as it opens ---------- */
 .vault-card {
@@ -503,8 +506,8 @@
 /* the scale a price is read against: under 50% review, 50-105% allow, 105-120% review, over 120% block */
 .guard-scale { background: linear-gradient(90deg, rgb(255 143 87 / 0.2) 0 31.25%, rgb(227 180 94 / 0.2) 31.25% 65.6%, rgb(255 143 87 / 0.2) 65.6% 75%, rgb(255 100 117 / 0.22) 75%); }
 .guard-needle { transition: left 700ms var(--ease-out-soft), opacity 300ms ease; }
-.ink-in { transition: opacity 500ms var(--ease-out-soft), transform 500ms var(--ease-out-soft), filter 500ms ease; }
-.ink-in[data-on="false"] { opacity: 0; transform: translateY(6px); filter: blur(3px); }
+.ink-in { transition: opacity 500ms var(--ease-out-soft), transform 500ms var(--ease-out-soft); }
+.ink-in[data-on="false"] { opacity: 0; transform: translateY(6px); }
 /* the gold seal Guard presses on a basket it has signed */
 .seal { opacity: 0; transform: scale(1.8) rotate(-30deg); transition: opacity 260ms ease, transform 600ms cubic-bezier(0.2, 1.4, 0.35, 1); }
 .seal[data-on="true"] { opacity: 1; transform: scale(1) rotate(0deg); }
@@ -593,14 +596,13 @@
 
 /* Keys inside always-dark plates. Unlayered, like .key-* itself, so these win. */
 .nav-rail .key-secondary, .nav-plate .key-secondary {
-  color: #ecebe7; background: var(--brushed-steel), linear-gradient(180deg, #2a2c2f, #121315);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 0 0 1px rgb(0 0 0 / 0.8), 0 0 0 2px rgb(255 255 255 / 0.05);
+  color: #f6e7c4; background: linear-gradient(180deg, #2e2414, #120d07);
+  box-shadow: inset 0 1px 0 rgb(255 240 200 / 0.16), 0 0 0 1px rgb(0 0 0 / 0.8), 0 0 0 2px rgb(240 205 140 / 0.12);
 }
-.nav-rail .key-ghost { color: #aeaca7; }
-.nav-rail .key-ghost:hover:not(:disabled) { color: #f4f2ed; background: rgb(255 255 255 / 0.06); }
-/* the slimmer rail takes slimmer keys */
-.nav-rail .key { height: 32px; font-size: 12px; padding-inline: 0.85rem; }
-.nav-rail .key-ghost { width: 32px; padding: 0; }
+.nav-rail .key-ghost { color: #d6c29b; }
+.nav-rail .key-ghost:hover:not(:disabled) { color: #fff3d2; background: rgb(255 226 160 / 0.08); }
+.nav-rail .key { height: 38px; font-size: 12.5px; padding-inline: 1rem; }
+.nav-rail .key-ghost { width: 38px; padding: 0; }
 .vault-card .key-secondary {
   color: #f2ebde; background: var(--brushed-dark), linear-gradient(180deg, #26221c, #14120f);
   box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.1), 0 0 0 1px rgb(255 236 200 / 0.14);
@@ -659,3 +661,62 @@ html[data-intro="skip"] .cp-intro, html[data-intro="done"] .cp-intro { display: 
 }
 .cp-intro-skip:hover, .cp-intro-skip:focus-visible { color: #f4f2ed; }
 .cp-intro-skip kbd { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0; padding: 0.1rem 0.4rem; border-radius: 6px; background: #0a0a0b; box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.9); }
+
+/* ---------- Run story: one basket, four stops, played as a short film in one screen (run-story.tsx) ---------- */
+@layer components {
+/* a brass-edged plate, light or dark with the theme */
+.rs-card {
+  position: relative; overflow: hidden; border-radius: 24px; border: 1px solid transparent;
+  background:
+    var(--brushed) padding-box,
+    linear-gradient(180deg, rgb(255 240 210 / 0.04), transparent 30%) padding-box,
+    linear-gradient(180deg, var(--color-surface-2), var(--color-surface)) padding-box,
+    linear-gradient(150deg, rgb(242 208 135 / 0.6), rgb(242 208 135 / 0.08) 32%, rgb(242 208 135 / 0.04) 62%, rgb(242 208 135 / 0.4)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 240 210 / 0.08), 0 40px 90px -40px rgb(0 0 0 / 0.9);
+}
+[data-theme="light"] .rs-card {
+  background:
+    var(--brushed) padding-box,
+    linear-gradient(180deg, #fffefb, var(--color-surface-2)) padding-box,
+    linear-gradient(150deg, rgb(176 125 30 / 0.55), rgb(176 125 30 / 0.1) 32%, rgb(176 125 30 / 0.06) 62%, rgb(176 125 30 / 0.4)) border-box;
+  box-shadow: inset 0 1px 0 #fff, 0 30px 70px -40px rgb(90 60 20 / 0.35);
+}
+/*
+ * One handover for titles and cards. "on" plays in after the leaving one has started to go; "out" leaves fast;
+ * "wait" jumps back to the start with no transition at all (its children too), so nothing ever plays in reverse.
+ * Opacity and transform only, so it all runs on the compositor.
+ */
+.rs-swap {
+  --in: 0px, 20px; --out: 0px, -16px;
+  transition: opacity 700ms var(--ease-out-soft) 220ms, transform 1000ms var(--ease-out-soft) 220ms;
+}
+.rs-layer { --in: 34px, 0px; --out: -34px, 0px; }
+.rs-swap[data-pos="out"] { opacity: 0; transform: translate3d(var(--out), 0); pointer-events: none;
+  transition: opacity 360ms cubic-bezier(0.4, 0, 1, 1), transform 620ms cubic-bezier(0.4, 0, 0.6, 1); }
+.rs-swap[data-pos="wait"] { opacity: 0; transform: translate3d(var(--in), 0); visibility: hidden; pointer-events: none; transition: none; }
+.rs-swap[data-pos="wait"] * { transition: none !important; }
+.rs-title { will-change: transform, opacity; }
+.rs-layer { will-change: transform, opacity; }
+
+/* pieces inside a card */
+.rs-tile { transition: opacity 600ms var(--ease-out-soft), transform 700ms var(--ease-out-soft); }
+.rs-tile[data-on="false"] { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+.rs-tile[data-off="true"] { opacity: 0.4; }
+.rs-stamp { transition: opacity 260ms ease, transform 520ms cubic-bezier(0.2, 1.45, 0.35, 1); transform-origin: left center; }
+.rs-stamp[data-on="false"] { opacity: 0; transform: scale(1.35); }
+.rs-rise { transition: opacity 600ms var(--ease-out-soft), transform 700ms var(--ease-out-soft); }
+.rs-rise[data-on="false"] { opacity: 0; transform: translate3d(0, 10px, 0); }
+.rs-sheet { transition: opacity 500ms var(--ease-out-soft), transform 900ms var(--ease-out-soft); }
+.rs-sheet[data-on="false"] { opacity: 0; transform: translate3d(0, 40px, 0); }
+.rs-press { transition: transform 300ms cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 300ms; }
+.rs-press[data-on="true"] { transform: scale(0.97); }
+.rs-tick { transition: opacity 240ms ease, transform 420ms cubic-bezier(0.2, 1.5, 0.35, 1); }
+.rs-tick[data-on="false"] { opacity: 0; transform: scale(0.3); }
+.rs-dim { transition: opacity 500ms var(--ease-out-soft); }
+.rs-dim[data-on="false"] { opacity: 0.35; }
+
+/* the rail */
+.rs-fill { transform: scaleX(0); transform-origin: left center; background: linear-gradient(90deg, #b8842f, #f6dc9c); will-change: transform; }
+[data-theme="light"] .rs-fill { background: linear-gradient(90deg, #8a5d0f, #c99634); }
+.rs-seg:focus-visible { outline-offset: 4px; }
+}

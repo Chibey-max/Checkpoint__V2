@@ -146,7 +146,7 @@ export function Refusals() {
                     aria-selected={on}
                     onClick={() => pick(i)}
                     data-spotlight
-                    className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl px-3 py-2.5 text-left transition-all duration-300 ${
+                    className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl px-3 py-2.5 text-left transition-[background-color,box-shadow,color] duration-300 ${
                       on ? "panel" : "hover:bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]"
                     }`}
                   >
@@ -223,7 +223,7 @@ function Terminal({ lines }: { lines: Line[] }) {
       {lines.map((l, i) => (
         <p
           key={i}
-          className={`transition-all duration-300 ${TONE[l.t]} ${l.t === "note" ? "mt-5 border-t border-white/[0.07] pt-4" : ""}`}
+          className={`transition-[opacity,transform] duration-300 ease-[var(--ease-out-soft)] ${TONE[l.t]} ${l.t === "note" ? "mt-5 border-t border-white/[0.07] pt-4" : ""}`}
           style={{ opacity: i < n ? 1 : 0, transform: i < n ? "none" : "translateX(-6px)" }}
         >
           {l.t === "cmd" && <span className="mr-2 text-[#f0c674]">$</span>}
