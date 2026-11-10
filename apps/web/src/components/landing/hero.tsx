@@ -23,7 +23,7 @@ function penLines(lines: string[]) {
   return lines.map((text, i) => {
     const d = text.length * PEN_MS_PER_CHAR;
     const el = (
-      <span key={i} className={`ink-line ${i ? "text-[#e3b45e]" : ""}`} style={{ "--ink-at": `${at}ms`, "--ink-d": `${d}ms` } as React.CSSProperties}>
+      <span key={i} className={`ink-line ${i ? "hero-ink-gold" : ""}`} style={{ "--ink-at": `${at}ms`, "--ink-d": `${d}ms` } as React.CSSProperties}>
         <span className="ink-pen">{text}</span>
       </span>
     );
@@ -210,7 +210,7 @@ export function Hero() {
         className={`relative -mt-[140px] md:-mt-[100px] ${reduced ? "h-svh" : "h-[600svh]"}`}
         style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
       >
-        <div className="sticky top-0 h-svh overflow-hidden bg-[#050506]">
+        <div className="hero-stage sticky top-0 h-svh overflow-hidden">
           {webgl ? (
             <VaultDoor progress={progress} onUnsupported={() => setWebgl(false)} />
           ) : (
@@ -219,24 +219,24 @@ export function Hero() {
           )}
           {/* keep the copy legible over the wall */}
           <div ref={copy} className="absolute inset-0">
-            <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(4_4_6/0.86)_0%,rgb(4_4_6/0.62)_42%,transparent_72%)] max-lg:bg-[linear-gradient(0deg,rgb(4_4_6/0.92)_0%,rgb(4_4_6/0.8)_45%,rgb(4_4_6/0.15)_72%,transparent_100%)]" />
+            <div aria-hidden className="hero-scrim pointer-events-none absolute inset-0" />
             <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 sm:px-6 lg:px-8">
               <div className={go ? "ink-go" : ""}>
-                <p className="hero-rise inline-flex items-center gap-2 rounded-full bg-[rgb(10_10_12/0.78)] py-1 pr-3 pl-1.5 text-[12px] text-[#c9c0ae] ring-1 ring-[rgb(227_180_94/0.25)]">
-                  <span className="rounded-full bg-[rgb(227_180_94/0.14)] px-2 py-0.5 font-engrave text-[10px] font-semibold tracking-[0.16em] text-[#e3b45e] uppercase">NEAR Hackathon 2026</span>
+                <p className="hero-rise hero-chip inline-flex items-center gap-2 rounded-full py-1 pr-3 pl-1.5 text-[12px] ring-1">
+                  <span className="rounded-full bg-[rgb(227_180_94/0.14)] px-2 py-0.5 font-engrave text-[10px] font-semibold tracking-[0.16em] text-accent uppercase">NEAR Hackathon 2026</span>
                   AI Security &amp; Defense
                 </p>
-                <h1 className="mt-6 font-script text-[clamp(3.4rem,7.2vw,8.6rem)] leading-[1.04] font-normal tracking-normal whitespace-nowrap text-[#f4ead6] max-sm:mt-3 max-sm:text-[10.6vw]">
+                <h1 className="mt-6 font-script text-[clamp(3.4rem,7.2vw,8.6rem)] leading-[1.04] font-normal tracking-normal whitespace-nowrap hero-ink max-sm:mt-3 max-sm:text-[10.6vw]">
                   {headline}
                 </h1>
-                <p className="hero-follow mt-7 max-w-[36rem] font-lede text-[clamp(1.05rem,1.3vw,1.25rem)] leading-[1.7] font-normal tracking-[0.01em] text-[#ddd3bf] max-sm:mt-4 max-sm:text-[0.98rem] max-sm:leading-[1.6]">
+                <p className="hero-follow mt-7 max-w-[36rem] font-lede text-[clamp(1.05rem,1.3vw,1.25rem)] leading-[1.7] font-normal tracking-[0.01em] hero-lede max-sm:mt-4 max-sm:text-[0.98rem] max-sm:leading-[1.6]">
                   {BODY}
                 </p>
                 <div className="hero-follow hero-follow-late mt-8 flex flex-wrap items-center gap-3 max-sm:mt-5 max-sm:gap-2 max-sm:[&>a]:h-11 max-sm:[&>a]:px-4 max-sm:[&>a]:text-sm">
                   <Link href="/desk" className="key key-primary h-12 px-6 text-[15px]">
                     Open the desk <ArrowRight aria-hidden className="size-4" />
                   </Link>
-                  <Link href="#refusals" className="key h-12 bg-[rgb(10_10_12/0.78)] px-6 text-[15px] text-[#f4ead6] ring-1 ring-[rgb(255_255_255/0.16)] hover:ring-[rgb(227_180_94/0.5)]">
+                  <Link href="#refusals" className="key hero-ghost h-12 px-6 text-[15px] ring-1">
                     <ShieldAlert aria-hidden className="size-4" /> What it refuses
                   </Link>
                 </div>
@@ -290,7 +290,7 @@ export function Hero() {
                 </ol>
               </div>
 
-              <div ref={cue} className="absolute inset-x-0 bottom-9 flex flex-col items-center gap-1.5 text-[#c9c0ae]">
+              <div ref={cue} className="hero-cue absolute inset-x-0 bottom-9 flex flex-col items-center gap-1.5">
                 <span className="font-engrave text-[11px] font-semibold tracking-[0.24em] uppercase">Scroll to open the vault</span>
                 <ChevronDown aria-hidden className="size-4 animate-bounce" />
               </div>

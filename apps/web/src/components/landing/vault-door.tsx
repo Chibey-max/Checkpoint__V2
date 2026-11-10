@@ -50,7 +50,7 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     const loc = gl.getAttribLocation(prog, "aPos");
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const U = Object.fromEntries(["uRes", "uWheel", "uBolt", "uOpen", "uCam", "uFrame", "uTilt", "uShift", "uNarrow", "uLamps"].map((n) => [n, gl.getUniformLocation(prog, n)]));
+    const U = Object.fromEntries(["uRes", "uWheel", "uBolt", "uOpen", "uCam", "uFrame", "uTilt", "uShift", "uNarrow", "uLamps", "uDay"].map((n) => [n, gl.getUniformLocation(prog, n)]));
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frame = { x: 0.55, zoom: 1, y: 0, sx: -0.24, sy: 0, narrow: 0 };
@@ -84,6 +84,10 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
 
     let dirty = true;
     let last = { p: -1, tx: 0, ty: 0 };
+    // the theme: the hall is lit for whichever one is on, and eases across when it changes
+    const isDay = () => (document.documentElement.dataset.theme === "light" ? 1 : 0);
+    let day = isDay();
+    let dayTo = day;
     function draw() {
       const p = reduced ? 0 : progress.current;
       const pose = vaultPose(p);
@@ -98,6 +102,7 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       gl!.uniform2f(U.uShift!, frame.sx * pose.shift, frame.sy * pose.shift);
       gl!.uniform1f(U.uNarrow!, frame.narrow);
       gl!.uniform3f(U.uLamps!, ...pose.lamps);
+      gl!.uniform1f(U.uDay!, day);
       // Parallax fades out once the door starts opening, so the camera move stays clean.
       const k = 1 - seg(p, 0.05, 0.3);
       gl!.uniform2f(U.uTilt!, tilt.x * k, tilt.y * k);
@@ -110,6 +115,17 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
+    let raf = 0;
+    const themeWatch = new MutationObserver(() => {
+      dayTo = isDay();
+      // nothing is animating (reduced motion, or the hero is off screen): just be right next time it's seen
+      if (reduced || !raf) {
+        day = dayTo;
+        draw();
+      }
+    });
+    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
     if (reduced) {
       draw();
       const redraw = new ResizeObserver(() => draw());
@@ -117,10 +133,10 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       return () => {
         ro.disconnect();
         redraw.disconnect();
+        themeWatch.disconnect();
       };
     }
 
-    let raf = 0;
     let visible = true;
     let prev = performance.now();
     // frame times of consecutive redraws; if the median of 24 in a row is over ~22 ms, drop to 70% of the pixels
@@ -132,6 +148,11 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       prev = now;
       tilt.x += (tilt.tx - tilt.x) * Math.min(1, dt * 2.5);
       tilt.y += (tilt.ty - tilt.y) * Math.min(1, dt * 2.5);
+      if (day !== dayTo) {
+        day += (dayTo - day) * Math.min(1, dt * 7);
+        if (Math.abs(dayTo - day) < 0.004) day = dayTo;
+        dirty = true;
+      }
       const moved = Math.abs(progress.current - last.p) > 1e-4 || Math.abs(tilt.x - last.tx) > 1e-3 || Math.abs(tilt.y - last.ty) > 1e-3;
       if (dirty || moved) {
         draw();
@@ -182,6 +203,7 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       stop();
       ro.disconnect();
       io.disconnect();
+      themeWatch.disconnect();
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("webglcontextlost", onLost);
