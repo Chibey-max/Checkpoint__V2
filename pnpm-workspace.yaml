@@ -2,5 +2,6 @@ packages:
   - "apps/*"
   - "packages/*"
   - "scripts"
+  - "attacks"
 minimumReleaseAgeExclude:
   - lucide-react@1.69.0

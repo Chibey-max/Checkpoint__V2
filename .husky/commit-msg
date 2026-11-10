@@ -1,0 +1,2 @@
+# Team rule: no AI tool or agent as author or co-author (see CONTRIBUTING / CLAUDE.md).
+bash scripts/check-ai-attribution.sh --file "$1"

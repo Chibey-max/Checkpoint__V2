@@ -17,6 +17,8 @@ export class RpcError extends Error {
 export interface ViewOptions {
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
+  /** Extra attempts after a network failure (unreachable, timeout, non-2xx HTTP). Default 1. */
+  retries?: number;
 }
 
 /** Call a view method and JSON-parse its result. Throws RpcError on any failure. */
@@ -26,6 +28,25 @@ export async function viewFunction<T = unknown>(
   methodName: string,
   args: Record<string, unknown> = {},
   opts: ViewOptions = {},
+): Promise<T> {
+  const retries = opts.retries ?? 1;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await viewOnce<T>(rpcUrl, contractId, methodName, args, opts);
+    } catch (e) {
+      // Only transient network failures are retried; contract and RPC errors are final.
+      if (!(e instanceof RpcError) || e.kind !== 'network' || attempt >= retries) throw e;
+      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+    }
+  }
+}
+
+async function viewOnce<T>(
+  rpcUrl: string,
+  contractId: string,
+  methodName: string,
+  args: Record<string, unknown>,
+  opts: ViewOptions,
 ): Promise<T> {
   const doFetch = opts.fetchImpl ?? fetch;
   let res: Response;

@@ -30,7 +30,18 @@
     "contracts:test": "bash scripts/contracts-build.sh && cargo test --workspace",
     "vault:check": "tsx scripts/vault-views-check.ts",
     "demo:sandbox": "tsx scripts/demo-sandbox.ts",
-    "cold-run": "bash scripts/cold-run.sh"
+    "cold-run": "bash scripts/cold-run.sh",
+    "gate:testnet": "tsx scripts/gate-testnet.ts",
+    "attack:stolen-key": "tsx attacks/stolen-key.ts",
+    "attack:over-cap": "tsx attacks/over-cap.ts",
+    "attack:expired": "tsx attacks/expired.ts",
+    "attack:unlisted-vendor": "tsx attacks/unlisted-vendor.ts",
+    "dao:propose": "tsx scripts/dao.ts propose",
+    "dao:vote": "tsx scripts/dao.ts vote",
+    "dao:show": "tsx scripts/dao.ts show",
+    "setup:testnet": "bash scripts/testnet/setup.sh",
+    "freeze:check": "bash scripts/testnet/freeze-check.sh",
+    "dao:propose-kind": "tsx scripts/dao.ts propose-kind"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

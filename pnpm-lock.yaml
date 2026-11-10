@@ -88,6 +88,18 @@ importers:
         specifier: ^5.9
         version: 5.9.3
 
+  attacks:
+    dependencies:
+      '@checkpoint/guard':
+        specifier: workspace:*
+        version: link:../packages/guard
+      '@checkpoint/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
+      near-api-js:
+        specifier: 7.4.0
+        version: 7.4.0
+
   packages/agents:
     dependencies:
       '@checkpoint/guard':

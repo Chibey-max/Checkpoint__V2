@@ -348,3 +348,36 @@ async fn gas_for_a_four_vendor_basket() -> anyhow::Result<()> {
     e.assert_inv1().await?;
     Ok(())
 }
+
+#[tokio::test]
+async fn at19_under_gassed_execution_fails_err_gas_with_no_state_change() -> anyhow::Result<()> {
+    let e = Env::new().await?;
+    // 4 payouts need 20 + 4 × (10 + 15) = 120 TGas; send 100.
+    let p = e
+        .payload(&[(1, CPUSD), (2, CPUSD), (3, CPUSD), (4, CPUSD)], 1)
+        .await?;
+    let s = sign(&p);
+    e.approve(&s).await?;
+    let before = e.balance().await?;
+    let r = e
+        .agent
+        .call(e.vault.id(), "execute_basket")
+        .args_json(json!({ "payload_b64": s.payload_b64, "signature_b64": s.signature_b64 }))
+        .gas(Gas::from_tgas(100))
+        .transact()
+        .await?;
+    assert!(err_of(&r).contains("ERR_GAS"));
+    assert_eq!(e.balance().await?, before, "no reservation");
+    assert!(e.basket(&s.hash_hex).await?.is_null(), "no basket record");
+    let approval = e
+        .view("get_approval", json!({ "hash_hex": s.hash_hex }))
+        .await?;
+    assert!(
+        !approval.is_null(),
+        "the approval is still there, so a properly gassed retry works"
+    );
+    ok(&e.execute(&s).await?);
+    assert_eq!(e.basket(&s.hash_hex).await?["status"], "Completed");
+    e.assert_inv1().await?;
+    Ok(())
+}

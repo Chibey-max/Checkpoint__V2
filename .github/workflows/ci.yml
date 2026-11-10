@@ -76,6 +76,20 @@ jobs:
       - run: CONTRACTS_BUILD=cargo bash scripts/contracts-build.sh
       - run: pnpm demo:sandbox
 
+  attribution:
+    # Team rule: no AI tool or agent as author or co-author (CLAUDE.md).
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: No AI co-author or "Generated with" lines in this PR's commits
+        if: github.event_name == 'pull_request'
+        run: bash scripts/check-ai-attribution.sh --range "${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+      - name: No AI co-author or "Generated with" lines on main
+        if: github.event_name == 'push'
+        run: bash scripts/check-ai-attribution.sh --range HEAD
+
   secrets:
     runs-on: ubuntu-24.04
     steps:
