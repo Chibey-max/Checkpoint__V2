@@ -2,6 +2,7 @@
  * Sputnik v2 council helpers (FR-G07, tasks I-0.5 / I-5.1).
  *
  *   pnpm dao:propose -- set_limits '{"max_basket_total":"200000000","daily_cap":"300000000","max_vendors":4,"max_ttl_ms":"1800000"}' [--as <council>] [--desc "..."]
+ *   pnpm dao:propose-kind -- '{"RemoveMemberFromRole":{"member_id":"x.testnet","role":"council"}}' --as <council> --desc "..."
  *   pnpm dao:vote -- <proposal_id> [--as <council>] [--reject]
  *   pnpm dao:show [-- <proposal_id>]
  *
@@ -108,6 +109,26 @@ async function main(): Promise<number> {
     console.log(`proposal ${id}: ${method} on ${VAULT}  tx ${NB}${r.tx}`);
     return 0;
   }
+  if (cmd === 'propose-kind') {
+    // Any Sputnik proposal kind as JSON, e.g. AddMemberToRole / RemoveMemberFromRole / Transfer.
+    const [json] = positionals;
+    if (!json || !as || !values.desc)
+      throw new Error("usage: pnpm dao:propose-kind -- '<kind json>' --as <council_account> --desc <text>");
+    const pol = (await viewFunction(RPC, DAO, 'get_policy', {})) as { proposal_bond: string };
+    const r = await call(
+      as,
+      'add_proposal',
+      { proposal: { description: values.desc, kind: JSON.parse(json) } },
+      BigInt(pol.proposal_bond),
+      100n * TGAS,
+    );
+    if (r.failed) throw new Error(`add_proposal failed: ${r.failed} (${NB}${r.tx})`);
+    const id = r.value
+      ? JSON.parse(Buffer.from(r.value, 'base64').toString())
+      : await viewFunction(RPC, DAO, 'get_last_proposal_id', {});
+    console.log(`proposal ${id}: ${values.desc}  tx ${NB}${r.tx}`);
+    return 0;
+  }
   if (cmd === 'vote') {
     const id = Number(positionals[0]);
     if (!Number.isInteger(id) || !as)
@@ -150,7 +171,7 @@ async function main(): Promise<number> {
     else console.log(JSON.stringify(pol, null, 2));
     return 0;
   }
-  throw new Error('commands: propose | vote | show');
+  throw new Error('commands: propose | propose-kind | vote | show');
 }
 
 main().then(
