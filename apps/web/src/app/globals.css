@@ -777,3 +777,32 @@ html[data-intro="skip"] .cp-intro, html[data-intro="done"] .cp-intro { display: 
 ::view-transition-new(root) { z-index: 2; }
 ::view-transition-old(root) { z-index: 1; }
 html[data-theme-switching] *, html[data-theme-switching] *::before, html[data-theme-switching] *::after { transition: none !important; }
+
+/* ---------- Scrollbar: a poured-gold thumb in a dark machined groove, like the nav ----------
+   Chromium/Safari get the full treatment through ::-webkit-scrollbar. Firefox only takes two colours, so it gets
+   scrollbar-color; that is kept away from Chromium, where setting it would switch off the custom bar. */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #0b0906, #16120c 50%, #0b0906);
+  box-shadow: inset 1px 0 0 rgb(255 226 160 / 0.06), inset -1px 0 0 rgb(0 0 0 / 0.6);
+}
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent; border-radius: 99px; background-clip: padding-box;
+  background-color: #b8842f;
+  background-image: linear-gradient(90deg, #8a6223 0%, #f1d48f 32%, #d4a24c 55%, #fbe6b0 72%, #9a7536 100%);
+  box-shadow: inset 0 1px 0 rgb(255 250 230 / 0.5);
+}
+::-webkit-scrollbar-thumb:hover { background-image: linear-gradient(90deg, #a07434 0%, #fde9b8 32%, #e3b45e 55%, #fff1cc 72%, #b08435 100%); }
+::-webkit-scrollbar-thumb:active { background-image: linear-gradient(90deg, #7a5a28 0%, #e6c27a 35%, #c08f3e 60%, #f1d48f 75%, #8a6223 100%); }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: #0b0906; }
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #e4ddd0, #efe9df 50%, #e4ddd0);
+  box-shadow: inset 1px 0 0 rgb(90 60 20 / 0.12);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb { background-image: linear-gradient(90deg, #7d5410 0%, #d6a64e 35%, #b07d1e 58%, #e9c57c 74%, #6f4a0c 100%); }
+[data-theme="light"] ::-webkit-scrollbar-corner { background: #e4ddd0; }
+@supports not selector(::-webkit-scrollbar) {
+  html { scrollbar-color: #d4a24c #120e08; scrollbar-width: thin; }
+  html[data-theme="light"] { scrollbar-color: #b07d1e #e4ddd0; }
+}
