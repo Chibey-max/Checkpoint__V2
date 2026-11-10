@@ -1,0 +1,96 @@
+{
+  "network": "testnet",
+  "root": "cpdemo.testnet",
+  "vault": "vault.cpdemo.testnet",
+  "token": "cpusd.cpdemo.testnet",
+  "agent": "agent.cpdemo.testnet",
+  "guardian": "guardian.cpdemo.testnet",
+  "owner_demo": "owner-demo.cpdemo.testnet",
+  "vendors": {
+    "vendor-01": "vendor-01.cpdemo.testnet",
+    "vendor-02": "vendor-02.cpdemo.testnet",
+    "vendor-03": "vendor-03.cpdemo.testnet",
+    "vendor-04": "vendor-04.cpdemo.testnet",
+    "vendor-05": "vendor-05.cpdemo.testnet (not allowlisted, AT-04)",
+    "vendor-06": "vendor-06.cpdemo.testnet (not registered on cpUSD, AT-10)"
+  },
+  "dao": "checkpoint-council.sputnik-v2.testnet",
+  "deploys": [
+    {
+      "date": "2026-11-06",
+      "contract": "cpusd.cpdemo.testnet",
+      "code_hash": "EjXGxRYJk8nmQNHi6xs5MMJtrPgfSo6njWGA9bJbZG9N",
+      "tx": "7Q82hhbrqUeq2pb15j8sD3N1rvHBCuBUA98aj11mt27J",
+      "build": "cargo-near 0.23 non-reproducible-wasm, rust 1.96.0, no sandbox feature"
+    },
+    {
+      "date": "2026-11-06",
+      "contract": "vault.cpdemo.testnet",
+      "code_hash": "4GcxzNMdU3dVLw8H3w2sydZ8RcZG56uXsmC9fQGaZQfS",
+      "tx": "HXALtS5eXQkFm5rqoGUcLYNhCVKwRTcwjM7LW5cevABb",
+      "build": "cargo-near 0.23 non-reproducible-wasm, rust 1.96.0",
+      "policy_version": 1
+    },
+    {
+      "date": "2026-11-09",
+      "contract": "checkpoint-council.sputnik-v2.testnet",
+      "tx": "5weSAGuoD7bofyPTR5wpudkVxXcdoUreYiFUoE5hyUC8",
+      "note": "Sputnik v2 factory create, default policy (council 1/2 threshold), proposal bond 1 NEAR"
+    },
+    {
+      "date": "2026-11-09",
+      "contract": "vault.cpdemo.testnet",
+      "code_hash": "G9cZQeMRyvM6Uni3mPujsPYUqyhDnJpxoNn6Nnp6K6K",
+      "tx": "64HRM8X8o5ZnF2LGgmmZNqahAQUeND32heVfJHYSziyG",
+      "build": "cargo-near 0.23 non-reproducible-wasm, rust 1.96.0, from the repo (pnpm freeze:check MATCH); code-only redeploy, no init, state kept",
+      "policy_version": 4
+    }
+  ],
+  "rpc_url": "https://rpc.testnet.near.org (provisional until D-04)",
+  "guard_pubkey_v1": "CAR74z4PpMpNAmCnmaRY3dPrjFUSMrswynTah4oSsBrY",
+  "rules_hash": "89e1b151b955375cf1ae7b5af890d0212ad6284e21dc280bc504090d63f9c23d",
+  "agent_fc_public_key": "ed25519:719FJC48v52RqDGevvFZShC5YaA2FVQcjPB21zoaFREG",
+  "smoke": [
+    {
+      "what": "owner-demo deposits 200 cpUSD",
+      "tx": "4wUAUpvQJYNudJ8kBqzVg3Ar1QirvQpLGBDo4A1p1ZfN"
+    },
+    {
+      "what": "owner-demo set_agent(agent)",
+      "tx": "9B9ufjwp3Q7SpzPzJ77cbXUbtPrGUv3x4UhMT4GwEdcR"
+    },
+    {
+      "what": "approve_basket 5cacb49c\u2026 (1 cpUSD to vendor-01)",
+      "tx": "DrvpjDkhwstAFb61FogNQhX86Yv7NMoMNJamFZN2c2T8"
+    },
+    {
+      "what": "pnpm settle with the FC key: Completed, vendor-01 received 1 cpUSD; replay rejected ERR_ALREADY_USED",
+      "tx": "2ptpZr2o4WnfkTmuXfxfunoDDePV9KsB5F8KS3iaF2p4"
+    },
+    {
+      "what": "Vault transfer_admin cpdemo.testnet \u2192 checkpoint-council.sputnik-v2.testnet (policy v3)",
+      "tx": "6nSBzPQbQxAVERwhLNFoCFzGN6mqnHV3yQNrn7357bEy"
+    },
+    {
+      "what": "DAO proposal 0 set_limits max basket 400 cpUSD, 2 of 3 votes, applied (policy v4)",
+      "tx": "9rLKi1UwDKLPpLGJPgpSpoN5CmpaXu6ifwZxys7RikXa"
+    },
+    {
+      "what": "DAO proposal 1 max_vendors 7 (out of bounds): passed, Vault refused ERR_BOUNDS",
+      "tx": "Ako9g1m194WSs9H93hFQPxNPZN7HSUoJ2o54rxXpUwT6"
+    },
+    {
+      "what": "after the redeploy: 1 cpUSD to vendor-01 via pnpm settle, Completed",
+      "tx": "CdidzKvqGtV5zsJ5K4dsbimvLcc6LRmgy1AdLUCZ22Rv"
+    },
+    {
+      "what": "patrick-checkpoint.testnet handed to Patrick's own key; local key deleted",
+      "tx": "BPiKKeRD8Q8tWW2RNpcNwc6PW3P4oVArSkCwW2RhjZME"
+    },
+    {
+      "what": "DAO proposal 2: remove isaac-cp.testnet from the council (team is David + Patrick), approved",
+      "tx": "BhzF8dswsjEJZTdoHP15yrQ4FLZgMHzoHYK2mbdKuUaK"
+    }
+  ],
+  "council": ["david-checkpoint.testnet", "patrick-checkpoint.testnet"]
+}

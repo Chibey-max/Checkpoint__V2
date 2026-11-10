@@ -98,6 +98,7 @@ Signatures are valid for 15 minutes, capped by the Vault's `max_ttl_ms`.
 | `GET /v1/requests/:id/events` | SSE stream (below) |
 | `POST /v1/requests/:id/acknowledge` | `{ offer_ids }` → `202`. Only REVIEW offers; triggers re-plan and re-sign. `409` in a state where acknowledging makes no sense. |
 | `POST /v1/requests/:id/cancel` | Stops the approval watcher. `409` once executing or finished. |
+| `GET /v1/requests/:id/intents-quote` **(added, D-6.2, P2)** | A **dry** NEAR Intents 1Click quote (mainnet) for paying the basket total as USDC on NEAR from wNEAR: `{ basket_total, quote: { label, dry: true, network: "mainnet", pay_asset, pay_amount, pay_amount_formatted, pay_usd, receive_asset, receive_amount, receive_amount_formatted, time_estimate_s, quoted_at, correlation_id } }`. Display-only: nothing is signed or moved, and Guard and the Vault never see it. `409 NO_BASKET` before a basket exists, `503 INTENTS_UNAVAILABLE` if 1Click can't be reached, `501 NOT_ENABLED` with `AGENTS_INTENTS=off`. |
 | `GET /v1/audit/:basket_id` | The evidence bundle |
 | `GET /v1/catalog` | `{ items: CatalogItem[] }` (each with `aliases` for list hints) |
 | `GET /v1/health` | `{ ok: true }` |
@@ -168,9 +169,9 @@ Verify anywhere with `verifyEvidenceBundle(bundle, { guardPubkeyB58, chainBasket
 
 ---
 
-## Vault views Guard and the agents read (proposal for Isaac)
+## Vault views Guard and the agents read
 
-The PRD names these views but not their JSON. The services parse them with the schemas in [`packages/shared/src/vault-views.ts`](../packages/shared/src/vault-views.ts) and fail closed on any other shape. Amounts are U128 strings.
+The PRD names these views but not their JSON. `contracts/vault/src/views.rs` implements exactly these shapes (checked live with `pnpm vault:check`). The services parse them with the schemas in [`packages/shared/src/vault-views.ts`](../packages/shared/src/vault-views.ts) and fail closed on any other shape. Amounts are U128 strings.
 
 | View | Args | Returns |
 |---|---|---|
@@ -180,4 +181,4 @@ The PRD names these views but not their JSON. The services parse them with the s
 | `get_approval` | `{ hash_hex }` | `null` or `{ owner, expires_at_ms, created_at_ms }` |
 | `get_basket` | `{ hash_hex }` | `null` or `{ hash, basket_id, owner, agent, token, total, evidence_hash (hex), status, created_at_ms, payouts[{ vendor, amount, status }] }` |
 
-`settlement.ts` in the agents package is the slot for Isaac's Settlement module (I-3.3, H9): `execute(payload_b64, signature_b64) → { tx_hash }`.
+`settlement.ts` in the agents package is the Settlement module (I-3.3, H9): `execute(payload_b64, signature_b64) → { tx_hash }`, sent with the agent's function-call key.

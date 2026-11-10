@@ -1,0 +1,14 @@
+{
+  "name": "@checkpoint/attacks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@checkpoint/guard": "workspace:*",
+    "@checkpoint/shared": "workspace:*",
+    "near-api-js": "7.4.0"
+  }
+}

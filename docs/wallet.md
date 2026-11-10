@@ -39,7 +39,7 @@
 1. `pnpm --filter web dev`, then open <http://localhost:3000/wallet-check>.
 2. **Sign in.** Pick Meteor or Intear and choose your testnet account. The account ID should appear on the page and in the nav.
 3. Step 2: click **Use wrap.testnet** (until cpUSD exists), then **Send storage_deposit**. The wallet should ask you to approve a call to `storage_deposit` with about 0.00125 NEAR attached. When it finishes, the page links the transaction on testnet.nearblocks.io.
-4. Once Isaac has deployed `cpusd.cpdemo.testnet` (H4), repeat step 3 with the default token. That is also the real "Register on cpUSD" flow for the Vault page.
+4. `cpusd.cpdemo.testnet` is deployed (H4): repeat step 3 with the default token. That is also the real "Register on cpUSD" flow for the Vault page.
 5. Write the result below: wallet, account, transaction hash, and anything odd (popups, network switching).
 
 ## Results of the manual check

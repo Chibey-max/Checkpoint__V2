@@ -23,7 +23,7 @@ flowchart LR
         OR["orchestrator.ts<br/>pipeline + watchers"]
         ST["store.ts<br/>node:sqlite event log"]
         EX["explain.ts<br/>templates · LLM + post-check"]
-        SE["settlement.ts<br/>(Isaac, I-3.3)"]
+        SE["settlement.ts<br/>(I-3.3)"]
     end
     OR --> PA --> CO
     OR -->|"HTTP: offer IDs only"| GS
@@ -49,7 +49,7 @@ flowchart LR
 | Guard and agents compute the same amounts | `shared/src/pricing.ts`, used by both | Agents cross-check Guard's signed payload against their own plan before asking for approval |
 | The LLM decides nothing | Parser output is pinned to catalogue keys; explanations are post-checked for unknown numbers, IDs, URLs and banned phrases; the LLM never sees `raw_text` | `parser-coordinator.test.ts`, AT-13 in `pipeline.test.ts` |
 | Every step is replayable and auditable | `store.ts` (event log), `request-state.ts` (one reducer for service and UI), `evidence.ts` | `pipeline.test.ts`, `scripts/verify-audit.test.ts` |
-| The Vault re-checks everything | Isaac's contract | `contracts/vault/tests` (to come) |
+| The Vault re-checks everything | `contracts/vault` | `contracts/vault/src/tests.rs` (unit) and `contracts/sandbox-tests` (near-workspaces) |
 
 ## Request lifecycle in the agents service
 
