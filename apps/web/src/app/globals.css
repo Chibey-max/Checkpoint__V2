@@ -834,3 +834,64 @@ html[data-theme-switching] *, html[data-theme-switching] *::before, html[data-th
 }
 [data-theme="light"] .nav-div { background: linear-gradient(180deg, transparent, rgb(120 85 30 / 0.35), transparent); }
 }
+
+/* ---------- Touch screens: a quieter backdrop. The glows hold still and the film grain (a full-screen blend layer)
+   is dropped, so a phone's GPU spends its frames on the vault, not on compositing the wall behind it. ---------- */
+@media (pointer: coarse) {
+  .cp-glow { animation: none !important; will-change: auto; }
+  .cp-grain { display: none; }
+}
+
+/* ---------- Phone dock: the page links in liquid gold glass at the bottom, in thumb reach (header.tsx) ---------- */
+@layer components {
+.dock {
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  border-radius: 26px; padding: 0 6px 6px; color: #f3e6c8; isolation: isolate;
+  border: 1px solid rgb(240 205 140 / 0.42);
+  background: var(--gold-glass);
+  -webkit-backdrop-filter: blur(10px) saturate(160%) brightness(0.85); backdrop-filter: blur(10px) saturate(160%) brightness(0.85);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 214 / 0.4), inset 0 -8px 16px -10px rgb(0 0 0 / 0.6),
+    0 18px 40px -14px rgb(0 0 0 / 0.85), 0 0 34px -16px rgb(233 180 94 / 0.5);
+}
+/* the poured rim along the top edge, and a highlight lying on the glass */
+.dock::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: linear-gradient(180deg, rgb(255 246 222 / 0.1), transparent 45%);
+}
+.dock::after {
+  content: ""; position: absolute; left: 14%; right: 14%; top: -1px; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, #f7dc9b 30%, #fff0c4 50%, #efcb80 70%, transparent);
+}
+.dock-note {
+  color: #ff9a5c; padding: 7px 4px 5px; margin: 0 6px 2px; white-space: nowrap; overflow: hidden;
+  border-bottom: 1px solid rgb(240 205 140 / 0.16); text-shadow: 0 1px 0 rgb(0 0 0 / 0.8);
+}
+.dock-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0 2px; border-radius: 18px;
+  font-family: var(--font-engrave); font-weight: 600; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #d6c29b; text-shadow: 0 1px 0 rgb(0 0 0 / 0.85), 0 0 8px rgb(0 0 0 / 0.6);
+  -webkit-tap-highlight-color: transparent; transition: color 200ms ease;
+}
+.dock-icon {
+  display: grid; place-items: center; width: 44px; height: 30px; border-radius: 99px;
+  transition: transform 300ms var(--ease-out-soft), background-color 200ms ease;
+}
+.dock-tab:active .dock-icon { transform: scale(0.92); }
+/* the current page: its icon sits in a drop of poured gold */
+.dock-tab[aria-current="page"] { color: #fde9b8; }
+.dock-tab[aria-current="page"] .dock-icon {
+  color: #1d1405;
+  background: linear-gradient(180deg, #fde9b8 0%, #ecc675 30%, #cf9c43 62%, #b07c2b 84%, #d9ad5e 100%);
+  box-shadow: inset 0 1px 0 rgb(255 252 236 / 0.85), inset 0 -1px 0 rgb(90 55 10 / 0.4), 0 0 0 1px rgb(60 38 8 / 0.7), 0 6px 16px -6px rgb(240 190 100 / 0.8);
+}
+[data-theme="light"] .dock {
+  color: #3b2a10; border-color: rgb(176 125 30 / 0.35);
+  background: linear-gradient(180deg, rgb(255 251 240 / 0.62), rgb(246 236 214 / 0.55));
+  -webkit-backdrop-filter: blur(10px) saturate(150%); backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.85), 0 16px 36px -16px rgb(90 60 20 / 0.45), 0 0 30px -16px rgb(214 160 70 / 0.45);
+}
+[data-theme="light"] .dock-note { color: #b4531a; border-bottom-color: rgb(120 85 30 / 0.15); text-shadow: none; }
+[data-theme="light"] .dock-tab { color: #5a4220; text-shadow: 0 1px 0 rgb(255 255 255 / 0.7); }
+[data-theme="light"] .dock-tab[aria-current="page"] { color: #1c1405; }
+}

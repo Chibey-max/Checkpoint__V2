@@ -165,7 +165,7 @@ export function RunStory() {
   const done = (ch === 3 && b >= 4) || (ch === 2 && b >= 3) || (ch === 1 && b >= 3);
 
   return (
-    <section ref={ref} aria-labelledby="run-title" className="relative flex min-h-[100svh] flex-col justify-center pt-28 pb-14 max-md:pt-40">
+    <section ref={ref} aria-labelledby="run-title" className="relative flex min-h-[100svh] flex-col justify-center pt-28 pb-14 max-md:pt-20">
       <h2 id="run-title" className="eyebrow mx-auto">
         Follow the money through the locks
       </h2>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, type MutableRefObject } from "react";
-import { VAULT_DOOR_FRAG } from "./vault-door-shader";
+import { isLiteDevice } from "@/lib/perf";
+import { VAULT_DOOR_FRAG, VAULT_DOOR_LITE } from "./vault-door-shader";
 import { seg, vaultPose } from "./vault-timeline";
 
 export { vaultPose };
@@ -27,23 +28,27 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, powerPreference: "high-performance" });
     if (!gl) return void onUnsupported?.();
 
-    const compile = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? "shader compile failed");
-      return s;
-    };
+    // Phones and low-power devices get the lite shader and fewer pixels (lib/perf.ts).
+    const lite = isLiteDevice();
+    const shaders = (
+      [
+        [gl.VERTEX_SHADER, VERT],
+        [gl.FRAGMENT_SHADER, lite ? VAULT_DOOR_LITE : VAULT_DOOR_FRAG],
+      ] as const
+    ).map(([type, src]) => {
+      const sh = gl.createShader(type)!;
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      return sh;
+    });
     const prog = gl.createProgram()!;
-    try {
-      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, VAULT_DOOR_FRAG));
-      gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? "link failed");
-    } catch (e) {
-      console.error(e);
-      return void onUnsupported?.();
-    }
+    shaders.forEach((sh) => gl.attachShader(prog, sh));
+    gl.linkProgram(prog);
+    // Where the driver allows it (KHR_parallel_shader_compile), the shader builds off the main thread: the intro and the
+    // page keep moving while it compiles, instead of freezing for it. Status is only read once it's done.
+    const parallel = gl.getExtension("KHR_parallel_shader_compile");
+
+    const run = (): (() => void) => {
     gl.useProgram(prog);
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -61,7 +66,7 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
     function resize() {
       const r = canvas!.getBoundingClientRect();
       // Ray marching is per pixel: render under the screen's resolution and let the browser scale it up.
-      const budget = (r.width < 768 ? 420_000 : 900_000) * quality;
+      const budget = (r.width < 768 ? (lite ? 200_000 : 420_000) : lite ? 480_000 : 900_000) * quality;
       let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const px = r.width * r.height * dpr * dpr;
       if (px > budget) dpr *= Math.sqrt(budget / px);
@@ -157,11 +162,11 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       if (dirty || moved) {
         draw();
         slow.push(ms);
-        if (slow.length >= 24) {
+        if (slow.length >= (lite ? 12 : 24)) {
           const median = slow.sort((a, b) => a - b)[slow.length >> 1]!;
           slow = [];
-          if (median > 22 && quality > 0.35) {
-            quality = Math.max(0.35, quality * 0.7);
+          if (median > 22 && quality > 0.3) {
+            quality = Math.max(0.3, quality * 0.7);
             resize();
           }
         }
@@ -207,6 +212,29 @@ export function VaultDoor({ progress, onUnsupported }: { progress: MutableRefObj
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("webglcontextlost", onLost);
+    };
+    };
+
+    let poll = 0;
+    let dead = false;
+    let stop: (() => void) | undefined;
+    const whenBuilt = () => {
+      if (dead) return;
+      if (parallel && !gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)) {
+        poll = requestAnimationFrame(whenBuilt);
+        return;
+      }
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        console.error(gl.getProgramInfoLog(prog), ...shaders.map((sh) => gl.getShaderInfoLog(sh)));
+        return void onUnsupported?.();
+      }
+      stop = run();
+    };
+    whenBuilt();
+    return () => {
+      dead = true;
+      cancelAnimationFrame(poll);
+      stop?.();
     };
     // progress is a ref; the effect wires it once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
