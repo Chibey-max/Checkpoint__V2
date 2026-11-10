@@ -181,4 +181,4 @@ The PRD names these views but not their JSON. `contracts/vault/src/views.rs` imp
 | `get_approval` | `{ hash_hex }` | `null` or `{ owner, expires_at_ms, created_at_ms }` |
 | `get_basket` | `{ hash_hex }` | `null` or `{ hash, basket_id, owner, agent, token, total, evidence_hash (hex), status, created_at_ms, payouts[{ vendor, amount, status }] }` |
 
-`settlement.ts` in the agents package is the slot for Isaac's Settlement module (I-3.3, H9): `execute(payload_b64, signature_b64) → { tx_hash }`.
+`settlement.ts` in the agents package is the Settlement module (I-3.3, H9): `execute(payload_b64, signature_b64) → { tx_hash }`, sent with the agent's function-call key.
