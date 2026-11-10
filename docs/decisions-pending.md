@@ -4,7 +4,9 @@ The code in this branch implements these choices. Each one either departs from P
 
 **Reply in chat with agree / change for each numbered item.** If an item is changed, it's a small edit; the file is named.
 
-## Needs agreement before H3 (rules hash to Isaac, Day 1 18:00)
+> **Team change (10 Nov):** the team is now David and Patrick. Isaac's tasks (Vault, cpUSD, DAO, settlement, deployment) moved to David, so items marked "Isaac" below are David's to decide. Patrick confirms anything that changes what the web app sees.
+
+## Needs agreement before H3 (rules hash, Day 1 18:00)
 
 ### 1. `max_age_hours` 720 instead of 168, and the clock is an input
 R-02 marks offers older than `max_age_hours` as REVIEW. With 168 h, a snapshot captured on 5–6 Nov goes stale on 12–13 Nov (freeze and video days), and every run after 14 Nov, including the AI screener's, would show every offer as REVIEW and Guard would refuse to sign. The config now says 720 h (30 days).
@@ -17,7 +19,7 @@ PRD §9.4 puts `"token": "cpusd.cpdemo.testnet"` inside `usd_to_token`. The sand
 
 `rules_hash = 89e1b151b955375cf1ae7b5af890d0212ad6284e21dc280bc504090d63f9c23d` (`pnpm rules:hash`)
 
-*Owner:* Isaac (Vault init uses this hash).
+*Owner:* David (Vault init uses this hash; changing it now takes a DAO vote, `set_rules_hash`).
 
 ## Needs agreement (behaviour)
 
@@ -27,7 +29,7 @@ PRD §7.3 step 5 only picks a REVIEW offer when an item has no ALLOW offer, so t
 
 ### 4. `evidence_hash` covers only what exists before signing
 §10.2 lists the signed basket and chain transaction hashes inside the evidence bundle, but `evidence_hash` goes inside the signed payload, which is circular. The bundle is now `{ core, evidence_hash, signed, chain }`. Only `core` (request, offers, verdicts, rules config and hash, acknowledgements, basket) is hashed; `signed` and `chain` are attached afterwards. `verify:audit` and the web app's verified badge use `verifyEvidenceBundle` from `@checkpoint/shared`.
-*Owner:* Patrick (audit page), Isaac (the Vault just stores and emits the 32 bytes).
+*Owner:* Patrick (audit page), David (the Vault just stores and emits the 32 bytes).
 
 ### 5. Adversarial rows live in `data/snapshot/fixtures/` and say `capture_method: "fixture"`
 The loader reads `catalog.json`, `offers.json` and every `fixtures/*.json`, so the demo shows the adversarial rows. Every fixture row must say `capture_method: "fixture"` (a new enum value), so the UI and README can label it as synthetic and the "real listings" claim stays true. `pnpm snapshot:check` enforces it.
@@ -35,7 +37,7 @@ The loader reads `catalog.json`, `offers.json` and every `fixtures/*.json`, so t
 
 ### 6. The demo basket and AT-01 need different requests
 With vendor-06 (unregistered on cpUSD) holding the cheapest allowed offer for one demo item, the demo basket always ends `PartiallyPaid`, which is good for AT-10. AT-01 ("both payouts Completed") then needs a request whose items vendor-06 doesn't win. The dev fixtures follow this layout: `dom-f` is vendor-06's.
-*Owner:* Patrick (snapshot), Isaac (AT-01 script).
+*Owner:* Patrick (snapshot), David (AT-01 is in `pnpm gate:testnet` and `pnpm demo:sandbox`).
 
 ## Additive interface changes (no breakage; please confirm)
 
@@ -49,7 +51,7 @@ With vendor-06 (unregistered on cpUSD) holding the cheapest allowed offer for on
    - Guard error codes `NOT_FOUND` and `INTERNAL`
 
    SSE messages carry `event: <type>` and the full envelope in `data`. See [api.md](api.md).
-8. **Vault view JSON** (Isaac): the views Guard and the agents read are proposed in [api.md § Vault views](api.md#vault-views-guard-and-the-agents-read-proposal-for-isaac), with arg names `owner_id`, `token_id`, `hash_hex` and the pubkey as base58. If the contract returns something else, change `packages/shared/src/vault-views.ts` in the same PR. Guard fails closed (503) on any unexpected shape.
+8. **Vault view JSON** (implemented in the contract; see #16): the views Guard and the agents read are proposed in [api.md § Vault views](api.md#vault-views-guard-and-the-agents-read-proposal-for-isaac), with arg names `owner_id`, `token_id`, `hash_hex` and the pubkey as base58. If the contract returns something else, change `packages/shared/src/vault-views.ts` in the same PR. Guard fails closed (503) on any unexpected shape.
 
 ## FYI (decided, easy to revert)
 
@@ -61,9 +63,9 @@ With vendor-06 (unregistered on cpUSD) holding the cheapest allowed offer for on
 14. **Repo is public, so the pre-commit hook fails closed without gitleaks.** Install it before committing: `brew install gitleaks`, or the release binary with its checksum verified, as the CI workflow does.
 15. **Task list weekdays are off by one.** 5 Nov 2026 is a Thursday. The gate is **Monday 9 Nov** and submission is **Saturday 14 Nov**. The labels come from `DAYS` in `docs/planning/source/build_tasks.py`.
 
-## Vault contract choices (David, covering Isaac's I-tasks, 6 Nov)
+## Vault contract choices (David, contract owner)
 
-These are in `contracts/vault`. They are all additive or they fill gaps in PRD §8 and §11.1. **Isaac, please review these first.**
+These are in `contracts/vault`. They are all additive or they fill gaps in PRD §8 and §11.1. They are decided and deployed. **Patrick:** #16 (view JSON), #17 (`ERR_UNKNOWN_OWNER`) and #23 (the new events) are the ones the web app can see.
 
 16. **The view JSON in item 8 is now implemented as proposed**, with arg names `owner_id`, `token_id`, `hash_hex` and the key as base58. The views also return a few extra fields (Zod strips them): `get_owner_state.basket_count`, `get_basket.day` and `get_basket.policy_version`. `get_status` returns `{paused, deficit, policy_version, guard_key_disabled, basket_count, owner_count}`. Millisecond times and amounts are strings. `get_owner_state.day` is always *today*, with `spent_today` already rolled over.
 17. **New error `ERR_UNKNOWN_OWNER`.** `set_agent`, `set_owner_limits` and `approve_basket` need the caller to have deposited at least once. Without this, anyone could fill the Vault's storage (which the Vault pays for) at a cost of 1 yocto per call. The demo order (deposit, then set_agent) already fits.
