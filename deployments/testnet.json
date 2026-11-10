@@ -82,7 +82,15 @@
     {
       "what": "after the redeploy: 1 cpUSD to vendor-01 via pnpm settle, Completed",
       "tx": "CdidzKvqGtV5zsJ5K4dsbimvLcc6LRmgy1AdLUCZ22Rv"
+    },
+    {
+      "what": "patrick-checkpoint.testnet handed to Patrick's own key; local key deleted",
+      "tx": "BPiKKeRD8Q8tWW2RNpcNwc6PW3P4oVArSkCwW2RhjZME"
+    },
+    {
+      "what": "DAO proposal 2: remove isaac-cp.testnet from the council (team is David + Patrick), approved",
+      "tx": "BhzF8dswsjEJZTdoHP15yrQ4FLZgMHzoHYK2mbdKuUaK"
     }
   ],
-  "council": ["david-checkpoint.testnet", "isaac-cp.testnet", "patrick-checkpoint.testnet"]
+  "council": ["david-checkpoint.testnet", "patrick-checkpoint.testnet"]
 }
