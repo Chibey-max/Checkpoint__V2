@@ -49,8 +49,10 @@ export function vaultErrorCode(err: unknown): VaultErrorCode | null {
 export function humanError(err: unknown): string {
   const code = vaultErrorCode(err);
   if (code) return VAULT_ERRORS[code];
-  const text = err instanceof Error ? err.message : String(err);
+  const text = err instanceof Error ? `${err.message} ${JSON.stringify(err)}` : typeof err === "string" ? err : JSON.stringify(err ?? "");
   if (/reject|denied|cancel/i.test(text)) return "You cancelled the request in your wallet.";
+  if (/does not exist|UNKNOWN_ACCOUNT|AccountDoesNotExist/i.test(text))
+    return "Your wallet account isn't on testnet yet. It needs a little testnet NEAR first (from a faucet such as near-faucet.io), then try again.";
   if (/not enough balance|NotEnoughBalance|LackBalanceForState/i.test(text)) return "Your account doesn't have enough NEAR for this transaction.";
   if (/fetch|network|ECONN|timeout/i.test(text)) return "Couldn't reach the NEAR network. Check your connection and try again.";
   return "Something went wrong. Please try again.";

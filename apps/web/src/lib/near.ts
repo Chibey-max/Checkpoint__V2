@@ -29,6 +29,19 @@ export async function hasContract(accountId: string) {
 }
 
 /**
+ * False only when the chain says the account doesn't exist, as with a new implicit (hex) wallet address that has
+ * never received NEAR. Any other failure counts as existing, so a flaky RPC never claims an account is missing.
+ */
+export async function accountExists(accountId: string) {
+  try {
+    await rpc().viewAccount({ accountId, blockQuery: { finality: "final" } });
+    return true;
+  } catch (e) {
+    return !/does not exist|UNKNOWN_ACCOUNT|AccountDoesNotExist/i.test(e instanceof Error ? `${e.message} ${JSON.stringify(e)}` : String(e));
+  }
+}
+
+/**
  * Re-reads a view until `done(result)` is true or the timeout passes. Used after transactions
  * instead of optimistic updates, so the chain stays the source of truth (P-1.2).
  */
