@@ -59,6 +59,38 @@
         "smtp",
         "10k emails"
       ]
+    },
+    {
+      "item_key": "cloud-gpu-h100-10h",
+      "title": "Cloud GPU, 1× NVIDIA H100 SXM 80 GB, 10 hours on demand",
+      "unit": "gpu-10h",
+      "min_spec": {},
+      "aliases": [
+        "h100",
+        "nvidia h100",
+        "cloud gpu",
+        "gpu cloud",
+        "gpu hours",
+        "gpu rental",
+        "rent a gpu"
+      ]
+    },
+    {
+      "item_key": "raspberry-pi5-8gb",
+      "title": "Raspberry Pi 5, 8 GB RAM, board only",
+      "unit": "board",
+      "min_spec": {
+        "ram_gb": 8
+      },
+      "aliases": [
+        "raspberry pi",
+        "raspberry pi 5",
+        "pi 5",
+        "rpi",
+        "rpi 5",
+        "single-board computer",
+        "sbc"
+      ]
     }
   ]
 }
