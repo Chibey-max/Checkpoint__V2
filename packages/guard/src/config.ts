@@ -1,9 +1,11 @@
 import { readFileSync } from 'node:fs';
 import {
   assertNotMainnet,
+  corsOriginFromEnv,
   generateKeyPair,
   RulesConfigSchema,
   rulesHashHex,
+  type CorsOrigin,
   type RulesConfig,
 } from '@checkpoint/shared';
 import {
@@ -31,7 +33,7 @@ export interface GuardConfig {
   snapshot: Snapshot;
   /** Pinned clock for R-02 (sandbox or dev only), for a reproducible keyless demo. */
   assessNowMs: number | null;
-  corsOrigin: string | undefined;
+  corsOrigin: CorsOrigin | undefined;
 }
 
 export function loadRulesConfig(path: string): RulesConfig {
@@ -93,6 +95,6 @@ export function loadGuardConfig(env: NodeJS.ProcessEnv = process.env): GuardConf
     rulesHash: rulesHashHex(rules),
     snapshot,
     assessNowMs,
-    corsOrigin: env.WEB_ORIGIN || undefined,
+    corsOrigin: corsOriginFromEnv(env.WEB_ORIGIN),
   };
 }

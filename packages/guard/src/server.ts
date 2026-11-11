@@ -1,5 +1,10 @@
 import { getConnInfo } from '@hono/node-server/conninfo';
-import { AssessRequestSchema, SignBasketRequestSchema, type GuardError } from '@checkpoint/shared';
+import {
+  AssessRequestSchema,
+  SignBasketRequestSchema,
+  type CorsOrigin,
+  type GuardError,
+} from '@checkpoint/shared';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { requestId, type RequestIdVariables } from 'hono/request-id';
@@ -41,7 +46,7 @@ export interface GuardAppOptions {
   logger?: Logger;
   /** false disables rate limiting (tests). Default 30 requests/minute/IP (FR-R09). */
   rateLimit?: { limit: number; windowMs: number } | false;
-  corsOrigin?: string | string[];
+  corsOrigin?: CorsOrigin;
 }
 
 export function createGuardApp(service: GuardService, opts: GuardAppOptions = {}) {

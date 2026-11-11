@@ -92,5 +92,21 @@
       "tx": "BhzF8dswsjEJZTdoHP15yrQ4FLZgMHzoHYK2mbdKuUaK"
     }
   ],
-  "council": ["david-checkpoint.testnet", "patrick-checkpoint.testnet"]
+  "council": ["david-checkpoint.testnet", "patrick-checkpoint.testnet"],
+  "hosting": {
+    "provider": "Render (free plan, Frankfurt), deployed 2026-11-11 from Phantomcall/Checkpoint__V2 main",
+    "guard": "https://checkpoint-guard.onrender.com",
+    "agents": "https://checkpoint-agents.onrender.com",
+    "web_origin": "https://checkpoint-eight-dusky.vercel.app,https://checkpoint-*-pinzypatz-2831s-projects.vercel.app,http://localhost:3000",
+    "llm": "groq openai/gpt-oss-120b",
+    "note": "auto-deploy is off (public repo URL); redeploy with: render deploys create <service id>"
+  },
+  "freeze": {
+    "date": "2026-11-11",
+    "vault_code_hash": "G9cZQeMRyvM6Uni3mPujsPYUqyhDnJpxoNn6Nnp6K6K",
+    "cpusd_code_hash": "EjXGxRYJk8nmQNHi6xs5MMJtrPgfSo6njWGA9bJbZG9N",
+    "policy_version": 4,
+    "dao": "checkpoint-council.sputnik-v2.testnet",
+    "freeze_check": "MATCH"
+  }
 }

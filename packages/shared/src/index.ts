@@ -14,3 +14,4 @@ export * from './rules-config';
 export * from './schemas';
 export * from './vault-views';
 export * from './verify';
+export * from './cors';
