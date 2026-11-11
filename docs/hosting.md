@@ -1,24 +1,34 @@
-# Optional hosting for judges (task D-8.2, P2)
+# Hosting Guard and the agents for the web app (task D-8.2)
 
-The **keyless path for judges is `pnpm demo:sandbox`**: it runs locally in about a minute and needs no account. Hosting Guard and the agents is a nice extra, not a requirement.
+The keyless path for judges is still `pnpm demo:sandbox`. Hosting lets the Vercel web app talk to a real Guard and agents on testnet.
 
-## Render (free tier, decision D-06)
+[`render.yaml`](../render.yaml) is a Render Blueprint for two free web services, `checkpoint-guard` and `checkpoint-agents`. Both run against the testnet Vault.
 
-[`render.yaml`](../render.yaml) is a Blueprint for two web services, `checkpoint-guard` and `checkpoint-agents`, both on the testnet Vault.
+## Deploy (about 15 minutes)
 
-1. In Render, go to **New → Blueprint** and pick this repo. Render reads `render.yaml`.
-2. Fill in the `sync: false` values in the dashboard. Never commit them.
-   - Both services: `NEAR_RPC_URL` (the D-04 choice) and `WEB_ORIGIN` (the web app's URL, for CORS).
-   - Guard: `GUARD_SECRET_KEY`, the same key the Vault has as Guard key v1. Copy it from the password manager.
-   - Agents: `AGENT_FC_PRIVATE_KEY` (function-call key only, from the password manager) and `GUARD_URL`, which is the Guard service's `https://…onrender.com` URL.
-3. Point the web app at the services: set `NEXT_PUBLIC_AGENTS_URL` to the agents service URL.
-4. Check that `GET /v1/health` on Guard returns `rules_hash_match: true`.
+1. In Render, go to **New → Blueprint**, connect GitHub and pick the repo: either `Phantomcall/Checkpoint__V2` or a fork kept in sync with `main`. Render reads `render.yaml` and proposes both services.
+2. Fill in the `sync: false` values when Render asks. **These are secrets: they go only in Render, never in git or in Vercel.**
 
-Things to know about the free tier:
+   | Variable | Service | Value |
+   |---|---|---|
+   | `NEAR_RPC_URL` | both | `https://rpc.testnet.fastnear.com` |
+   | `GUARD_SECRET_KEY` | Guard | From Bitwarden: "Checkpoint .env: GUARD_SECRET_KEY". It must be the key the Vault knows as Guard v1, `CAR74z4P…`. |
+   | `AGENT_FC_PRIVATE_KEY` | agents | From Bitwarden: "Checkpoint .env: AGENT_FC_PRIVATE_KEY". It is a function-call key that can only call `execute_basket`. |
+   | `GROQ_API_KEY` | agents | From Bitwarden: "Checkpoint .env: GROQ_API_KEY" |
+   | `GUARD_URL` | agents | The Guard service's URL, e.g. `https://checkpoint-guard.onrender.com` |
+   | `WEB_ORIGIN` | both | The Vercel production URL. To allow preview links too, add a pattern after a comma, e.g. `https://checkpoint.vercel.app,https://checkpoint-*-yourteam.vercel.app` |
 
-- Free instances sleep after about 15 minutes idle. The first request then takes 30–60 s. Open both health URLs before a demo.
-- The agents' SQLite file is on an ephemeral disk, so request history resets on every restart or deploy. Audit bundles for recorded baskets are in `docs/evidence.md` anyway.
-- The hosted agents run with `LLM_PROVIDER=none`. To turn on Groq explanations, set `LLM_PROVIDER=groq` and add `GROQ_API_KEY` as a secret.
-- The function-call key can only call `execute_basket` on the Vault, with a 1 NEAR allowance. A leaked hosted key can't move funds without a Guard signature and an owner approval (AT-08).
+3. Click **Apply**. The first build takes a few minutes.
+4. Check both services:
+   - `https://checkpoint-guard.onrender.com/v1/health` should show `"rules_hash_match": true`.
+   - `https://checkpoint-agents.onrender.com/v1/health` should show `{"ok":true}`.
+5. In Vercel, set these two values and redeploy the web app:
+   - `NEXT_PUBLIC_AGENTS_URL`: the agents URL
+   - `NEXT_PUBLIC_GUARD_URL`: the Guard URL
 
-**Status (7 Nov):** the Blueprint is ready but not deployed. Deploying needs the team's Render account and the two secrets from the password manager.
+## Know before a demo
+
+- **Free instances sleep after about 15 minutes idle.** The first request then takes 30–60 s. Open both `/v1/health` URLs a minute before a demo or recording.
+- **The agents' SQLite history is on an ephemeral disk,** so it resets on every deploy or restart. Paid baskets stay on chain, and `pnpm verify:audit` and the Audit page still read them.
+- **The agent key is limited.** The function-call key can only call `execute_basket`, with a 1 NEAR allowance. Even if it leaked, nothing moves without a Guard signature and the owner's approval (AT-08).
+- **`WEB_ORIGIN` controls which sites may call the services.** Anything not listed is blocked by the browser. Each entry allows one `*`, which matches letters, digits and hyphens only, never a `.` or `/`.
