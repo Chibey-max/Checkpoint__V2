@@ -75,6 +75,8 @@ export function RequestRoom({ id }: { id: string }) {
   // NO_ITEMS is explained by the "outside the catalogue" panel, so it isn't shown again as a bare error
   const fatal = view.errors.filter((e) => !e.recoverable && e.code !== "CANCELLED" && !(e.code === "NO_ITEMS" && view.unmatched.length));
   const notes = view.errors.filter((e) => e.recoverable);
+  // once the request is over nothing more is coming, so a dropped live connection isn't worth a warning
+  const over = ["final", "refused", "expired", "cancelled"].includes(view.state) || fatal.length > 0 || (!view.items.length && view.unmatched.length > 0);
 
   return (
     <div className="pt-10">
@@ -115,7 +117,7 @@ export function RequestRoom({ id }: { id: string }) {
             <p className="eyebrow px-2.5 pt-1.5 pb-2">Agent timeline</p>
             <Timeline view={view} />
           </div>
-          {conn && (
+          {conn && !over && (
             <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn-soft px-3 py-2 text-[12.5px] text-warn ring-1 ring-inset ring-warn/30">
               <WifiOff aria-hidden className="mt-0.5 size-4 shrink-0" /> {conn}
             </p>
@@ -200,7 +202,23 @@ export function RequestRoom({ id }: { id: string }) {
           {view.refusal && (
             <section role="alert" className="panel rounded-[var(--radius-card)] p-5 ring-1 ring-inset ring-bad/30">
               <p className="eyebrow text-bad">{view.refusal.code === "GUARD_UNAVAILABLE" ? "Guard is unavailable" : "Guard refused to sign"}</p>
-              <p className="mt-2 text-[13px] text-fg">{view.refusal.message}</p>
+              {(() => {
+                const plain = plainRefusal(view.refusal);
+                return plain ? (
+                  <>
+                    <p className="mt-2 text-[15px] font-medium text-fg">{plain.title}</p>
+                    <p className="mt-1 max-w-prose text-[13.5px] leading-relaxed text-muted">{plain.body}</p>
+                    {plain.href && (
+                      <Link href={plain.href} className="key key-secondary mt-3 h-9 px-4 text-[13px]">
+                        {plain.cta}
+                      </Link>
+                    )}
+                    <p className="mt-3 font-mono text-[11px] break-all text-faint">Guard said: {view.refusal.message}</p>
+                  </>
+                ) : (
+                  <p className="mt-2 text-[13px] text-fg">{view.refusal.message}</p>
+                );
+              })()}
               <ul className="mt-2 space-y-1 text-[13px] text-bad">
                 {view.refusal.findings.map((f, i) => (
                   <li key={`${f.rule_id}${i}`}>
@@ -278,4 +296,26 @@ function OutsideCatalogue({ unmatched, titles, rest }: { unmatched: { text: stri
       </div>
     </section>
   );
+}
+
+/**
+ * Guard's refusals are written for logs ("Agent X is not authorised by Y (set_agent)"). For the ones a person can act
+ * on, say what it means and what to do; Guard's own words stay underneath.
+ */
+function plainRefusal(r: { code: string; message: string }): { title: string; body: string; href?: string; cta?: string } | null {
+  if (/not authorised by .*\(set_agent\)/.test(r.message))
+    return {
+      title: "This account hasn't switched on the settlement agent",
+      body: "Guard only signs a basket the Vault could actually pay, and the Vault only pays through an agent its owner has switched on. Register on cpUSD, deposit cpUSD into your Vault and turn on Settlement agent on the Vault page, then send the list again. To try the whole flow without setting up a Vault, sign in as the demo owner.",
+      href: "/vault",
+      cta: "Open the Vault page",
+    };
+  if (r.code === "GUARD_UNAVAILABLE" || r.code === "GUARD_BAD_RESPONSE")
+    return {
+      title: "Guard didn't answer in time",
+      body: "The hosted Guard sleeps when nobody has used it for a while and takes up to a minute to wake. Nothing was signed or paid. Send the list again in a moment.",
+      href: "/desk",
+      cta: "Back to the desk",
+    };
+  return null;
 }

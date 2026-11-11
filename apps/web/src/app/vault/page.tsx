@@ -7,7 +7,7 @@ import { TrustLabel } from "@/components/trust-label";
 import { accountUrl, config, txUrl } from "@/lib/config";
 import { humanError } from "@/lib/errors";
 import { formatAmount, parseAmount } from "@/lib/format";
-import { ft, hasContract, pollView, vault, type VaultBalanceView, type VaultOwnerStateView, type VaultPolicyView } from "@/lib/near";
+import { accountExists, ft, hasContract, pollView, vault, type VaultBalanceView, type VaultOwnerStateView, type VaultPolicyView } from "@/lib/near";
 import { utcDayIndex } from "@checkpoint/shared";
 import { deposit, isRegistered, setAgent, storageDeposit, storageMin, txHash, withdraw, type Tx } from "@/lib/tx";
 import { useWallet } from "@/lib/wallet";
@@ -17,6 +17,8 @@ const AGENT = "agent.cpdemo.testnet";
 const DEMO_OWNER = "owner-demo.cpdemo.testnet";
 
 interface Data {
+  /** false for a new wallet address that has never received NEAR, so can't register, deposit or sign yet */
+  exists: boolean;
   vaultLive: boolean;
   tokenLive: boolean;
   registered: boolean;
@@ -36,13 +38,13 @@ function useVault(accountId: string | null) {
     setLoading(true);
     setError(null);
     try {
-      const [vaultLive, tokenLive] = await Promise.all([hasContract(config.vaultId), hasContract(config.tokenId)]);
+      const [vaultLive, tokenLive, exists] = await Promise.all([hasContract(config.vaultId), hasContract(config.tokenId), accountExists(accountId)]);
       const registered = tokenLive ? await isRegistered(accountId) : false;
       const wallet = tokenLive && registered ? BigInt(await ft.balanceOf(config.tokenId, accountId)) : 0n;
       const [policy, owner, balance] = vaultLive
         ? await Promise.all([vault.policy().catch(() => null), vault.ownerState(accountId).catch(() => null), vault.balance(accountId).catch(() => null)])
         : [null, null, null];
-      const d = { vaultLive, tokenLive, registered, wallet, policy, owner, balance };
+      const d = { exists, vaultLive, tokenLive, registered, wallet, policy, owner, balance };
       setData(d);
       return d;
     } catch (e) {
@@ -155,6 +157,22 @@ export default function VaultPage() {
         </div>
       )}
       {error && <Banner tone="bad" Icon={AlertTriangle} text={error} />}
+      {data && !data.exists && (
+        <StateCard
+          Icon={Wallet}
+          title="Your wallet account isn't on testnet yet"
+          body={`${shown} is a new wallet address. It only exists once it has received some testnet NEAR, and it needs a little to register on cpUSD and sign. Fund it from a testnet faucet, then refresh. cpUSD itself is a test token the team issues; to see a Vault that is already set up, view the demo owner.`}
+        >
+          <div className="flex flex-wrap gap-2">
+            <a href="https://near-faucet.io/" target="_blank" rel="noreferrer" className="key key-secondary h-9 px-4 text-[13px]">
+              Testnet faucet
+            </a>
+            <a href={`/vault?view=${DEMO_OWNER}`} className="key key-primary h-9 px-4 text-[13px]">
+              View the demo owner
+            </a>
+          </div>
+        </StateCard>
+      )}
       {data && !data.vaultLive && (
         <StateCard Icon={Hammer} title="The Vault isn't on testnet yet" body={`${config.vaultId} hasn't been deployed yet. Until it is, this page can only read the token side.`}>
           <a href={accountUrl(config.vaultId)} target="_blank" rel="noreferrer" className="font-mono text-xs text-accent underline-offset-4 hover:underline">
@@ -195,7 +213,7 @@ export default function VaultPage() {
                   <p className="mt-1 text-[13px] text-muted">NEP-145 storage: your account needs a small NEAR deposit on the token before it can hold cpUSD. Unused NEAR is refunded.</p>
                   <button
                     onClick={() => run("Register on cpUSD", async () => storageDeposit(accountId!, await storageMin()), (d) => !!d?.registered)}
-                    disabled={!!busy}
+                    disabled={!!busy || !data.exists}
                     className="key key-primary mt-4 h-10 px-5 text-sm"
                   >
                     {busy ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <UserPlus aria-hidden className="size-4" />} Register on cpUSD
