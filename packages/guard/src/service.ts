@@ -73,6 +73,9 @@ function randomU64(): bigint {
   return new DataView(b.buffer, b.byteOffset, 8).getBigUint64(0, true);
 }
 
+/** How long /v1/health reuses its last Vault read. */
+export const HEALTH_CACHE_MS = 30_000;
+
 export class GuardService {
   private readonly now: () => number;
   private readonly assessNow: () => number;
@@ -140,15 +143,35 @@ export class GuardService {
     return this.policyProblems(policy);
   }
 
+  /**
+   * Health is polled often (Render checks every 5 s), so the Vault read behind it
+   * is cached for HEALTH_CACHE_MS. Without the cache every probe was a live RPC
+   * call, and the shared hosting IPs hit the RPC provider's rate limit (HTTP 429).
+   * Signing and assessing always read the Vault live.
+   */
+  private healthCache: {
+    at: number;
+    value: Awaited<ReturnType<GuardService['healthUncached']>>;
+  } | null = null;
+
   async health() {
+    const t = this.now();
+    if (this.healthCache && t - this.healthCache.at < HEALTH_CACHE_MS)
+      return this.healthCache.value;
+    const value = await this.healthUncached();
+    this.healthCache = { at: t, value };
+    return value;
+  }
+
+  private async healthUncached() {
     try {
       const policy = await this.d.vault.getPolicy();
       const problems = this.policyProblems(policy);
       return {
         ok: problems.length === 0,
         rpc_ok: true,
-        vault_policy_version: policy.policy_version,
-        rules_hash_match: policy.rules_hash === this.d.rulesHash,
+        vault_policy_version: policy.policy_version as number | null,
+        rules_hash_match: (policy.rules_hash === this.d.rulesHash) as boolean | null,
       };
     } catch {
       return { ok: false, rpc_ok: false, vault_policy_version: null, rules_hash_match: null };
