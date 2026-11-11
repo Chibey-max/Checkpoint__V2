@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { isLiteDevice } from "@/lib/perf";
+import { renderTier } from "@/lib/perf";
 
 /**
  * The ring lock from the first version of the landing hero, now the intro that plays when someone first opens the
@@ -358,7 +358,7 @@ export function RingLock({
       const rect = canvas!.getBoundingClientRect();
       let dpr = Math.min(window.devicePixelRatio || 1, 2);
       const px = rect.width * rect.height * dpr * dpr;
-      const budget = isLiteDevice() ? 300_000 : PIXEL_BUDGET;
+      const budget = renderTier() === "mobile" ? 300_000 : PIXEL_BUDGET;
       if (px > budget) dpr *= Math.sqrt(budget / px);
       canvas!.width = Math.max(1, Math.round(rect.width * dpr));
       canvas!.height = Math.max(1, Math.round(rect.height * dpr));
