@@ -3,6 +3,7 @@ import {
   AccountIdSchema,
   CreateRequestSchema,
   type AgentEvent,
+  type CorsOrigin,
 } from '@checkpoint/shared';
 import { silentLogger, type Logger } from '@checkpoint/guard';
 import { Hono, type Context } from 'hono';
@@ -14,7 +15,7 @@ import { HttpError, type Orchestrator } from './orchestrator';
 
 export interface AgentsAppOptions {
   logger?: Logger;
-  corsOrigin?: string | string[];
+  corsOrigin?: CorsOrigin;
   /** Extra routes (the mock server mounts /v1/dev/* here). */
   extend?: (app: Hono<{ Variables: RequestIdVariables }>) => void;
   keepAliveMs?: number;

@@ -1,6 +1,7 @@
 # Render Blueprint for the optional judge-facing hosting (task D-8.2, D-06).
 # Secrets are `sync: false`: Render asks for them in the dashboard; nothing
-# secret lives in git. See docs/hosting.md.
+# secret lives in git. WEB_ORIGIN takes a comma-separated list, and one `*`
+# per entry for Vercel preview links. See docs/hosting.md.
 services:
   - type: web
     name: checkpoint-guard
@@ -42,5 +43,7 @@ services:
       - { key: GUARD_URL, sync: false }
       - { key: EVIDENCE_DIR, value: ./data/snapshot }
       - { key: AGENTS_DB_PATH, value: ./data/private/agents.sqlite }
-      - { key: LLM_PROVIDER, value: none }
+      - { key: LLM_PROVIDER, value: groq }
+      - { key: GROQ_API_KEY, sync: false }
+      - { key: LLM_MODEL, value: openai/gpt-oss-120b }
       - { key: WEB_ORIGIN, sync: false }

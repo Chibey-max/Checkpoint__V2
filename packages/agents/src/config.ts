@@ -1,4 +1,10 @@
-import { assertNotMainnet, rulesHashHex, type RulesConfig } from '@checkpoint/shared';
+import {
+  assertNotMainnet,
+  corsOriginFromEnv,
+  rulesHashHex,
+  type CorsOrigin,
+  type RulesConfig,
+} from '@checkpoint/shared';
 import {
   envInt,
   loadSnapshotOrThrow,
@@ -19,7 +25,7 @@ export interface AgentsConfig {
   port: number;
   dbPath: string;
   chainMode: 'rpc' | 'mock';
-  corsOrigin: string | undefined;
+  corsOrigin: CorsOrigin | undefined;
   llm: LlmConfig;
   rules: RulesConfig;
   rulesHash: string;
@@ -65,7 +71,7 @@ export function loadAgentsConfig(env: NodeJS.ProcessEnv = process.env): AgentsCo
         ? ':memory:'
         : resolveFromRoot(env.AGENTS_DB_PATH || './data/private/agents.sqlite'),
     chainMode,
-    corsOrigin: env.WEB_ORIGIN || undefined,
+    corsOrigin: corsOriginFromEnv(env.WEB_ORIGIN),
     llm,
     rules,
     rulesHash: rulesHashHex(rules),
