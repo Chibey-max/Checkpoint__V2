@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { GeistSerif } from "geist/font/serif";
-import { Cinzel, Cormorant_Garamond, Parisienne, Raleway } from "next/font/google";
+import localFont from "next/font/local";
 import { Atmosphere } from "@/components/site/atmosphere";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
@@ -11,14 +11,41 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
 
-/** The hero's handwriting. next/font downloads it at build time and serves it from this site. */
-const script = Parisienne({ weight: "400", subsets: ["latin"], variable: "--font-script-face", display: "swap" });
+/*
+ * Fonts are self-hosted (src/fonts, SIL OFL 1.1) so dev and builds never depend on
+ * fonts.googleapis.com; a slow or offline connection used to fall back to default fonts.
+ */
+/** The hero's handwriting. */
+const script = localFont({ src: "../fonts/parisienne-latin-400-normal.woff2", weight: "400", variable: "--font-script-face", display: "swap" });
 /** Display headings: a banknote serif. */
-const display = Cormorant_Garamond({ weight: ["500", "600"], style: ["normal", "italic"], subsets: ["latin"], variable: "--font-display-face", display: "swap" });
-/** Engraved labels: Roman capitals, like the lettering on a vault door or a bank's brass plate. */
+const display = localFont({
+  src: [
+    { path: "../fonts/cormorant-garamond-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/cormorant-garamond-latin-500-italic.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/cormorant-garamond-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/cormorant-garamond-latin-600-italic.woff2", weight: "600", style: "italic" },
+  ],
+  variable: "--font-display-face",
+  display: "swap",
+});
 /** The hero's lede under the handwritten headline: a refined sans, so the script stays the only flourish. */
-const lede = Raleway({ weight: ["400", "500"], subsets: ["latin"], variable: "--font-lede-face", display: "swap" });
-const engrave = Cinzel({ weight: ["500", "600"], subsets: ["latin"], variable: "--font-engrave-face", display: "swap" });
+const lede = localFont({
+  src: [
+    { path: "../fonts/raleway-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/raleway-latin-500-normal.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-lede-face",
+  display: "swap",
+});
+/** Engraved labels: Roman capitals, like the lettering on a vault door or a bank's brass plate. */
+const engrave = localFont({
+  src: [
+    { path: "../fonts/cinzel-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/cinzel-latin-600-normal.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-engrave-face",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Checkpoint · Procurement Desk",
