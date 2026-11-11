@@ -14,6 +14,16 @@
 export const VAULT_DOOR_FRAG = `#version 300 es
 precision highp float;
 out vec4 outColor;
+// Quality knobs. The lite tier (phones, low-power devices) defines smaller ones ahead of these: see VAULT_DOOR_LITE.
+#ifndef MARCH_STEPS
+#define MARCH_STEPS 150
+#define MARCH_K 0.9
+#define HIT_EPS 0.0004
+#define SHADOW_STEPS 28
+#define STACK_STEPS 24
+#define AO_STEPS 4
+#define FBM_OCT 4
+#endif
 
 uniform vec2 uRes;
 uniform float uWheel;   // wheel angle (rad)
@@ -69,7 +79,7 @@ float noise(vec2 p) {
   f = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash21(i), hash21(i + vec2(1, 0)), f.x), mix(hash21(i + vec2(0, 1)), hash21(i + vec2(1, 1)), f.x), f.y);
 }
-float fbm(vec2 p) { float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * noise(p); p *= 2.03; a *= 0.5; } return s; }
+float fbm(vec2 p) { float a = 0.5, s = 0.0; for (int i = 0; i < FBM_OCT; i++) { s += a * noise(p); p *= 2.03; a *= 0.5; } return s; }
 
 mat2 rot(float a) { float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
 float sdBox(vec3 p, vec3 b) { vec3 q = abs(p) - b; return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0); }
@@ -251,10 +261,10 @@ vec3 calcNormal(vec3 p) {
 
 float softShadow(vec3 ro, vec3 rd) {
   float res = 1.0, t = 0.02;
-  for (int i = 0; i < 28; i++) {
+  for (int i = 0; i < SHADOW_STEPS; i++) {
     float h = map(ro + rd * t).x;
     res = min(res, 10.0 * h / t);
-    t += clamp(h, 0.02, 0.25);
+    t += clamp(h, 0.02, 0.25) * (28.0 / float(SHADOW_STEPS));
     if (res < 0.01 || t > 4.0) break;
   }
   return clamp(res, 0.0, 1.0);
@@ -263,10 +273,10 @@ float softShadow(vec3 ro, vec3 rd) {
 // shadows inside the vault only come from the gold and its pallet, so they march just those
 float stackShadow(vec3 ro, vec3 rd, float maxT) {
   float res = 1.0, t = 0.01;
-  for (int i = 0; i < 24; i++) {
+  for (int i = 0; i < STACK_STEPS; i++) {
     float h = stackShadowMap(ro + rd * t);
     res = min(res, 8.0 * h / t);
-    t += clamp(h, 0.006, 0.12);
+    t += clamp(h, 0.006, 0.12) * (24.0 / float(STACK_STEPS));
     if (res < 0.01 || t > maxT) break;
   }
   return clamp(res, 0.0, 1.0);
@@ -274,8 +284,8 @@ float stackShadow(vec3 ro, vec3 rd, float maxT) {
 
 float ao(vec3 p, vec3 n) {
   float o = 0.0, s = 1.0;
-  for (int i = 1; i <= 4; i++) {
-    float h = 0.025 * float(i);
+  for (int i = 1; i <= AO_STEPS; i++) {
+    float h = 0.025 * float(i) * (4.0 / float(AO_STEPS));
     o += (h - map(p + n * h).x) * s;
     s *= 0.6;
   }
@@ -457,10 +467,10 @@ void main() {
   float t = 0.0;
   vec2 h = vec2(0.0);
   bool hit = false;
-  for (int i = 0; i < 150; i++) {
+  for (int i = 0; i < MARCH_STEPS; i++) {
     h = map(ro + rd * t);
-    if (h.x < 0.0004 * t) { hit = true; break; }
-    t += h.x * 0.9;
+    if (h.x < HIT_EPS * t) { hit = true; break; }
+    t += h.x * MARCH_K;
     if (t > 20.0) break;
   }
 
@@ -668,3 +678,9 @@ void main() {
   outColor = vec4(col, 1.0);
 }
 `;
+
+/** The lite tier: the same scene with about 40% fewer march steps, half-length shadows and two-octave noise. */
+export const VAULT_DOOR_LITE = VAULT_DOOR_FRAG.replace(
+  "#version 300 es\n",
+  "#version 300 es\n#define MARCH_STEPS 90\n#define MARCH_K 1.0\n#define HIT_EPS 0.0009\n#define SHADOW_STEPS 12\n#define STACK_STEPS 10\n#define AO_STEPS 2\n#define FBM_OCT 2\n",
+);

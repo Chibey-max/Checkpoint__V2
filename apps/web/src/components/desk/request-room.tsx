@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowLeft, Check, CircleSlash, FlaskConical, ScanSearch, WifiOff } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CircleSlash, FlaskConical, ScanSearch, ShieldQuestion, WifiOff } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useReducer, useState } from "react";
 import { HeaderRings, LockChips, type LockName } from "@/components/page-header";
@@ -72,7 +72,8 @@ export function RequestRoom({ id }: { id: string }) {
   if (view.state === "executing" || view.state === "final") locks.push("you");
   if (view.settlement.final_status && view.settlement.final_status !== "Failed") locks.push("vault");
   const firstLine = view.text.split("\n")[0] ?? "";
-  const fatal = view.errors.filter((e) => !e.recoverable && e.code !== "CANCELLED");
+  // NO_ITEMS is explained by the "outside the catalogue" panel, so it isn't shown again as a bare error
+  const fatal = view.errors.filter((e) => !e.recoverable && e.code !== "CANCELLED" && !(e.code === "NO_ITEMS" && view.unmatched.length));
   const notes = view.errors.filter((e) => e.recoverable);
 
   return (
@@ -122,14 +123,7 @@ export function RequestRoom({ id }: { id: string }) {
         </aside>
 
         <div className="min-w-0 space-y-4">
-          {view.unmatched.length > 0 && (
-            <div className="flex items-start gap-3 rounded-2xl bg-warn-soft px-4 py-3 text-[13px] text-warn ring-1 ring-inset ring-warn/30">
-              <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
-              <span>
-                Not in the catalogue, so nothing was guessed: <span className="font-mono">{view.unmatched.map((u) => `“${u.text}”`).join(", ")}</span>
-              </span>
-            </div>
-          )}
+          {view.unmatched.length > 0 && <OutsideCatalogue unmatched={view.unmatched} titles={titles} rest={view.items.length > 0} />}
           {fatal.map((e, i) => (
             <div key={`f${i}`} role="alert" className="flex items-start gap-3 rounded-2xl bg-bad-soft px-4 py-3 text-[13px] text-bad ring-1 ring-inset ring-bad/30">
               <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -146,7 +140,8 @@ export function RequestRoom({ id }: { id: string }) {
               </span>
             </div>
           ))}
-          {view.offers.length === 0 && !fatal.length ? (
+          {/* nothing matched the catalogue: the panel above says so, and no offers are coming */}
+          {view.offers.length === 0 && !view.items.length && view.unmatched.length ? null : view.offers.length === 0 && !fatal.length ? (
             <div className="panel flex flex-col items-center rounded-[var(--radius-card)] py-20 text-center">
               <ScanSearch aria-hidden className="size-8 animate-pulse text-accent" />
               <p className="mt-3 text-sm text-fg">{conn ? "Waiting for the agents service" : "Agents are reading your list"}</p>
@@ -233,5 +228,54 @@ export function RequestRoom({ id }: { id: string }) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Lines the agents couldn't match to the catalogue. Not an error to apologise for: Guard only signs prices it can check
+ * against at least three captured listings, so for anything outside the snapshot it won't guess, and says so.
+ */
+function OutsideCatalogue({ unmatched, titles, rest }: { unmatched: { text: string; reason: string }[]; titles: Record<string, string>; rest: boolean }) {
+  const verified = Object.values(titles).map((t) => t.split(",")[0]!);
+  return (
+    <section aria-labelledby="outside-title" className="panel rounded-[var(--radius-card)] p-5">
+      <div className="flex items-start gap-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-warn-soft text-warn ring-1 ring-inset ring-warn/30">
+          <ShieldQuestion aria-hidden className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="eyebrow text-warn">Outside the verified catalogue</p>
+          <h3 id="outside-title" className="display mt-2 text-[1.6rem] text-fg">
+            Guard won&apos;t price what it <span className="gilt italic">hasn&apos;t verified.</span>
+          </h3>
+          <ul className="mt-3 space-y-1.5">
+            {unmatched.map((u, i) => (
+              <li key={i} className="text-[13.5px] text-fg">
+                <span className="font-mono">“{u.text}”</span>
+                <span className="block text-[12px] text-muted">{u.reason === "no catalogue item matches" ? "Not in the price snapshot." : `${u.reason[0]!.toUpperCase()}${u.reason.slice(1)}.`}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 max-w-prose text-[13.5px] leading-relaxed text-muted">
+            Guard signs a price only when it can compare it with at least three real listings captured with their source and
+            time. Without those there&apos;s no market median to check against, so Checkpoint doesn&apos;t guess.{" "}
+            {rest ? "The rest of your list carries on below." : "Nothing was bought and nothing was signed."}
+          </p>
+          {verified.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 font-mono text-[10.5px] tracking-wider text-faint uppercase">Verified today</span>
+              {verified.map((t) => (
+                <span key={t} className="rounded-full border border-line px-2.5 py-1 text-xs text-muted">
+                  {t}
+                </span>
+              ))}
+              <Link href="/desk" className="ml-1 text-xs text-accent underline-offset-4 hover:underline">
+                Start a new list
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }

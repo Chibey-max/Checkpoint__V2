@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { GeistSerif } from "geist/font/serif";
@@ -20,6 +20,9 @@ const display = Cormorant_Garamond({ weight: ["500", "600"], style: ["normal", "
 const lede = Raleway({ weight: ["400", "500"], subsets: ["latin"], variable: "--font-lede-face", display: "swap" });
 const engrave = Cinzel({ weight: ["500", "600"], subsets: ["latin"], variable: "--font-engrave-face", display: "swap" });
 
+/** viewport-fit=cover, so the phone dock can sit just above the home indicator (env(safe-area-inset-bottom)). */
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+
 export const metadata: Metadata = {
   title: "Checkpoint · Procurement Desk",
   description: "AI agents propose purchases. Guard checks every offer, you approve the exact basket, and the Vault enforces your limits on NEAR.",
@@ -39,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + INTRO_SCRIPT }} />
       </head>
-      <body className="min-h-screen">
+      <body className="min-h-screen max-md:pb-[calc(112px+env(safe-area-inset-bottom))]">
         <Intro />
         <WalletProvider>
           <Atmosphere />

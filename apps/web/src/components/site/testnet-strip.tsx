@@ -12,3 +12,13 @@ export function TestnetStrip() {
     </p>
   );
 }
+
+/** The same notice, as one line along the top of the phone dock (FR-UI07: on every screen). */
+export function TestnetNote() {
+  return (
+    <p role="status" className="dock-note flex items-center justify-center gap-1.5 font-mono text-[8.5px] tracking-[0.06em] uppercase">
+      <span className="size-1 shrink-0 rounded-full bg-[#ff9a5c] animate-pulse-dot" />
+      NEAR {config.network} · test tokens · vendor accounts are stand-ins
+    </p>
+  );
+}

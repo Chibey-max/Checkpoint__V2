@@ -7,8 +7,9 @@ This folder holds the price evidence the Guard rules run on (PRD §9, §10.2). E
 | Snapshot | `snap-v0-2026-11-05` (v0, not frozen yet; freezes at P-1.3 after David's validator runs) |
 | Captured | 2026-11-05, between 17:00 and 17:40 UTC. Every offer carries `captured_at: 2026-11-05T17:30:00Z`. |
 | Captured by | Patrick |
+| Second capture | 2026-11-11, 13:51 UTC: two catalogue items added (cloud GPU and Raspberry Pi 5), seven offers. Each offer carries its own `captured_at`. The 5 Nov rows are unchanged. |
 | Method | `capture_method: "script"`. Each pricing page was fetched and the plan's price read from the page text. Screenshots were taken with headless Chrome at 1366×2200. |
-| Category | Compute and dev infrastructure (decision D-01) |
+| Category | Compute and dev infrastructure (decision D-01). The second capture stays inside it: GPU compute and a single-board computer. Items stay under the Vault's 400 cpUSD basket cap. |
 | Currency | USD. Two Hetzner prices are listed in EUR and converted at the ECB reference rate for 2026-11-05: **1 EUR = 1.1224 USD**. The result is floored to micro-USD. |
 | Units | Prices are integer micro-USD (1 USD = 1,000,000). The Coordinator converts 1 USD to 1 cpUSD (6 decimals). |
 
@@ -20,6 +21,8 @@ This folder holds the price evidence the Guard rules run on (PRD §9, §10.2). E
 | `domain-com-year` | .com domain registration, 1 year | `{"tld": "com"}` |
 | `storage-1tb-month` | Object storage, 1 TB stored, 1 month | `{"storage_gb": 1000}` |
 | `email-10k-month` | Transactional email, 10,000 emails, 1 month | `{"emails_per_month": 10000}` |
+| `cloud-gpu-h100-10h` | Cloud GPU, 1× NVIDIA H100 SXM 80 GB, 10 hours on demand | `{}`: the spec schema has no GPU fields, so like-for-like rests on the product: H100 **SXM** only (PCIe and NVL are different parts) |
+| `raspberry-pi5-8gb` | Raspberry Pi 5, 8 GB RAM, board only | `{"ram_gb": 8}` |
 
 `storage_gb` and `emails_per_month` extend the `min_spec` fields listed in PRD §10.2, so storage and email can be spec-checked too (R-10).
 
@@ -29,10 +32,10 @@ Every offer is paid to a neutral stand-in testnet account (D-09). The UI shows t
 
 | Stand-in | Sellers | Notes |
 |---|---|---|
-| `vendor-01` | DigitalOcean, Porkbun, Postmark | |
-| `vendor-02` | Amazon Web Services, Gandi, Wasabi | |
-| `vendor-03` | Cloudflare, Name.com, Mailgun | |
-| `vendor-04` | Akamai (Linode), Hetzner, IONOS, Resend | |
+| `vendor-01` | DigitalOcean, Porkbun, Postmark, RunPod, CanaKit | |
+| `vendor-02` | Amazon Web Services, Gandi, Wasabi, Thunder Compute, Vilros | |
+| `vendor-03` | Cloudflare, Name.com, Mailgun, Hyperstack, Adafruit | |
+| `vendor-04` | Akamai (Linode), Hetzner, IONOS, Resend, PiShop | |
 | `vendor-05` | Fixture rows only | **Not allowlisted** (AT-04) |
 | `vendor-06` | Backblaze, OVHcloud | **Not registered on cpUSD** (AT-10). Backblaze is the cheapest good storage offer, so the demo basket pays vendor-06. |
 
@@ -78,6 +81,27 @@ Verdicts below are what Guard returns (`assessOffers` from `@checkpoint/guard`, 
 | `email-mailgun` | Mailgun | vendor-03 | $15.00 | 100.00% | ALLOW (R-08) | [page](https://www.mailgun.com/pricing/) | [jpg](screens/email-mailgun.jpg) | – |
 | `email-resend` | Resend | vendor-04 | $20.00 | 133.33% | BLOCK (R-05) | [page](https://resend.com/pricing) | [jpg](screens/email-resend.jpg) | Cheapest Resend plan that covers 10k/month; it includes 50k. |
 
+### Cloud GPU, 1× H100 SXM 80 GB, 10 hours (median $32.00) · captured 2026-11-11
+
+| offer_id | Seller | Stand-in | Price | Ratio | Expected | Source | Screenshot | Note |
+|---|---|---|---|---|---|---|---|---|
+| `gpu-h100-hyperstack` | Hyperstack | vendor-03 | $32.00 | 100.00% | ALLOW (R-08) | [page](https://www.hyperstack.cloud/gpu-pricing) | [jpg](screens/gpu-h100-hyperstack.jpg) | On-demand $3.20/hr x 10. The reservation table (from $2.72/hr) needs a commitment, so it is not used. |
+| `gpu-h100-thunder` | Thunder Compute | vendor-02 | $32.00 | 100.00% | ALLOW (R-08) | [page](https://www.thundercompute.com/pricing) | [jpg](screens/gpu-h100-thunder.jpg) | $3.20/hr x 10 with the included vCPUs; extra vCPUs are not counted. |
+| `gpu-h100-runpod` | RunPod | vendor-01 | $39.90 | 124.69% | BLOCK (R-05) | [page](https://www.runpod.io/pricing) | [jpg](screens/gpu-h100-runpod.jpg) | $3.99/hr x 10. RunPod's H100 PCIe ($2.89/hr) is a different part. A real-world 'over 120%' case. |
+
+Excluded: Lambda's listed H100 price ($4.59/GPU/hr) only takes effect on 16 Nov 2026, so it isn't a current price. Vast.ai renders its rates after load and Vultr blocked the fetch.
+
+### Raspberry Pi 5, 8 GB, board only (median $175.00) · captured 2026-11-11
+
+| offer_id | Seller | Stand-in | Price | Ratio | Expected | Source | Screenshot | Note |
+|---|---|---|---|---|---|---|---|---|
+| `pi5-pishop` | PiShop | vendor-04 | $175.00 | 100.00% | ALLOW (R-08) | [page](https://www.pishop.us/product/raspberry-pi-5-8gb/) | [jpg](screens/pi5-pishop.jpg) | Official reseller, in stock. |
+| `pi5-canakit` | CanaKit | vendor-01 | $175.00 | 100.00% | ALLOW (R-08) | [page](https://www.canakit.com/raspberry-pi-5-8gb.html) | [jpg](screens/pi5-canakit.jpg) | Board only; the kits on the same page are not like-for-like. |
+| `pi5-vilros` | Vilros | vendor-02 | $175.00 | 100.00% | ALLOW (R-08) | [page](https://vilros.com/products/raspberry-pi-5) | [jpg](screens/pi5-vilros.jpg) | Board only. |
+| `pi5-adafruit` | Adafruit | vendor-03 | $200.00 | 114.28% | REVIEW (R-06) | [page](https://www.adafruit.com/product/5813) | [jpg](screens/pi5-adafruit.jpg) | Out of stock at capture; the listed price is kept as an 'above the median' case. |
+
+Excluded: SparkFun's page loaded without a price, and Micro Center blocked the fetch. A physical graphics card (e.g. RTX 3050) was tried too: Newegg, Micro Center, B&H, Amazon, Best Buy, Walmart, eBay and Adorama all block headless Chrome, and Jumia and Konga list only laptops with the GPU built in (well over the basket cap). It needs a manual capture.
+
 ### Expected demo basket
 
 For the list "2× VPS 2 vCPU/4 GB for 1 month, 1× .com domain for 1 year, 1 TB object storage for 1 month, 10k transactional emails", the result should be the same with or without the fixtures:
@@ -109,7 +133,7 @@ No real offer is above 120% of the VPS median, so `fx-vps-overpriced` supplies t
 
 ## Known issues and to-dos
 
-1. **Staleness (resolved in config, pending team OK).** `config/rules.config.json` now sets `max_age_hours` to 720 (decisions-pending #1), so these 5 Nov captures stay fresh until 5 Dec, past submission and judging. The snapshot is frozen as of 5 Nov: new rows go only into `fixtures/`.
+1. **Staleness (resolved in config, pending team OK).** `config/rules.config.json` now sets `max_age_hours` to 720 (decisions-pending #1), so these 5 Nov captures stay fresh until 5 Dec, past submission and judging, and the 11 Nov captures until 11 Dec. The 5 Nov rows are frozen; the 11 Nov capture added new items only and changed no existing row, so every verdict above and the demo basket are unchanged.
 2. **Five screenshots still need capturing by hand.** Lightsail, Hetzner Cloud, Porkbun, IONOS and Backblaze blocked headless Chrome. Open each source URL in a normal browser, take the screenshot with Flameshot, save it as `screens/<offer_id>.jpg` and set the offer's `screenshot` field.
 3. **"Starting at" and intro prices** (OVHcloud $4.54 and IONOS $1) are kept as displayed. They are real examples of prices the rules should send to REVIEW rather than auto-buy.
 4. **Excluded:** Vultr, Namecheap, Spaceship, GoDaddy and Hover blocked automated fetches. Cloudflare Registrar publishes no .com price on its product page, so it was skipped rather than taken from a third-party tracker. Dynadot's price needed a coupon.

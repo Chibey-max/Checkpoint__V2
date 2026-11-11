@@ -4,6 +4,7 @@ import { ArrowRight, ChevronDown, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ALL_DONE, GuardCard, VaultCard, YouCard, type LockSteps } from "./lock-story";
+import { isTouch } from "@/lib/perf";
 import { VaultDoor } from "./vault-door";
 import { easeInOut, passed, seg, T } from "./vault-timeline";
 
@@ -102,15 +103,30 @@ export function Hero() {
         s.style.opacity = "0.002";
         s.style.setProperty("--press", "0.5");
       });
+    // Where the section sits, measured on resize rather than every frame: reading layout after the loop's style writes
+    // would force the browser to recompute it each frame.
+    const box = { top: 0, height: 1 };
+    const measure = () => {
+      const el = section.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      box.top = r.top + window.scrollY;
+      box.height = r.height;
+    };
+    measure();
+    const boxWatch = new ResizeObserver(measure);
+    if (section.current) boxWatch.observe(section.current);
+    window.addEventListener("resize", measure);
+    // A little inertia, so the mechanism feels heavy rather than glued to the scrollbar. A finger already scrolls
+    // smoothly, so on touch it follows twice as closely and never feels like it lags behind.
+    const follow = isTouch() ? 15 : 7;
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - prev) / 1000);
       prev = now;
       const el = section.current;
       if (el) {
-        const r = el.getBoundingClientRect();
-        const target = seg(-r.top, 0, Math.max(1, r.height - window.innerHeight));
-        // A little inertia, so the mechanism feels heavy rather than glued to the scrollbar.
-        progress.current += (target - progress.current) * (1 - Math.exp(-dt * 7));
+        const target = seg(window.scrollY - box.top, 0, Math.max(1, box.height - window.innerHeight));
+        progress.current += (target - progress.current) * (1 - Math.exp(-dt * follow));
         if (Math.abs(target - progress.current) < 1e-4) progress.current = target;
         const p = progress.current;
         if (copy.current) {
@@ -194,7 +210,11 @@ export function Hero() {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      boxWatch.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   const headline = penLines(HEADLINE);
@@ -207,7 +227,7 @@ export function Hero() {
         ref={section}
         aria-label="Checkpoint"
         // Full-bleed, tucked up under the floating nav. The extra height is the scroll that opens the door.
-        className={`relative -mt-[140px] md:-mt-[100px] ${reduced ? "h-svh" : "h-[600svh]"}`}
+        className={`relative -mt-[72px] md:-mt-[100px] ${reduced ? "h-svh" : "h-[600svh]"}`}
         style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
       >
         <div className="hero-stage sticky top-0 h-svh overflow-hidden">
@@ -220,7 +240,7 @@ export function Hero() {
           {/* keep the copy legible over the wall */}
           <div ref={copy} className="absolute inset-0">
             <div aria-hidden className="hero-scrim pointer-events-none absolute inset-0" />
-            <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 sm:px-6 lg:px-8">
+            <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 max-md:pb-[150px] sm:px-6 lg:px-8">
               <div className={go ? "ink-go" : ""}>
                 <p className="hero-rise hero-chip inline-flex items-center gap-2 rounded-full py-1 pr-3 pl-1.5 text-[12px] ring-1">
                   <span className="rounded-full bg-[rgb(227_180_94/0.14)] px-2 py-0.5 font-engrave text-[10px] font-semibold tracking-[0.16em] text-accent uppercase">NEAR Hackathon 2026</span>
@@ -256,7 +276,7 @@ export function Hero() {
                   }}
                   aria-hidden={active !== i}
                   style={{ opacity: 0, visibility: "hidden" }}
-                  className={`pointer-events-none absolute inset-0 mx-auto flex w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-5 sm:px-6 lg:px-8 ${
+                  className={`pointer-events-none absolute inset-0 mx-auto flex w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-5 max-md:pb-[124px] sm:px-6 lg:px-8 ${
                     i === 2 ? "justify-end" : "justify-start"
                   }`}
                 >
@@ -268,7 +288,7 @@ export function Hero() {
                 ref={rail}
                 aria-hidden
                 style={{ opacity: 0 }}
-                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[150px] max-lg:bottom-auto md:max-lg:top-[112px]"
+                className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[84px] max-lg:bottom-auto md:max-lg:top-[112px]"
               >
                 <ol className="nav-plate flex items-center gap-2 rounded-full px-3 py-1.5">
                   {LOCKS.map((l, i) => (
@@ -290,7 +310,7 @@ export function Hero() {
                 </ol>
               </div>
 
-              <div ref={cue} className="hero-cue absolute inset-x-0 bottom-9 flex flex-col items-center gap-1.5">
+              <div ref={cue} className="hero-cue absolute inset-x-0 bottom-9 flex max-md:hidden flex-col items-center gap-1.5">
                 <span className="font-engrave text-[11px] font-semibold tracking-[0.24em] uppercase">Scroll to open the vault</span>
                 <ChevronDown aria-hidden className="size-4 animate-bounce" />
               </div>
