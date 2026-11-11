@@ -4,7 +4,23 @@ The keyless path for judges is still `pnpm demo:sandbox`. Hosting lets the Verce
 
 [`render.yaml`](../render.yaml) is a Render Blueprint for two free web services, `checkpoint-guard` and `checkpoint-agents`. Both run against the testnet Vault.
 
-## Deploy (about 15 minutes)
+## Live (11 Nov)
+
+| Service | URL | Render ID |
+|---|---|---|
+| Guard | https://checkpoint-guard.onrender.com | `srv-dbq51j49v7es73ci4lb0` |
+| Agents (Groq on) | https://checkpoint-agents.onrender.com | `srv-dbq51p0ae00c73dbe8q0` |
+
+`WEB_ORIGIN` on both: `https://checkpoint-eight-dusky.vercel.app`, `https://checkpoint-*-pinzypatz-2831s-projects.vercel.app` (Vercel previews) and `http://localhost:3000`.
+
+Checked after deploy:
+- Guard health: `rules_hash_match: true`, policy v4.
+- CORS headers come back for the Vercel site and are refused for other origins.
+- The demo list reached a Guard-signed basket in 4 s with the LLM parser.
+
+The services deploy from the public repo URL, so **auto-deploy is off.** After merging to `main`, run `render deploys create srv-dbq51j49v7es73ci4lb0` (Guard) and `render deploys create srv-dbq51p0ae00c73dbe8q0` (agents).
+
+## Deploy from scratch (about 15 minutes)
 
 1. In Render, go to **New → Blueprint**, connect GitHub and pick the repo: either `Phantomcall/Checkpoint__V2` or a fork kept in sync with `main`. Render reads `render.yaml` and proposes both services.
 2. Fill in the `sync: false` values when Render asks. **These are secrets: they go only in Render, never in git or in Vercel.**
