@@ -14,7 +14,14 @@ import {
 } from '@checkpoint/shared';
 import { loadSnapshotOrThrow } from '@checkpoint/shared/node';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createGuardApp, createLogger, GuardService, GuardSigner, MockVaultViews } from '../src';
+import {
+  createGuardApp,
+  createLogger,
+  GuardService,
+  GuardSigner,
+  HEALTH_CACHE_MS,
+  MockVaultViews,
+} from '../src';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const SNAP = loadSnapshotOrThrow(`${ROOT}data/fixtures/dev-snapshot`);
@@ -371,5 +378,27 @@ describe('determinism', () => {
   });
   it('same request, nonce and clock → same hash', async () => {
     expect((await (await post(setup().app, '/v1/sign-basket', signReq())).json()).hash_hex).toBe(a);
+  });
+});
+
+describe('health caching (hosted probes every 5 s)', () => {
+  it('reads the Vault once per HEALTH_CACHE_MS, not once per probe', async () => {
+    const { service, vault } = setup();
+    let t = NOW;
+    (service as unknown as { now: () => number }).now = () => t;
+    let reads = 0;
+    const real = vault.getPolicy.bind(vault);
+    vault.getPolicy = async () => {
+      reads += 1;
+      return real();
+    };
+    for (let i = 0; i < 6; i++) {
+      expect((await service.health()).rules_hash_match).toBe(true);
+      t += 5_000; // 6 probes over 25 s
+    }
+    expect(reads).toBe(1);
+    t = NOW + HEALTH_CACHE_MS + 1;
+    await service.health();
+    expect(reads).toBe(2);
   });
 });
