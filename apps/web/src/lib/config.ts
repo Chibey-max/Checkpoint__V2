@@ -16,6 +16,8 @@ export const config = {
   guardUrl: clean(process.env.NEXT_PUBLIC_GUARD_URL) ?? "http://localhost:8787",
   explorerUrl: clean(process.env.NEXT_PUBLIC_EXPLORER_URL) ?? "https://testnet.nearblocks.io",
   useMock: clean(process.env.NEXT_PUBLIC_USE_MOCK) === "1",
+  /** Saved evidence bundles, used by the Audit page when the agents service no longer has one (docs/evidence/bundles). */
+  evidenceUrl: clean(process.env.NEXT_PUBLIC_EVIDENCE_URL) ?? "https://raw.githubusercontent.com/Phantomcall/Checkpoint__V2/main/docs/evidence/bundles",
 } as const;
 
 export const txUrl = (hash: string) => `${config.explorerUrl}/txns/${hash}`;

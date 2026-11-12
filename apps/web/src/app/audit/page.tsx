@@ -24,6 +24,8 @@ interface Row {
   status: Status | null;
   payouts: { vendor: string; amount: string; status: string | null }[];
   bundle: EvidenceBundle | null;
+  /** where the bundle came from: the agents service that built it, or the copy saved in the repo */
+  from: BundleFrom;
   bundleError: string | null;
   /** The evidence hash the Vault stored, when the row came from chain. All zeros means none was bound (a smoke test). */
   chainEvidence: string | null;
@@ -45,12 +47,29 @@ const TERMINAL_NOTE: Record<Hint, string> = {
   browser: "The in-browser agents keep bundles in this browser, so download a basket's Evidence JSON first. The key is the published dev key.",
 };
 
-async function fetchBundle(basketId: string): Promise<{ bundle: EvidenceBundle | null; error: string | null }> {
+type BundleFrom = "agents" | "repo" | null;
+
+/**
+ * A basket's evidence bundle: from the agents service that built it, or, when that service no longer has it (the hosted
+ * one forgets everything when it restarts), from the copy saved in the repo at docs/evidence/bundles/<basket id>.json.
+ * Either way the page re-verifies it in the browser (hashes, Guard's signature, the chain record), so where it came from
+ * doesn't change what it proves; it is shown only so nobody is surprised.
+ */
+async function fetchBundle(basketId: string): Promise<{ bundle: EvidenceBundle | null; error: string | null; from: BundleFrom }> {
+  let error: string;
   try {
-    return { bundle: (await agents.audit(basketId)) as EvidenceBundle, error: null };
+    return { bundle: (await agents.audit(basketId)) as EvidenceBundle, error: null, from: "agents" };
   } catch (e) {
-    return { bundle: null, error: e instanceof Error ? e.message : String(e) };
+    error = e instanceof Error ? e.message : String(e);
   }
+  if (agents.mode !== "mock" && /^[0-9a-f-]{36}$/.test(basketId)) {
+    try {
+      const r = await fetch(`${config.evidenceUrl}/${basketId}.json`, { cache: "no-store" });
+      if (r.ok) return { bundle: (await r.json()) as EvidenceBundle, error: null, from: "repo" };
+      if (r.status === 404) error += " · no copy saved in docs/evidence/bundles yet";
+    } catch {}
+  }
+  return { bundle: null, error, from: null };
 }
 
 /** Before the chain has the basket, the signed payload's own created_at_ms is the best timestamp. */
@@ -62,8 +81,18 @@ function createdAt(bundle: EvidenceBundle | null) {
   }
 }
 
-function toRow(basket_id: string, bundle: EvidenceBundle | null, bundleError: string | null, chain: VaultBasketView | null | undefined, guardKey: string | null): Row {
+function toRow(basket_id: string, bundle: EvidenceBundle | null, bundleError: string | null, chain: VaultBasketView | null | undefined, guardKey: string | null, from: BundleFrom = null): Row {
   const v = bundle ? verifyEvidenceBundle(bundle, { guardPubkeyB58: guardKey, ...(chain !== undefined ? { chainBasket: chain } : {}) }) : { ok: false, checks: [] };
+  // A bundle can be valid and still be for a different basket (a mislabelled saved copy): it must name the one asked for.
+  if (bundle?.signed) {
+    let named: string | null = null;
+    try {
+      named = decodePayload(fromBase64(bundle.signed.payload_b64)).basket_id;
+    } catch {}
+    const same = named === basket_id;
+    v.checks = [{ name: "bundle is for this basket", status: same ? "PASS" : "FAIL", detail: same ? basket_id : `bundle is for ${named ?? "an unreadable basket"}` }, ...v.checks];
+    v.ok = v.ok && same;
+  }
   const fromChain = chain ?? null;
   return {
     basket_id,
@@ -75,6 +104,7 @@ function toRow(basket_id: string, bundle: EvidenceBundle | null, bundleError: st
       ? fromChain.payouts.map((p) => ({ vendor: p.vendor, amount: p.amount, status: p.status }))
       : (bundle?.core.basket.payouts ?? []).map((p, i) => ({ vendor: p.vendor_id, amount: p.amount, status: bundle?.chain.payouts.find((x) => x.index === i)?.status ?? null })),
     bundle,
+    from,
     bundleError,
     chainEvidence: fromChain?.evidence_hash ?? null,
     checks: v.checks,
@@ -96,8 +126,8 @@ function useAudit(owner: string) {
         const [baskets, policy] = await Promise.all([vault.baskets(owner), vault.policy().catch(() => null)]);
         const out = await Promise.all(
           baskets.map(async (b) => {
-            const { bundle, error } = await fetchBundle(b.basket_id);
-            return toRow(b.basket_id, bundle, error, b, policy?.guard_pubkey ?? null);
+            const { bundle, error, from } = await fetchBundle(b.basket_id);
+            return toRow(b.basket_id, bundle, error, b, policy?.guard_pubkey ?? null, from);
           }),
         );
         setRows(out.sort((a, b) => b.created - a.created));
@@ -110,8 +140,8 @@ function useAudit(owner: string) {
             const view = await agents.requestView(r.request_id);
             const id = view.signed?.basket_id ?? view.basket?.basket_id;
             if (!id) return null;
-            const { bundle, error } = await fetchBundle(id);
-            return toRow(id, bundle, error, undefined, guardKey);
+            const { bundle, error, from } = await fetchBundle(id);
+            return toRow(id, bundle, error, undefined, guardKey, from);
           }),
         );
         setRows(out.filter((x): x is Row => !!x).sort((a, b) => b.created - a.created));
@@ -144,11 +174,11 @@ export default function AuditPage() {
     const id = lookup.trim();
     if (!id) return;
     setFound("loading");
-    const { bundle, error } = await fetchBundle(id);
+    const { bundle, error, from } = await fetchBundle(id);
     if (!bundle) return setFound({ error: error ?? "Not found." });
     let chain: VaultBasketView | null | undefined;
     if (source === "chain" && bundle.signed) chain = await vault.basket(bundle.signed.hash_hex).catch(() => undefined);
-    setFound(toRow(id, bundle, null, chain, source === "chain" ? ((await vault.policy().catch(() => null))?.guard_pubkey ?? null) : await agents.guardPubkey()));
+    setFound(toRow(id, bundle, null, chain, source === "chain" ? ((await vault.policy().catch(() => null))?.guard_pubkey ?? null) : await agents.guardPubkey(), from));
   }
 
   const hint: Hint = source === "chain" ? "chain" : agents.mode === "mock" ? "browser" : dev ? "dev" : "chain";
@@ -376,6 +406,15 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
             <p className="flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-muted uppercase">
               <FileSearch aria-hidden className="size-3.5" /> Checked in your browser
             </p>
+            {r.from === "repo" && (
+              <p className="mt-2 text-[12px] text-muted">
+                Evidence from the{" "}
+                <a href={`https://github.com/Phantomcall/Checkpoint__V2/blob/main/docs/evidence/bundles/${r.basket_id}.json`} target="_blank" rel="noreferrer" className="text-accent underline-offset-4 hover:underline">
+                  copy saved in the repo
+                </a>
+                ; the hosted agents no longer hold it. Every check below is recomputed here all the same.
+              </p>
+            )}
             {r.bundle ? (
               <ul className="mt-3 space-y-2">
                 {r.checks.map((c) => (
@@ -402,7 +441,7 @@ function BasketRow({ r, open, onToggle, dev }: { r: Row; open: boolean; onToggle
                   <span className="text-fg">The status and payouts are read straight from the Vault.</span>{" "}
                   {noEvidence
                     ? "This basket was approved with an empty evidence hash: a contract smoke test, not one the agents built, so there's no bundle to check."
-                    : "Its evidence bundle is kept by the agents service that built it, which this page can't reach, so the evidence hash and Guard's signature aren't rechecked here."}
+                    : "Its evidence bundle was kept by the agents service that built it, and the hosted service forgets bundles when it restarts. With no saved copy in the repo, the evidence hash and Guard's signature can't be rechecked here."}
                 </p>
                 {!noEvidence && r.bundleError && (
                   <p className="truncate font-mono text-[10.5px] text-faint" title={r.bundleError}>
