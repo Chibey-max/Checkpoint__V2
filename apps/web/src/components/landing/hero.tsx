@@ -9,6 +9,8 @@ import { VaultDoor } from "./vault-door";
 import { easeInOut, passed, seg, T } from "./vault-timeline";
 
 const HEADLINE = ["Your agents shop.", "Three locks decide."];
+/** localStorage key for the phone switch that turns the scroll story off ("off") or back on ("on"). */
+const ANIM_KEY = "cp-vault-anim";
 const BODY =
   "Agents research real offers and build a basket. Guard checks every price and signs only that basket. You approve its exact hash, and the Vault checks your caps before a single cpUSD moves.";
 
@@ -61,6 +63,9 @@ export function Hero() {
   const [webgl, setWebgl] = useState(true);
   const [go, setGo] = useState(false);
   const [reduced, setReduced] = useState(false);
+  // Phones can turn the scroll story off (it's several screens of scrolling there); the choice is remembered.
+  const [animOff, setAnimOff] = useState(false);
+  const still = reduced || animOff;
   const [steps, setSteps] = useState<LockSteps>({ guard: 0, you: 0, vault: 0 });
   const [active, setActive] = useState(-1);
 
@@ -83,7 +88,24 @@ export function Hero() {
   }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setReduced(true);
+    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    try {
+      setAnimOff(localStorage.getItem(ANIM_KEY) === "off");
+    } catch {}
+  }, []);
+  const setAnim = (on: boolean) => {
+    setAnimOff(!on);
+    try {
+      localStorage.setItem(ANIM_KEY, on ? "on" : "off");
+    } catch {}
+    window.scrollTo(0, 0);
+  };
+
+  useEffect(() => {
+    if (still) {
+      progress.current = 0;
+      return;
+    }
     let raf = 0;
     let prev = performance.now();
     let last = { g: -1, y: -1, v: -1, a: -2 };
@@ -215,7 +237,7 @@ export function Hero() {
       boxWatch.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [still]);
 
   const headline = penLines(HEADLINE);
   const cards = [<GuardCard key="g" step={steps.guard} />, <YouCard key="y" step={steps.you} />, <VaultCard key="v" step={steps.vault} />];
@@ -227,7 +249,7 @@ export function Hero() {
         ref={section}
         aria-label="Checkpoint"
         // Full-bleed, tucked up under the floating nav. The extra height is the scroll that opens the door.
-        className={`relative -mt-[72px] md:-mt-[100px] ${reduced ? "h-svh" : "h-[600svh]"}`}
+        className={`relative -mt-[72px] md:-mt-[100px] ${still ? "h-svh" : "h-[600svh]"}`}
         style={{ marginLeft: "calc(50% - 50vw)", width: "100vw" }}
       >
         <div className="hero-stage sticky top-0 h-svh overflow-hidden">
@@ -240,6 +262,21 @@ export function Hero() {
           {/* keep the copy legible over the wall */}
           <div ref={copy} className="absolute inset-0">
             <div aria-hidden className="hero-scrim pointer-events-none absolute inset-0" />
+            {/* phones: the scroll story is several screens long there, so it can be switched off (remembered) */}
+            {!reduced && (
+              <button
+                type="button"
+                role="switch"
+                aria-checked={!animOff}
+                onClick={() => setAnim(animOff)}
+                className="hero-chip absolute top-[84px] right-4 z-10 flex items-center gap-2.5 rounded-full py-1.5 pr-1.5 pl-3 text-[12px] ring-1 md:hidden"
+              >
+                Vault animation
+                <span className={`relative h-5 w-9 rounded-full transition-colors duration-300 ${animOff ? "bg-[rgb(140_132_119/0.45)]" : "bg-accent"}`}>
+                  <span className={`absolute top-0.5 left-0.5 size-4 rounded-full bg-[#fbf6ea] shadow transition-transform duration-300 ${animOff ? "" : "translate-x-4"}`} />
+                </span>
+              </button>
+            )}
             <div className="relative mx-auto flex h-full w-full max-w-7xl items-center px-4 pt-24 max-lg:items-end max-lg:pb-24 max-md:pb-[150px] sm:px-6 lg:px-8">
               <div className={go ? "ink-go" : ""}>
                 <p className="hero-rise hero-chip inline-flex items-center gap-2 rounded-full py-1 pr-3 pl-1.5 text-[12px] ring-1">
@@ -264,7 +301,7 @@ export function Hero() {
             </div>
           </div>
 
-          {!reduced && (
+          {!still && (
             <>
               {/* the three locks, told over the mechanism */}
               <h2 className="sr-only">Three locks, each one sees the others&apos; work</h2>
@@ -321,7 +358,7 @@ export function Hero() {
         </div>
       </section>
 
-      {reduced && (
+      {still && (
         <section aria-labelledby="locks-title" className="py-20">
           <p className="eyebrow">How it works</p>
           <h2 id="locks-title" className="display mt-4 text-5xl text-fg">

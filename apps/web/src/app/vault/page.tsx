@@ -10,6 +10,7 @@ import { formatAmount, parseAmount } from "@/lib/format";
 import { accountExists, ft, hasContract, pollView, vault, type VaultBalanceView, type VaultOwnerStateView, type VaultPolicyView } from "@/lib/near";
 import { utcDayIndex } from "@checkpoint/shared";
 import { deposit, isRegistered, setAgent, storageDeposit, storageMin, txHash, withdraw, type Tx } from "@/lib/tx";
+import { AccountLabel } from "@/components/site/account-label";
 import { useWallet } from "@/lib/wallet";
 
 const AGENT = "agent.cpdemo.testnet";
@@ -146,6 +147,11 @@ export default function VaultPage() {
   return (
     <>
       {header}
+      {!readOnly && accountId && (
+        <p className="mb-4 flex flex-wrap items-center gap-2 text-[13px] text-muted">
+          <Wallet aria-hidden className="size-4 text-accent" /> Signed in as <AccountLabel accountId={accountId} />
+        </p>
+      )}
       {readOnly && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 text-[13px] text-muted ring-1 ring-inset ring-line">
           <span className="flex items-center gap-2">
