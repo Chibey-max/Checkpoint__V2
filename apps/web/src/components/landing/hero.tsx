@@ -327,17 +327,17 @@ export function Hero() {
                 style={{ opacity: 0 }}
                 className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center max-lg:top-[84px] max-lg:bottom-auto md:max-lg:top-[112px]"
               >
-                <ol className="nav-plate flex items-center gap-2 rounded-full px-3 py-1.5">
+                <ol className="nav-plate lock-rail flex items-center gap-2 rounded-full px-3 py-1.5">
                   {LOCKS.map((l, i) => (
                     <li key={l.key} className="flex items-center gap-2">
                       {i > 0 && (
-                        <span className="relative h-px w-10 overflow-hidden bg-[rgb(255_236_200/0.14)] max-sm:w-5">
+                        <span className="lock-rail-track relative h-px w-10 overflow-hidden max-sm:w-5">
                           <span className="lock-rail-fill absolute inset-0" style={{ "--rail": `var(--r${i})` } as React.CSSProperties} />
                         </span>
                       )}
                       <span
                         className={`flex items-center gap-1.5 font-engrave text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors duration-500 ${
-                          i <= active ? "text-[#f0cf8a]" : "text-[#8c8477]"
+                          i <= active ? "lock-rail-on" : "lock-rail-off"
                         }`}
                       >
                         <span className="text-[10px] opacity-70">{l.n}</span> {l.label}

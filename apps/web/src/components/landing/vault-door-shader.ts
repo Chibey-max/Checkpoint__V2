@@ -417,7 +417,7 @@ vec3 roomRadiance(vec3 o, vec3 d, float rough, float seeGold) {
 vec3 env(vec3 d, float rough) {
   float w = mix(0.05, 0.6, rough);
   vec3 c = vec3(0.02, 0.02, 0.022) + vec3(0.11, 0.1, 0.09) * smoothstep(-0.3, 1.0, d.y);
-  c = mix(c, vec3(0.1, 0.095, 0.09) + vec3(0.85, 0.8, 0.72) * smoothstep(-0.2, 0.9, d.y), uDay);
+  c = mix(c, vec3(0.05, 0.048, 0.045) + vec3(0.5, 0.47, 0.43) * smoothstep(-0.2, 0.9, d.y), uDay);
   float box = smoothstep(w + 0.35, 0.3 - w * 0.4, length(d - normalize(vec3(-0.5, 0.6, 0.62))));
   c += vec3(1.0, 0.86, 0.66) * box * 2.8;
   float box2 = smoothstep(w + 0.3, 0.2 - w * 0.4, length(d - normalize(vec3(0.35, 0.75, 0.55))));
@@ -491,15 +491,24 @@ void main() {
     vec3 base; float metal; float rough;
     if (m < 1.5) {              // concrete wall
       float nz = fbm(p.xy * 3.0) * 0.6 + fbm(p.xy * 18.0) * 0.4;
-      base = mix(vec3(0.16, 0.15, 0.14), vec3(0.6, 0.56, 0.5), uDay) * (0.6 + 0.8 * nz) * mix(1.0, 0.8 + 0.2 * nz, uDay);
-      metal = 0.0; rough = 0.9;
+      vec3 night = vec3(0.16, 0.15, 0.14) * (0.6 + 0.8 * nz);
+      // by day the wall is smooth glazed porcelain, a touch off-white so it never blows out, with a soft gloss
+      vec3 day = vec3(0.76, 0.75, 0.72) * (0.985 + 0.015 * nz);
+      base = mix(night, day, uDay);
+      metal = 0.0; rough = mix(0.9, 0.3, uDay);
     } else if (m < 2.5) {       // frame
-      base = STEEL * 0.8; metal = 1.0; rough = 0.36 + 0.1 * noise(vec2(atan(p.y, p.x) * 40.0, length(p.xy) * 300.0));
+      // by day the frame darkens to gunmetal, so the white door has an edge to sit in
+      base = STEEL * mix(0.8, 0.42, uDay); metal = 1.0; rough = 0.36 + 0.1 * noise(vec2(atan(p.y, p.x) * 40.0, length(p.xy) * 300.0));
     } else if (m < 3.25) {      // door steel, lathe brushed; the back face is plain mill-finish plate
       float streak = noise(vec2(rq * 420.0, 0.5)) * 0.6 + noise(vec2(rq * 90.0, 3.1)) * 0.4;
       base = STEEL * (0.85 + 0.25 * streak); metal = 1.0; rough = 0.3 + 0.16 * streak;
       if (q.z < DZ0 + 0.02) { base = STEEL * (0.38 + 0.08 * streak); rough = 0.5; }
       else if (rq > DR - 0.012) { base = STEEL * (0.42 + 0.1 * noise(vec2(atan(q.y, q.x) * 3.0, q.z * 260.0))); rough = 0.42; }
+      // by day the door is the night door's twin in white: glossy porcelain enamel instead of glossy black steel
+      vec3 enamel = vec3(0.84, 0.83, 0.8) * (0.975 + 0.025 * streak);
+      if (q.z < DZ0 + 0.02) enamel *= 0.8;
+      else if (rq > DR - 0.012) enamel *= 0.88;
+      base = mix(base, enamel, uDay); metal = mix(metal, 0.0, uDay); rough = mix(rough, 0.09, uDay);
     } else if (m < 3.75) {      // hub
       base = STEEL * 0.95; metal = 1.0; rough = 0.18;
     } else if (m < 4.5) {       // brass wheel
@@ -612,8 +621,8 @@ void main() {
     // outside: warm key from upper left (a spot centred on the door) and a cool rim
     if (inside < 0.999) {
       vec3 L1 = normalize(vec3(-0.55, 0.65, 0.75));
-      float spot = mix(mix(0.12, 0.7, uDay), 1.0, smoothstep(3.4, 0.8, length(p.xy - vec2(0.1, 0.25))));
-      lit += diffC * vec3(1.0, 0.97, 0.92) * 0.7 * uDay * (0.55 + 0.45 * max(n.y, 0.0) + 0.3 * max(n.z, 0.0)) * occ * (1.0 - inside);
+      float spot = mix(mix(0.12, 0.34, uDay), 1.0, smoothstep(3.4, 0.8, length(p.xy - vec2(0.1, 0.25))));
+      lit += diffC * vec3(1.0, 0.97, 0.92) * 0.3 * uDay * (0.55 + 0.45 * max(n.y, 0.0) + 0.3 * max(n.z, 0.0)) * occ * (1.0 - inside);
       float sh = softShadow(p + n * 0.003, L1);
       lit += ggx(n, v, L1, F0, diffC, rough) * sh * vec3(1.0, 0.9, 0.78) * 3.2 * spot * (1.0 - inside);
       vec3 L2 = normalize(vec3(0.85, 0.15, 0.45));
@@ -636,14 +645,14 @@ void main() {
     vec3 envC = env(refl, rough) * mix(1.0, 0.55, inside * (1.0 - open));
     if (inside > 0.0) envC = mix(envC, roomRadiance(p + n * 0.002, refl, rough, m > 6.5 && m < 7.5 ? 0.0 : (m < 6.5 && n.y < 0.7 ? 0.3 : 1.0)), inside);
     lit += envC * Fv * mix(0.35, 1.0, metal) * occ;
-    lit += diffC * (0.02 + 0.05 * inside + 0.3 * uDay * inside) * occ;
+    lit += diffC * (0.02 + 0.05 * inside + 0.2 * uDay * inside) * occ;
     // gold: the warm bounce of the room off every face, so the bars never go olive in shadow
     if (m > 6.5 && m < 7.5) lit += base * 0.09 * occ * inside;
     lit += emit;
 
     col = lit;
     // distance haze outside
-    col = mix(col, mix(vec3(0.006, 0.005, 0.004), vec3(0.62, 0.58, 0.52), uDay), 1.0 - exp(-mix(0.015, 0.0035, uDay) * t * t * (1.0 - inside)));
+    col = mix(col, mix(vec3(0.006, 0.005, 0.004), vec3(0.62, 0.58, 0.52), uDay), 1.0 - exp(-mix(0.015, 0.0015, uDay) * t * t * (1.0 - inside)));
   }
 
   // lamps blooming in the vault's air
@@ -671,7 +680,7 @@ void main() {
   // vignette and grade
   vec2 suv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
   float vig = smoothstep(1.25, 0.25, length(suv * vec2(0.85, 1.0)));
-  col *= mix(mix(0.35, 0.82, uDay), 1.0, vig);
+  col *= mix(mix(0.35, 0.6, uDay), 1.0, vig);
   col = clamp((col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14), 0.0, 1.0);
   col = pow(col, vec3(1.0 / 2.2));
   col += (hash21(gl_FragCoord.xy) - 0.5) / 255.0;
