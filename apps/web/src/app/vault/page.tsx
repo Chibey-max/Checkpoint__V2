@@ -124,7 +124,7 @@ export default function VaultPage() {
     return (
       <>
         {header}
-        <StateCard Icon={Wallet} title="Sign in to see your vault" body="Balances, limits and agent access are read from NEAR for your account. Use a testnet wallet: Meteor, Intear or Nightly.">
+        <StateCard Icon={Wallet} title="Sign in to see your vault" body="Balances, limits and agent access are read from NEAR for your account. Use a testnet wallet (Meteor, Intear or Nightly) and make sure it is set to testnet; a wallet on mainnet shows a different, empty account.">
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setViewing(DEMO_OWNER)} className="key key-ghost h-11 px-5 text-sm">
               <Eye aria-hidden className="size-4" /> View the demo owner

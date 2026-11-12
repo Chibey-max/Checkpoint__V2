@@ -103,6 +103,8 @@ const live: AgentsClient = {
     }
   },
   hasDevWallet() {
+    // the dev wallet only exists on a local agents service; hosted ones would just answer 404
+    if (!/^http:\/\/(localhost|127\.0\.0\.1)/.test(config.agentsUrl)) return Promise.resolve(false);
     dev ??= fetch(url("/v1/dev/state"))
       .then((r) => r.ok)
       .catch(() => false);
