@@ -42,8 +42,8 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-serif: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
-  --font-display: var(--font-display-face), var(--font-geist-serif), ui-serif, Georgia, serif;
+  --font-serif: var(--font-display-face), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-face), ui-serif, Georgia, serif;
   --font-engrave: var(--font-engrave-face), var(--font-display-face), ui-serif, serif;
   --font-script: var(--font-script-face), "Snell Roundhand", cursive;
   --font-lede: var(--font-lede-face), var(--font-geist-sans), ui-sans-serif, sans-serif;
@@ -895,3 +895,8 @@ html[data-theme-switching] *, html[data-theme-switching] *::before, html[data-th
 [data-theme="light"] .dock-tab { color: #5a4220; text-shadow: 0 1px 0 rgb(255 255 255 / 0.7); }
 [data-theme="light"] .dock-tab[aria-current="page"] { color: #1c1405; }
 }
+
+/* Decorative layers (the rings behind page titles, the glows) may reach past the edge; they must never make the page
+   scroll sideways. On the root, so it also catches layers positioned against the page rather than the body; clip
+   rather than hidden, so position: sticky on the header keeps working. */
+html { overflow-x: clip; }

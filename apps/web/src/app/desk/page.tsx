@@ -11,6 +11,7 @@ import type { CatalogItem, RequestSummary } from "@/lib/agents/types";
 import { formatAmount } from "@/lib/format";
 import { humanError } from "@/lib/errors";
 import { parseAmount } from "@/lib/format";
+import { servicesReady, useServices, wakeServices } from "@/lib/services";
 import { useWallet } from "@/lib/wallet";
 
 const EXAMPLE = "2× VPS 2 vCPU / 4 GB for 1 month\n1× .com domain for 1 year\n1 TB object storage for 1 month\n10k transactional emails";
@@ -29,6 +30,7 @@ const NEXT: Record<(typeof LANES)[number]["key"], string> = {
 export default function DeskPage() {
   const router = useRouter();
   const { accountId } = useWallet();
+  const svc = useServices();
   const [text, setText] = useState("");
   const [max, setMax] = useState("");
   const [prefer, setPrefer] = useState<string[]>([]);
@@ -73,6 +75,11 @@ export default function DeskPage() {
     setBusy(true);
     setErr(null);
     try {
+      // the hosted services may still be waking: hold the list until both answer, rather than send it into a 502
+      if (!servicesReady()) {
+        await wakeServices();
+        if (!servicesReady()) throw new Error("The agents didn't wake up in time. Free hosting can take a minute; please try again.");
+      }
       const constraints = {
         ...(max.trim() ? { max_total: parseAmount(max).toString() } : {}),
         ...(prefer.length ? { preferred_vendors: prefer.map((v) => `${v}.cpdemo.testnet`) } : {}),
@@ -184,10 +191,13 @@ export default function DeskPage() {
                 </>
               )}
             </p>
-            <button disabled={!text.trim() || !!maxErr || busy} className="key key-primary h-11 px-5 text-sm">
-              {busy ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Sparkles aria-hidden className="size-4" />}
-              Start research
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <ServicesChip />
+              <button disabled={!text.trim() || !!maxErr || busy} className="key key-primary h-11 px-5 text-sm">
+                {busy ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Sparkles aria-hidden className="size-4" />}
+                {busy && !svc.ready ? "Waiting for the agents…" : "Start research"}
+              </button>
+            </div>
           </div>
           {err && (
             <p role="alert" className="mt-4 flex items-start gap-2 rounded-xl bg-bad-soft px-3 py-2 text-sm text-bad ring-1 ring-inset ring-bad/25">
@@ -256,6 +266,7 @@ export default function DeskPage() {
           )}
         </aside>
       </div>
+      <TryIt />
     </>
   );
 }
@@ -281,4 +292,96 @@ function ago(t: number) {
   if (s < 3600) return `${Math.floor(s / 60)} min ago`;
   if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
   return `${Math.floor(s / 86400)} d ago`;
+}
+
+/**
+ * Whether the hosted agents and Guard are awake. They sleep when unused, and the site wakes them as soon as anyone opens
+ * a page (lib/services.ts), so this usually reads "ready" by the time a list is written.
+ */
+function ServicesChip() {
+  const svc = useServices();
+  const [, tick] = useState(0);
+  // rendered only in the browser: the status and the seconds counter don't exist on the server
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const waking = svc.agents === "waking" || svc.guard === "waking";
+  useEffect(() => {
+    if (!waking) return;
+    const t = window.setInterval(() => tick((n) => n + 1), 1000);
+    return () => window.clearInterval(t);
+  }, [waking]);
+  if (!mounted || !svc.enabled) return null;
+  const down = svc.agents === "down" || svc.guard === "down";
+  const secs = Math.max(0, Math.round((Date.now() - svc.since) / 1000));
+  return (
+    <span role="status" className="flex items-center gap-2 font-mono text-[11px] text-muted">
+      <span className={`size-1.5 rounded-full ${svc.ready ? "bg-ok" : down ? "bg-bad" : "animate-pulse bg-warn"}`} />
+      {svc.ready ? (
+        "Agents and Guard ready"
+      ) : down ? (
+        <>
+          Agents unreachable ·{" "}
+          <button type="button" onClick={() => void wakeServices()} className="text-accent underline-offset-4 hover:underline">
+            retry
+          </button>
+        </>
+      ) : svc.since ? (
+        `Waking the agents (free hosting naps) · ${secs}s`
+      ) : (
+        "Checking the agents…"
+      )}
+    </span>
+  );
+}
+
+/** For judges and anyone else arriving cold: the three ways to see Checkpoint work, and what each needs. */
+function TryIt() {
+  const ways = [
+    {
+      k: "No wallet",
+      title: "Send a list right here",
+      body: "Without signing in, the desk shops as the demo owner. Agents research, Guard checks every price and signs a real basket you can inspect. Approving it needs that owner's wallet, so it stops there; paid baskets are on the Audit page.",
+      link: { href: "/audit", label: "See paid baskets" },
+    },
+    {
+      k: "Your wallet",
+      title: "Use your own testnet account",
+      body: "Sign in with a testnet wallet (Meteor, Intear or Nightly switched to testnet), get testnet NEAR from a faucet, and register on cpUSD on the Vault page. cpUSD is a test token the team issues, so ask for some in a GitHub issue to deposit and pay.",
+      link: { href: "/vault", label: "Open the Vault" },
+    },
+    {
+      k: "Your machine",
+      title: "Run the whole loop locally",
+      body: "pnpm demo:sandbox deploys the contracts to a local NEAR sandbox, runs a request through Guard, your approval and the Vault, then three attacks, and prints a PASS table. About a minute, no accounts.",
+      link: { href: "https://github.com/Phantomcall/Checkpoint__V2#readme", label: "README" },
+    },
+  ];
+  return (
+    <section aria-labelledby="try-title" className="mt-10">
+      <p className="eyebrow">Trying it out</p>
+      <h2 id="try-title" className="display mt-3 text-[2rem] text-fg">
+        Three ways in, <span className="gilt italic">no setup needed for the first.</span>
+      </h2>
+      <ol className="mt-5 grid gap-4 md:grid-cols-3">
+        {ways.map((w, i) => (
+          <li key={w.k} className="panel flex flex-col rounded-[var(--radius-card)] p-5">
+            <p className="font-mono text-[10.5px] tracking-[0.16em] text-accent uppercase">
+              0{i + 1} · {w.k}
+            </p>
+            <p className="mt-2 text-[15px] font-medium text-fg">{w.title}</p>
+            <p className="mt-2 flex-1 text-[13px] leading-relaxed text-muted">{w.body}</p>
+            {w.link.href.startsWith("http") ? (
+              <a href={w.link.href} target="_blank" rel="noreferrer" className="mt-3 text-[13px] text-accent underline-offset-4 hover:underline">
+                {w.link.label} ↗
+              </a>
+            ) : (
+              <Link href={w.link.href} className="mt-3 text-[13px] text-accent underline-offset-4 hover:underline">
+                {w.link.label} →
+              </Link>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
 }

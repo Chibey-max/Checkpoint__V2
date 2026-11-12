@@ -8,7 +8,7 @@ export function WalletButton() {
   if (!ready) return <span className="key key-secondary h-9 w-28 animate-pulse px-4 text-[13px] text-faint">Wallet</span>;
   if (!accountId)
     return (
-      <button onClick={() => signIn()} className="key key-primary h-9 px-4 text-[13px]">
+      <button onClick={() => signIn()} title="Use a NEAR testnet wallet (Meteor, Intear, or Nightly switched to testnet)" className="key key-primary h-9 px-4 text-[13px]">
         <Wallet aria-hidden className="size-4" /> Sign in
       </button>
     );

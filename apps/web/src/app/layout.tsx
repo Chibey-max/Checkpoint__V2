@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import { GeistSerif } from "geist/font/serif";
 import localFont from "next/font/local";
 import { Atmosphere } from "@/components/site/atmosphere";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
 import { Intro } from "@/components/site/intro";
+import { ServiceWarmup } from "@/components/site/service-warmup";
 import { Spotlight } from "@/components/ui/spotlight";
 import { WalletProvider } from "@/lib/wallet";
 import "./globals.css";
@@ -50,9 +50,16 @@ const engrave = localFont({
 /** viewport-fit=cover, so the phone dock can sit just above the home indicator (env(safe-area-inset-bottom)). */
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
+const SITE = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://checkpoint-eight-dusky.vercel.app";
+const DESCRIPTION = "AI agents propose purchases. Guard checks every offer, you approve the exact basket, and the Vault enforces your limits on NEAR.";
+
+/** Each page sets its own title through the template; the link preview (app/opengraph-image.png) is the vault door. */
 export const metadata: Metadata = {
-  title: "Checkpoint · Procurement Desk",
-  description: "AI agents propose purchases. Guard checks every offer, you approve the exact basket, and the Vault enforces your limits on NEAR.",
+  metadataBase: new URL(SITE),
+  title: { default: "Checkpoint · A spending firewall for AI agents", template: "%s · Checkpoint" },
+  description: DESCRIPTION,
+  openGraph: { type: "website", siteName: "Checkpoint", title: "Checkpoint · A spending firewall for AI agents", description: DESCRIPTION, url: "/" },
+  twitter: { card: "summary_large_image", title: "Checkpoint · A spending firewall for AI agents", description: DESCRIPTION },
 };
 
 /** Sets the theme before first paint (no flash). `?theme=light|dark` overrides and persists, handy for demos and screenshots. */
@@ -65,12 +72,13 @@ const INTRO_SCRIPT = `try{var i=new URLSearchParams(location.search).get("intro"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${GeistSerif.variable} ${script.variable} ${display.variable} ${engrave.variable} ${lede.variable}`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable} ${script.variable} ${display.variable} ${engrave.variable} ${lede.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT + INTRO_SCRIPT }} />
       </head>
       <body className="min-h-screen max-md:pb-[calc(112px+env(safe-area-inset-bottom))]">
         <Intro />
+        <ServiceWarmup />
         <WalletProvider>
           <Atmosphere />
           <Spotlight />
