@@ -12,6 +12,7 @@ import { formatAmount } from "@/lib/format";
 import { humanError } from "@/lib/errors";
 import { parseAmount } from "@/lib/format";
 import { servicesReady, useServices, wakeServices } from "@/lib/services";
+import { AccountLabel } from "@/components/site/account-label";
 import { useWallet } from "@/lib/wallet";
 
 const EXAMPLE = "2× VPS 2 vCPU / 4 GB for 1 month\n1× .com domain for 1 year\n1 TB object storage for 1 month\n10k transactional emails";
@@ -182,9 +183,9 @@ export default function DeskPage() {
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted">
               {accountId ? (
-                <>
-                  Buying as <span className="font-mono text-fg">{accountId}</span>
-                </>
+                <span className="inline-flex flex-wrap items-center gap-1.5">
+                  Buying as <AccountLabel accountId={accountId} />
+                </span>
               ) : (
                 <>
                   Not signed in · the demo uses <span className="font-mono">{DEMO_OWNER}</span>
